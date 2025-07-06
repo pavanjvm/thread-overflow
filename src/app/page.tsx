@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import TextPressure from '@/components/TextPressure';
+import IconCloudDisplay from '@/components/IconCloudDisplay';
 
 export default function LandingPage() {
   return (
-    <div className="flex-grow grid md:grid-cols-2 gap-12 items-center h-full">
+    <div className="grid md:grid-cols-2 gap-12 items-center py-24">
       <div className="flex flex-col justify-center text-center md:text-left">
         <div className="h-20">
-            <TextPressure text="Thread Overflow" textColor="hsl(var(--primary))" />
+          <TextPressure text="Thread Overflow" textColor="hsl(var(--primary))" />
         </div>
         <p className="mt-2 text-2xl text-muted-foreground max-w-lg mx-auto md:mx-0">
           Where your silly thoughts, brilliant ideas, and random musings collide in a big, friendly internet explosion!
@@ -22,15 +22,8 @@ export default function LandingPage() {
           </Button>
         </div>
       </div>
-      <div className="flex justify-center p-8">
-        <Image
-          src="https://placehold.co/600x450.png"
-          alt="A zany collage of cartoon characters chatting and exchanging ideas"
-          width={600}
-          height={450}
-          className="rounded-xl shadow-2xl transform hover:scale-105 transition-transform duration-300"
-          data-ai-hint="cartoon characters community"
-        />
+      <div className="flex justify-center items-center p-8 h-[500px]">
+        <IconCloudDisplay />
       </div>
     </div>
   );
