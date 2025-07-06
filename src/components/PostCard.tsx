@@ -19,10 +19,14 @@ const PostCard = ({ post }: PostCardProps) => {
         <div className="flex-grow">
           <CardHeader>
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={post.author.avatarUrl} data-ai-hint="user avatar" />
-                <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+              <Avatar className="h-5 w-5">
+                <AvatarImage src={post.community.iconUrl} data-ai-hint="community icon" />
+                <AvatarFallback>{post.community.name.charAt(0)}</AvatarFallback>
               </Avatar>
+              <Link href={`/c/${post.community.slug}`} className="font-semibold hover:underline hover:text-primary transition-colors">
+                c/{post.community.slug}
+              </Link>
+              <span className="text-xs">•</span>
               <span>Posted by {post.author.name}</span>
               <span>•</span>
               <span>{post.createdAt}</span>

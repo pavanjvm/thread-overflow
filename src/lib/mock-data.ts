@@ -1,4 +1,4 @@
-import { User, Post, Comment } from './types';
+import { User, Post, Comment, Community } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125 },
@@ -6,6 +6,12 @@ export const users: User[] = [
   { id: 'user-3', name: 'Charlie', avatarUrl: 'https://placehold.co/40x40.png?text=C', stars: 72 },
   { id: 'user-4', name: 'Diana', avatarUrl: 'https://placehold.co/40x40.png?text=D', stars: 150 },
   { id: 'user-5', name: 'Eve', avatarUrl: 'https://placehold.co/40x40.png?text=E', stars: 55 },
+];
+
+export const communities: Community[] = [
+  { id: 'comm-1', name: 'Next.js', slug: 'nextjs', iconUrl: 'https://placehold.co/40x40.png?text=N' },
+  { id: 'comm-2', name: 'React', slug: 'react', iconUrl: 'https://placehold.co/40x40.png?text=R' },
+  { id: 'comm-3', name: 'CSS', slug: 'css', iconUrl: 'https://placehold.co/40x40.png?text=C' },
 ];
 
 export const comments: Comment[] = [
@@ -21,6 +27,7 @@ export const posts: Post[] = [
     title: 'How to build a Next.js app with Firebase Studio?',
     content: 'Full content of the post about building a Next.js app. It goes into detail about project setup, component creation, styling with Tailwind CSS, and deploying to Firebase. It also covers best practices for server components and data fetching patterns to ensure optimal performance.',
     author: users[0],
+    community: communities[0],
     createdAt: '4 hours ago',
     votes: 24,
     comments: [comments[0], comments[1]],
@@ -30,6 +37,7 @@ export const posts: Post[] = [
     title: 'The best way to manage state in modern React',
     content: 'This post explores various state management libraries and patterns in React, including Zustand, Redux Toolkit, and React Query. It provides code examples and performance benchmarks to help developers choose the right tool for their project.',
     author: users[3],
+    community: communities[1],
     createdAt: '1 day ago',
     votes: 102,
     comments: [comments[2]],
@@ -39,6 +47,7 @@ export const posts: Post[] = [
     title: 'A deep dive into CSS Grid and Flexbox',
     content: 'A comprehensive guide to CSS Grid and Flexbox, explaining the core concepts of each layout module. It includes interactive examples and common use-cases to help readers master modern CSS for responsive web design.',
     author: users[2],
+    community: communities[2],
     createdAt: '3 days ago',
     votes: 56,
     comments: [],

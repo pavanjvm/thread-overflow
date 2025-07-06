@@ -5,6 +5,13 @@ export interface User {
   stars: number;
 }
 
+export interface Community {
+  id: string;
+  name: string;
+  slug: string;
+  iconUrl: string;
+}
+
 export interface Comment {
   id: string;
   content: string;
@@ -18,6 +25,7 @@ export interface Post {
   title: string;
   content: string;
   author: User;
+  community: Community;
   createdAt: string;
   votes: number;
   comments: Comment[];

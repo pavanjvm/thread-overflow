@@ -32,12 +32,21 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { suggestPostTitlesAction } from './actions';
 import { Loader2, Wand2 } from 'lucide-react';
+import { communities } from '@/lib/mock-data';
 
 const formSchema = z.object({
+  communityId: z.string().min(1, 'Please select a community.'),
   title: z.string().min(5, 'Title must be at least 5 characters long.'),
   content: z.string().min(20, 'Content must be at least 20 characters long.'),
 });
@@ -52,6 +61,7 @@ export default function NewPostPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      communityId: '',
       title: '',
       content: '',
     },
@@ -107,6 +117,30 @@ export default function NewPostPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
+              <FormField
+                control={form.control}
+                name="communityId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Community</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a community to post in" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {communities.map((community) => (
+                          <SelectItem key={community.id} value={community.id}>
+                            c/{community.slug}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="title"
