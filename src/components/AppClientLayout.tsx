@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Toaster } from "@/components/ui/toaster"
 import Header from '@/components/Header';
@@ -17,7 +17,7 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { communities } from '@/lib/mock-data';
-import { Newspaper, Plus } from 'lucide-react';
+import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function AppClientLayout({
@@ -26,6 +26,7 @@ export default function AppClientLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isLandingPage = pathname === '/';
   
   if (isLandingPage) {
@@ -45,6 +46,14 @@ export default function AppClientLayout({
     );
   }
 
+  const topics = [
+    { name: 'Finance', slug: 'finance', icon: CircleDollarSign },
+    { name: 'AI', slug: 'ai', icon: BrainCircuit },
+    { name: 'Bug Fixes', slug: 'bug-fixes', icon: Bug },
+    { name: 'Innovations', slug: 'innovations', icon: Lightbulb },
+    { name: 'Ideas & Suggestions', slug: 'ideas-suggestions', icon: MessageSquare },
+  ];
+
   return (
     <body className={cn("font-body antialiased")}>
       <SidebarProvider>
@@ -58,6 +67,21 @@ export default function AppClientLayout({
                           <Link href="/feed"><Newspaper /> All Posts</Link>
                       </SidebarMenuButton>
                   </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>Topics</SidebarGroupLabel>
+              <SidebarMenu>
+                  {topics.map((topic) => (
+                      <SidebarMenuItem key={topic.slug}>
+                          <SidebarMenuButton asChild isActive={pathname === '/search' && searchParams.get('q') === topic.slug}>
+                              <Link href={`/search?q=${topic.slug}`}>
+                                  <topic.icon />
+                                  <span>{topic.name}</span>
+                              </Link>
+                          </SidebarMenuButton>
+                      </SidebarMenuItem>
+                  ))}
               </SidebarMenu>
             </SidebarGroup>
             <SidebarGroup>
