@@ -28,6 +28,7 @@ export default function AppClientLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isLandingPage = pathname === '/';
+  const isAuthPage = pathname === '/login' || pathname === '/signup';
   
   if (isLandingPage) {
      return (
@@ -36,8 +37,20 @@ export default function AppClientLayout({
         "landing-theme"
       )}>
         <div className="flex flex-col min-h-screen">
-          <Header />
           <main className="flex-grow container mx-auto px-4 py-8">
+            {children}
+          </main>
+        </div>
+        <Toaster />
+      </body>
+    );
+  }
+  
+  if (isAuthPage) {
+     return (
+      <body className={cn("font-body antialiased")}>
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-grow">
             {children}
           </main>
         </div>

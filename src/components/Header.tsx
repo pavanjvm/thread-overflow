@@ -25,14 +25,6 @@ const Header = () => {
   const pathname = usePathname();
   const defaultSearch = searchParams.get('q') ?? '';
 
-  // Early return for landing page before calling hooks that need context.
-  if (pathname === '/') {
-    return null;
-  }
-
-  // This hook needs to be used within a SidebarProvider.
-  // By checking the pathname first, we ensure this component only uses the hook
-  // when it's rendered within the main app layout that has the provider.
   const { mounted } = useSidebar();
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
