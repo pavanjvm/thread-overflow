@@ -1,17 +1,22 @@
 import { posts, communities } from '@/lib/mock-data';
 import PostCard from '@/components/PostCard';
-import { notFound } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { Community } from '@/lib/types';
 
 export default function CommunityPage({ params }: { params: { slug: string } }) {
-  const community = communities.find((c) => c.slug === params.slug);
+  let community: Community | undefined = communities.find((c) => c.slug === params.slug);
   
   if (!community) {
-    notFound();
+    community = {
+        id: `new-${params.slug}`,
+        name: params.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        slug: params.slug,
+        iconUrl: `https://placehold.co/64x64.png`
+    };
   }
   
-  const communityPosts = posts.filter((post) => post.community.id === community.id);
+  const communityPosts = posts.filter((post) => post.community.id === community!.id);
 
   return (
     <div className="space-y-6">

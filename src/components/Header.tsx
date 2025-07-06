@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Flame, Home, Plus, Trophy, User, LogOut, Settings } from 'lucide-react';
+import { Flame, Home, Plus, Trophy, User, LogOut, Settings, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -62,6 +62,9 @@ const Header = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/c/new"><Users className="mr-2" />Create Community</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/profile"><User className="mr-2" />Profile</Link>
                 </DropdownMenuItem>
