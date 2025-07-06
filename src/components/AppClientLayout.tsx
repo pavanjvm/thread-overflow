@@ -29,11 +29,18 @@ export default function AppClientLayout({
 }>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isLandingPage = pathname === '/';
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   
   useEffect(() => {
+    if (!mounted) return;
+
     if (isLandingPage) {
       document.body.classList.add('landing-theme');
     } else {
@@ -43,7 +50,7 @@ export default function AppClientLayout({
     return () => {
       document.body.classList.remove('landing-theme');
     }
-  }, [isLandingPage]);
+  }, [isLandingPage, mounted]);
 
   if (isLandingPage || isAuthPage) {
      const mainContainerClass = isLandingPage ? "container mx-auto px-4 py-8" : "";
