@@ -21,6 +21,7 @@ import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, Messag
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
 import AIChatbot from './AIChatbot';
+import Loading from '@/app/loading';
 
 export default function AppClientLayout({
   children,
@@ -52,6 +53,10 @@ export default function AppClientLayout({
       document.body.classList.remove('landing-theme');
     }
   }, [isLandingPage, mounted]);
+  
+  if (!mounted) {
+    return <Loading />;
+  }
 
   const topics = [
     { name: 'Finance', slug: 'finance', icon: CircleDollarSign },
@@ -136,8 +141,8 @@ export default function AppClientLayout({
         )}
       </SidebarProvider>
       
-      {mounted && <AIChatbot />}
-      {mounted && <Toaster />}
+      <AIChatbot />
+      <Toaster />
     </>
   );
 }
