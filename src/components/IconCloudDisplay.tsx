@@ -9,7 +9,6 @@ const slugs = [
   "x",
   "linkedin",
   "discord",
-  "telegram",
   "slack",
   "youtube",
   "pinterest",
@@ -17,10 +16,8 @@ const slugs = [
   "snapchat",
   "medium",
   "quora",
-  "dribbble",
   "behance",
   "twitch",
-  "spotify",
   "soundcloud",
 ];
 
