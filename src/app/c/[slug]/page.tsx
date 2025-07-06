@@ -6,23 +6,16 @@ import type { Community } from '@/lib/types';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Users } from 'lucide-react';
+import { notFound } from 'next/navigation';
 
 export default function CommunityPage({ params }: { params: { slug: string } }) {
-  let community: Community | undefined = communities.find((c) => c.slug === params.slug);
+  const community = communities.find((c) => c.slug === params.slug);
   
   if (!community) {
-    community = {
-        id: `new-${params.slug}`,
-        name: params.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-        slug: params.slug,
-        iconUrl: `https://placehold.co/64x64.png`,
-        coverImageUrl: 'https://placehold.co/1200x300.png',
-        description: 'This is a brand new community. Be the first to post!',
-        members: 0,
-    };
+    notFound();
   }
   
-  const communityPosts = posts.filter((post) => post.community.id === community!.id && post.status !== 'draft');
+  const communityPosts = posts.filter((post) => post.community.id === community.id && post.status !== 'draft');
 
   return (
     <div className="space-y-6">
