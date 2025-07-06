@@ -62,7 +62,7 @@ export default function AppClientLayout({
           </main>
         </div>
         {mounted && <AIChatbot />}
-        <Toaster />
+        {mounted && <Toaster />}
       </>
     );
   }
@@ -139,7 +139,7 @@ export default function AppClientLayout({
           </div>
         </SidebarInset>
         {mounted && <AIChatbot />}
-        <Toaster />
+        {mounted && <Toaster />}
       </SidebarProvider>
     </>
   );
