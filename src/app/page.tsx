@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import TextPressure from '@/components/TextPressure';
 
 export default function LandingPage() {
   return (
@@ -8,9 +9,9 @@ export default function LandingPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col justify-center text-center md:text-left space-y-6">
-            <h1 className="text-7xl font-bold text-primary">
-              Thread Overflow
-            </h1>
+            <div className="h-48">
+                <TextPressure text="Thread Overflow" textColor="hsl(var(--primary))" />
+            </div>
             <p className="text-2xl text-muted-foreground max-w-lg mx-auto md:mx-0">
               Where your silly thoughts, brilliant ideas, and random musings collide in a big, friendly internet explosion!
             </p>
