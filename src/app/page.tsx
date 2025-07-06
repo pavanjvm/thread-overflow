@@ -9,7 +9,7 @@ export default function LandingPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col justify-center text-center md:text-left">
-            <div className="h-40">
+            <div className="h-32">
                 <TextPressure text="Thread Overflow" textColor="hsl(var(--primary))" />
             </div>
             <p className="text-2xl text-muted-foreground max-w-lg mx-auto md:mx-0">
