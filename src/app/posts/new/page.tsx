@@ -32,9 +32,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { communities } from '@/lib/mock-data';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, UploadCloud } from "lucide-react";
-import { useState, useEffect } from 'react';
+import { BarChart2, Image as ImageIcon } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
 const formSchema = z.object({
@@ -49,6 +48,7 @@ export default function NewPostPage() {
   const router = useRouter();
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -140,65 +140,49 @@ export default function NewPostPage() {
                   </FormItem>
                 )}
               />
+               <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>Body</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="What are your thoughts? (optional)" className="min-h-[200px]" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                  </FormItem>
+                  )}
+              />
 
-              <Tabs defaultValue="text" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Text Post</TabsTrigger>
-                    <TabsTrigger value="media"><UploadCloud className="mr-2 h-4 w-4" /> Image or Video</TabsTrigger>
-                </TabsList>
-                <TabsContent value="text" className="mt-4">
-                     <FormField
-                        control={form.control}
-                        name="content"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormControl>
-                            <Textarea placeholder="Write your post content here... (optional if uploading media)" className="min-h-[200px]" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </TabsContent>
-                <TabsContent value="media" className="mt-4">
-                    <FormField
-                        control={form.control}
-                        name="media"
-                        render={() => (
-                            <FormItem>
-                                <FormControl>
-                                    <label htmlFor="media-upload" className="relative flex justify-center items-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                                        <Input 
-                                            id="media-upload"
-                                            type="file" 
-                                            className="hidden" 
-                                            accept="image/*,video/*"
-                                            onChange={handleFileChange}
-                                        />
-                                        {mediaPreview ? (
-                                            <>
-                                                {mediaType === 'image' ? (
-                                                    <Image src={mediaPreview} alt="Media preview" fill className="object-contain rounded-md" />
-                                                ) : (
-                                                    <video src={mediaPreview} controls className="w-full h-full object-contain rounded-md" />
-                                                )}
-                                            </>
-                                        ) : (
-                                            <div className="text-center text-muted-foreground">
-                                                <UploadCloud className="h-10 w-10 mx-auto mb-2" />
-                                                <p className="font-semibold">Click to upload</p>
-                                                <p className="text-xs">PNG, JPG, GIF, MP4, WEBM</p>
-                                            </div>
-                                        )}
-                                    </label>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </TabsContent>
-              </Tabs>
-              
+              {mediaPreview && (
+                <div className="mt-4 relative w-full h-64 rounded-lg overflow-hidden border">
+                    {mediaType === 'image' ? (
+                        <Image src={mediaPreview} alt="Media preview" fill className="object-contain" />
+                    ) : (
+                        <video src={mediaPreview} controls className="w-full h-full object-contain" />
+                    )}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <Input 
+                    id="media-upload"
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                    ref={fileInputRef}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                    <ImageIcon className="mr-2 h-4 w-4" />
+                    Image or Video
+                </Button>
+                <Button type="button" variant="outline" size="sm" disabled>
+                    <BarChart2 className="mr-2 h-4 w-4" />
+                    Poll
+                </Button>
+              </div>
+
             </CardContent>
             <CardFooter>
               <Button type="submit">Create Post</Button>
