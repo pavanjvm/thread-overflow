@@ -76,11 +76,11 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
         state.velocityX = (state.mouseX - width / 2) / width * 0.5;
         state.velocityY = (state.mouseY - height / 2) / height * 0.5;
 
-        state.rotationY += state.velocityX * 0.02;
-        state.rotationX -= state.velocityY * 0.02;
+        state.rotationY += state.velocityX * 0.01;
+        state.rotationX -= state.velocityY * 0.01;
       } else {
         // Slow constant rotation
-        state.rotationY += 0.0002;
+        state.rotationY += 0.001;
       }
 
 

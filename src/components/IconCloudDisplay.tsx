@@ -2,23 +2,12 @@ import { IconCloud } from "@/components/magicui/icon-cloud";
 
 const slugs = [
   "reddit",
-  "instagram",
-  "stackoverflow",
-  "whatsapp",
-  "facebook",
   "x",
-  "linkedin",
   "discord",
+  "stackoverflow",
   "slack",
-  "youtube",
   "pinterest",
-  "tiktok",
-  "snapchat",
-  "medium",
-  "quora",
-  "behance",
-  "twitch",
-  "soundcloud",
+  "whatsapp",
 ];
 
 export default function IconCloudDisplay() {
