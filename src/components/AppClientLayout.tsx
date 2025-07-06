@@ -141,8 +141,8 @@ export default function AppClientLayout({
         )}
       </SidebarProvider>
       
-      <AIChatbot />
-      <Toaster />
+      {mounted && !isLandingPage && <AIChatbot />}
+      {mounted && <Toaster />}
     </>
   );
 }
