@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -40,14 +42,51 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+
+    const onMouseDown = (e: React.MouseEvent<HTMLElement>) => {
+      const element = e.currentTarget
+      const ripple = document.createElement("span")
+      const rect = element.getBoundingClientRect()
+      const size = Math.max(rect.width, rect.height)
+      const x = e.clientX - rect.left - size / 2
+      const y = e.clientY - rect.top - size / 2
+
+      ripple.style.width = ripple.style.height = `${size}px`
+      ripple.style.left = `${x}px`
+      ripple.style.top = `${y}px`
+
+      ripple.classList.add(
+        "pointer-events-none",
+        "absolute",
+        "animate-ripple",
+        "rounded-full",
+        "bg-current",
+        "opacity-25"
+      )
+
+      element.appendChild(ripple)
+
+      setTimeout(() => {
+        ripple.remove()
+      }, 600)
+
+      props.onMouseDown?.(e)
+    }
+
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          "relative overflow-hidden"
+        )}
         ref={ref}
+        onMouseDown={onMouseDown}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     )
   }
 )
