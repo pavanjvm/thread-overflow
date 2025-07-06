@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Post } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
