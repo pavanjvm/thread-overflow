@@ -20,6 +20,7 @@ import { communities } from '@/lib/mock-data';
 import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare, FileText } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
+import AIChatbot from './AIChatbot';
 
 export default function AppClientLayout({
   children,
@@ -128,6 +129,7 @@ export default function AppClientLayout({
           <div className="container mx-auto px-4 py-8">
             {children}
           </div>
+          <AIChatbot />
         </SidebarInset>
         <Toaster />
       </SidebarProvider>
