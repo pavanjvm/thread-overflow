@@ -13,13 +13,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import type { FormEvent } from 'react';
 import React from 'react';
 
 const Header = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const defaultSearch = searchParams.get('q') ?? '';
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -32,6 +33,10 @@ const Header = () => {
       router.push('/feed');
     }
   };
+
+  if (pathname === '/') {
+    return null;
+  }
 
   return (
     <header className="bg-card border-b sticky top-0 z-50">
