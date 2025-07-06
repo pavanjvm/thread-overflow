@@ -19,6 +19,7 @@ import {
 import { communities } from '@/lib/mock-data';
 import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useState, useEffect } from 'react';
 
 export default function AppClientLayout({
   children,
@@ -27,35 +28,42 @@ export default function AppClientLayout({
 }>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   const isLandingPage = pathname === '/';
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   
-  if (isLandingPage) {
-     return (
-      <body className={cn(
-        "font-body antialiased",
-        "landing-theme"
-      )}>
-        <div className="flex flex-col min-h-screen">
-          <main className="flex-grow container mx-auto px-4 py-8">
-            {children}
-          </main>
-        </div>
-        <Toaster />
-      </body>
-    );
+  useEffect(() => {
+    if (isLandingPage) {
+      document.body.classList.add('landing-theme');
+    } else {
+      document.body.classList.remove('landing-theme');
+    }
+
+    return () => {
+      document.body.classList.remove('landing-theme');
+    }
+  }, [isLandingPage]);
+
+  if (!isClient) {
+    return null;
   }
   
-  if (isAuthPage) {
+  if (isLandingPage || isAuthPage) {
+     const mainContainerClass = isLandingPage ? "container mx-auto px-4 py-8" : "";
      return (
-      <body className={cn("font-body antialiased")}>
+      <>
         <div className="flex flex-col min-h-screen">
-          <main className="flex-grow">
+          <main className={cn("flex-grow", mainContainerClass)}>
             {children}
           </main>
         </div>
         <Toaster />
-      </body>
+      </>
     );
   }
 
@@ -68,7 +76,7 @@ export default function AppClientLayout({
   ];
 
   return (
-    <body className={cn("font-body antialiased")}>
+    <>
       <SidebarProvider>
         <Sidebar>
           <SidebarContent className="p-2">
@@ -122,6 +130,6 @@ export default function AppClientLayout({
         </SidebarInset>
         <Toaster />
       </SidebarProvider>
-    </body>
+    </>
   );
 }
