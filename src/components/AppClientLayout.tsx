@@ -54,6 +54,7 @@ export default function AppClientLayout({
             {children}
           </main>
         </div>
+        <AIChatbot />
         <Toaster />
       </>
     );
