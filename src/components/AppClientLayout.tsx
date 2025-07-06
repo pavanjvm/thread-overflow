@@ -67,11 +67,6 @@ export default function AppClientLayout({
                           <Link href="/feed"><Newspaper /> All Posts</Link>
                       </SidebarMenuButton>
                   </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroup>
-            <SidebarGroup>
-              <SidebarGroupLabel>Topics</SidebarGroupLabel>
-              <SidebarMenu>
                   {topics.map((topic) => (
                       <SidebarMenuItem key={topic.slug}>
                           <SidebarMenuButton asChild isActive={pathname === '/search' && searchParams.get('q') === topic.slug}>
