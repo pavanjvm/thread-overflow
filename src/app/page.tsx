@@ -1,14 +1,27 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import TextPressure from '@/components/TextPressure';
 import IconCloudDisplay from '@/components/IconCloudDisplay';
+import { useTheme } from 'next-themes';
 
 export default function LandingPage() {
+  const { resolvedTheme } = useTheme();
+
+  const textColor =
+    resolvedTheme === 'light'
+      ? 'hsl(var(--foreground))'
+      : 'hsl(var(--primary))';
+
   return (
     <div className="grid md:grid-cols-2 gap-12 items-center py-24">
       <div className="flex flex-col justify-center text-center md:text-left">
         <div className="h-24">
-          <TextPressure text="Thread Overflow" textColor="hsl(var(--primary))" />
+          <TextPressure
+            text="Thread Overflow"
+            textColor={textColor}
+          />
         </div>
         <p className="mt-12 text-2xl text-muted-foreground max-w-lg mx-auto md:mx-0">
           Where your silly thoughts, brilliant ideas, and random musings collide in a big, friendly internet explosion!
