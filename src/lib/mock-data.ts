@@ -52,4 +52,20 @@ export const posts: Post[] = [
     votes: 56,
     comments: [],
   },
+  {
+    id: 'post-4',
+    title: 'Which frontend framework do you prefer?',
+    content: 'There are many great options out there. Let us know which one is your favorite for building modern web apps. If you choose "Other", let us know in the comments!',
+    author: users[1],
+    community: communities[1],
+    createdAt: '2 days ago',
+    votes: 42,
+    comments: [],
+    pollOptions: [
+      { text: 'React', votes: 15 },
+      { text: 'Vue', votes: 8 },
+      { text: 'Svelte', votes: 12 },
+      { text: 'Other', votes: 2 },
+    ]
+  },
 ];

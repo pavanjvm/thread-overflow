@@ -23,6 +23,11 @@ export interface Comment {
   stars: number;
 }
 
+export interface PollOption {
+  text: string;
+  votes: number;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -32,4 +37,5 @@ export interface Post {
   createdAt: string;
   votes: number;
   comments: Comment[];
+  pollOptions?: PollOption[];
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { communities } from '@/lib/mock-data';
-import { BarChart2, Image as ImageIcon } from "lucide-react";
+import { BarChart2, Image as ImageIcon, PlusCircle, X } from "lucide-react";
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
@@ -41,6 +41,9 @@ const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long.'),
   content: z.string().optional(),
   media: z.any().optional(),
+  pollOptions: z.array(z.object({
+    value: z.string().min(1, { message: 'Option cannot be empty.' }).max(80, { message: 'Option cannot be more than 80 characters.' })
+  })).min(2, "A poll must have at least two options.").max(6, "A poll can have at most six options.").optional(),
 });
 
 export default function NewPostPage() {
@@ -49,6 +52,8 @@ export default function NewPostPage() {
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showPollFields, setShowPollFields] = useState(false);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,6 +63,22 @@ export default function NewPostPage() {
       content: '',
     },
   });
+  
+  const { fields, append, remove } = useFieldArray({
+      control: form.control,
+      name: "pollOptions",
+  });
+
+  const handleTogglePoll = () => {
+      const isShowing = !showPollFields;
+      setShowPollFields(isShowing);
+      if (isShowing) {
+          form.setValue('pollOptions', [{ value: '' }, { value: '' }]);
+      } else {
+          form.setValue('pollOptions', undefined);
+          form.clearErrors('pollOptions');
+      }
+  };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,8 +103,7 @@ export default function NewPostPage() {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     // TODO: Replace with your API call to create a new post.
-    // This will now include `values.media` which is a FileList.
-    // You will likely want to upload this file to your backend/storage service.
+    // This will now include `values.media` and `values.pollOptions`.
     console.log('Form values:', values);
     
     toast({
@@ -154,6 +174,41 @@ export default function NewPostPage() {
                   )}
               />
 
+              {showPollFields && (
+                <div className="space-y-4 pt-4 border-t">
+                  <FormLabel>Poll Options</FormLabel>
+                  {fields.map((field, index) => (
+                    <FormField
+                      key={field.id}
+                      control={form.control}
+                      name={`pollOptions.${index}.value`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center gap-2">
+                            <FormControl>
+                              <Input {...field} placeholder={`Option ${index + 1}`} />
+                            </FormControl>
+                            {fields.length > 2 && (
+                              <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="shrink-0">
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                  {fields.length < 6 && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ value: '' })}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Option
+                    </Button>
+                  )}
+                  {form.formState.errors.pollOptions && <FormMessage>{form.formState.errors.pollOptions.message}</FormMessage>}
+                </div>
+              )}
+
               {mediaPreview && (
                 <div className="mt-4 relative w-full h-64 rounded-lg overflow-hidden border">
                     {mediaType === 'image' ? (
@@ -177,7 +232,7 @@ export default function NewPostPage() {
                     <ImageIcon className="mr-2 h-4 w-4" />
                     Image or Video
                 </Button>
-                <Button type="button" variant="outline" size="sm" disabled>
+                <Button type="button" variant="outline" size="sm" onClick={handleTogglePoll} data-state={showPollFields ? 'active' : 'inactive'} className="data-[state=active]:bg-accent">
                     <BarChart2 className="mr-2 h-4 w-4" />
                     Poll
                 </Button>

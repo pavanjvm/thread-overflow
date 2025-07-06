@@ -6,6 +6,7 @@ import VoteButtons from '@/components/VoteButtons';
 import CommentCard from '@/components/CommentCard';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
+import PollDisplay from '@/components/PollDisplay';
 
 export default function PostPage({ params }: { params: { id: string } }) {
   const post = posts.find((p) => p.id === params.id);
@@ -38,6 +39,11 @@ export default function PostPage({ params }: { params: { id: string } }) {
             <CardTitle className="text-3xl">{post.title}</CardTitle>
           </CardHeader>
           <CardContent>
+            {post.pollOptions && post.pollOptions.length > 0 && (
+                <div className="mb-6">
+                    <PollDisplay options={post.pollOptions} />
+                </div>
+            )}
             <div className="prose dark:prose-invert max-w-none">
               <p>{post.content}</p>
             </div>
