@@ -9,9 +9,9 @@ export const users: User[] = [
 ];
 
 export const communities: Community[] = [
-  { id: 'comm-1', name: 'Next.js', slug: 'nextjs', iconUrl: 'https://placehold.co/40x40.png?text=N' },
-  { id: 'comm-2', name: 'React', slug: 'react', iconUrl: 'https://placehold.co/40x40.png?text=R' },
-  { id: 'comm-3', name: 'CSS', slug: 'css', iconUrl: 'https://placehold.co/40x40.png?text=C' },
+  { id: 'comm-1', name: 'Next.js', slug: 'nextjs', iconUrl: 'https://placehold.co/40x40.png?text=N', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'The official community for Next.js enthusiasts. Discuss features, ask questions, and share your projects.', members: 12845 },
+  { id: 'comm-2', name: 'React', slug: 'react', iconUrl: 'https://placehold.co/40x40.png?text=R', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'A community for learning and developing with React. All skill levels are welcome.', members: 98321 },
+  { id: 'comm-3', name: 'CSS', slug: 'css', iconUrl: 'https://placehold.co/40x40.png?text=C', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'All things CSS! From basic styling to advanced animations and layout techniques.', members: 45201 },
 ];
 
 export const comments: Comment[] = [

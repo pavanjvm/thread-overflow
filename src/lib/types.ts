@@ -10,6 +10,9 @@ export interface Community {
   name: string;
   slug: string;
   iconUrl: string;
+  coverImageUrl: string;
+  description: string;
+  members: number;
 }
 
 export interface Comment {

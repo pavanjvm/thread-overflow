@@ -1,8 +1,11 @@
 import { posts, communities } from '@/lib/mock-data';
 import PostCard from '@/components/PostCard';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Community } from '@/lib/types';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Users } from 'lucide-react';
 
 export default function CommunityPage({ params }: { params: { slug: string } }) {
   let community: Community | undefined = communities.find((c) => c.slug === params.slug);
@@ -12,7 +15,10 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         id: `new-${params.slug}`,
         name: params.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
         slug: params.slug,
-        iconUrl: `https://placehold.co/64x64.png`
+        iconUrl: `https://placehold.co/64x64.png`,
+        coverImageUrl: 'https://placehold.co/1200x300.png',
+        description: 'This is a brand new community. Be the first to post!',
+        members: 0,
     };
   }
   
@@ -20,17 +26,41 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
   return (
     <div className="space-y-6">
+      <div className="relative h-48 w-full overflow-hidden rounded-lg bg-card">
+        <Image
+          src={community.coverImageUrl}
+          alt={`${community.name} cover image`}
+          fill
+          className="object-cover"
+          data-ai-hint="community cover"
+        />
+      </div>
+
       <Card>
-        <CardHeader className="flex flex-row items-center gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
-            <AvatarFallback className="text-2xl">{community.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-3xl">c/{community.slug}</CardTitle>
-            <CardDescription className="text-lg">{community.name}</CardDescription>
-          </div>
-        </CardHeader>
+        <div className="px-6">
+            <div className="flex items-end gap-4 -mt-10">
+                <Avatar className="h-24 w-24 border-4 border-card">
+                    <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
+                    <AvatarFallback className="text-4xl">{community.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="py-2 flex-grow">
+                    <CardTitle className="text-3xl">{community.name}</CardTitle>
+                    <CardDescription>c/{community.slug}</CardDescription>
+                </div>
+                <div className="py-2">
+                    <Button>Join Community</Button>
+                </div>
+            </div>
+        </div>
+        <CardContent className="pt-4">
+            <p className="text-muted-foreground">{community.description}</p>
+        </CardContent>
+        <CardFooter>
+            <div className="flex items-center gap-2 text-muted-foreground">
+                <Users className="h-5 w-5" />
+                <span className="font-bold">{community.members.toLocaleString()}</span> members
+            </div>
+        </CardFooter>
       </Card>
       
       <h2 className="text-2xl font-bold tracking-tight text-foreground">
