@@ -82,86 +82,88 @@ export default function AIChatbot() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="icon"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
-        >
-          <Bot className="h-7 w-7" />
-          <span className="sr-only">Open AI Chat</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] md:max-w-lg lg:max-w-2xl h-[80vh] flex flex-col p-0">
-        <DialogHeader className="p-4 border-b">
-          <DialogTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5" />
-            AI Assistant
-          </DialogTitle>
-          <DialogDescription>
-            Ask me anything about the posts on this platform.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full" ref={scrollAreaRef}>
-            <div className="p-4 space-y-6">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'flex items-start gap-3',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  {message.role === 'assistant' && (
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>
-                        <Bot />
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
+    <div className="fixed bottom-6 right-6 z-50">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button
+            size="icon"
+            className="h-14 w-14 rounded-full shadow-lg"
+          >
+            <Bot className="h-7 w-7" />
+            <span className="sr-only">Open AI Chat</span>
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px] md:max-w-lg lg:max-w-2xl h-[80vh] flex flex-col p-0">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              AI Assistant
+            </DialogTitle>
+            <DialogDescription>
+              Ask me anything about the posts on this platform.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full" ref={scrollAreaRef}>
+              <div className="p-4 space-y-6">
+                {messages.map((message) => (
                   <div
+                    key={message.id}
                     className={cn(
-                      'max-w-[80%] rounded-lg p-3 text-sm',
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                      'flex items-start gap-3',
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
-                    <p>{message.content}</p>
+                    {message.role === 'assistant' && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          <Bot />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div
+                      className={cn(
+                        'max-w-[80%] rounded-lg p-3 text-sm',
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      )}
+                    >
+                      <p>{message.content}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-        <DialogFooter className="p-4 border-t">
-          <div className="w-full space-y-4">
-             <div className="flex items-center gap-2">
-                 <Sparkles className="h-5 w-5 text-muted-foreground" />
-                 <p className="text-sm font-medium text-muted-foreground">Suggested Prompts</p>
-             </div>
-             <div className="flex flex-wrap gap-2">
-                {suggestedPrompts.map((prompt) => (
-                    <Button key={prompt} variant="outline" size="sm" onClick={(e) => handleSubmit(e as any, prompt)}>
-                        {prompt}
-                    </Button>
                 ))}
-             </div>
-            <form onSubmit={handleSubmit} className="flex w-full items-center space-x-2">
-              <Input
-                value={input}
-                onChange={handleInputChange}
-                placeholder="Ask about posts, users, or communities..."
-              />
-              <Button type="submit" size="icon" disabled={!input.trim()}>
-                <Send className="h-4 w-4" />
-                <span className="sr-only">Send message</span>
-              </Button>
-            </form>
+              </div>
+            </ScrollArea>
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="p-4 border-t">
+            <div className="w-full space-y-4">
+               <div className="flex items-center gap-2">
+                   <Sparkles className="h-5 w-5 text-muted-foreground" />
+                   <p className="text-sm font-medium text-muted-foreground">Suggested Prompts</p>
+               </div>
+               <div className="flex flex-wrap gap-2">
+                  {suggestedPrompts.map((prompt) => (
+                      <Button key={prompt} variant="outline" size="sm" onClick={(e) => handleSubmit(e as any, prompt)}>
+                          {prompt}
+                      </Button>
+                  ))}
+               </div>
+              <form onSubmit={handleSubmit} className="flex w-full items-center space-x-2">
+                <Input
+                  value={input}
+                  onChange={handleInputChange}
+                  placeholder="Ask about posts, users, or communities..."
+                />
+                <Button type="submit" size="icon" disabled={!input.trim()}>
+                  <Send className="h-4 w-4" />
+                  <span className="sr-only">Send message</span>
+                </Button>
+              </form>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
