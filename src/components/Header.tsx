@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import type { FormEvent } from 'react';
 import React from 'react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 const Header = () => {
   const router = useRouter();
@@ -42,7 +43,8 @@ const Header = () => {
     <header className="bg-card border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger />
             <Link href="/feed" className="flex items-center space-x-2 text-primary font-bold text-lg">
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
