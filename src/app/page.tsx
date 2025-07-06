@@ -8,7 +8,7 @@ export default function LandingPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col justify-center text-center md:text-left space-y-6">
-            <h1 className="text-7xl font-bold text-primary animate-bounce">
+            <h1 className="text-7xl font-bold text-primary">
               Thread Overflow
             </h1>
             <p className="text-2xl text-muted-foreground max-w-lg mx-auto md:mx-0">
