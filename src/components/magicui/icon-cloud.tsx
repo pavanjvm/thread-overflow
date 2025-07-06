@@ -16,6 +16,7 @@ type IconData = {
 export function IconCloud({ iconSlugs }: IconCloudProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [isHovered, setIsHovered] = useState(false);
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -66,15 +67,22 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
 
     const animate = () => {
       const { current: state } = rotationState;
-      const { width, height } =
-        containerRef.current!.getBoundingClientRect();
 
-      // Update velocity based on mouse position
-      state.velocityX = (state.mouseX - width / 2) / width * 0.5;
-      state.velocityY = (state.mouseY - height / 2) / height * 0.5;
+      if (isHovered && containerRef.current) {
+        const { width, height } =
+          containerRef.current.getBoundingClientRect();
 
-      state.rotationY += state.velocityX * 0.02;
-      state.rotationX -= state.velocityY * 0.02;
+        // Update velocity based on mouse position
+        state.velocityX = (state.mouseX - width / 2) / width * 0.5;
+        state.velocityY = (state.mouseY - height / 2) / height * 0.5;
+
+        state.rotationY += state.velocityX * 0.02;
+        state.rotationX -= state.velocityY * 0.02;
+      } else {
+        // Slow constant rotation
+        state.rotationY += 0.0002;
+      }
+
 
       // Apply transformations to each icon
       const sinX = Math.sin(state.rotationX);
@@ -110,11 +118,13 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isMounted, iconData]);
+  }, [isMounted, iconData, isHovered]);
 
   return (
     <div
       ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="relative flex h-full w-full items-center justify-center"
       style={{ perspective: "1000px" }}
     >
