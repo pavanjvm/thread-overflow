@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Flame, Plus, Trophy, User, LogOut, Settings, Users, Search } from 'lucide-react';
+import { Ghost, Plus, Trophy, User, LogOut, Settings, Users, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -39,7 +39,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 gap-4">
           <div className="flex items-center space-x-2 shrink-0">
             <Link href="/" className="flex items-center space-x-2 text-primary font-bold text-lg">
-              <Flame className="h-6 w-6" />
+              <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
             </Link>
           </div>

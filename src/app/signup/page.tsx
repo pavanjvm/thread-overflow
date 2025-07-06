@@ -3,14 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Flame } from 'lucide-react';
+import { Ghost } from 'lucide-react';
 
 export default function SignupPage() {
   return (
     <div className="flex items-center justify-center py-12">
       <Card className="mx-auto max-w-sm w-full">
         <CardHeader className="text-center">
-          <Flame className="mx-auto h-12 w-12 text-primary" />
+          <Ghost className="mx-auto h-12 w-12 text-primary" />
           <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>Enter your information to create an account</CardDescription>
         </CardHeader>
