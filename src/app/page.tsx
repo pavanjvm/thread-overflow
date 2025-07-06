@@ -8,14 +8,14 @@ export default function LandingPage() {
     <div className="flex-grow flex items-center">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="flex flex-col justify-center text-center md:text-left space-y-4">
+          <div className="flex flex-col justify-center text-center md:text-left">
             <div className="h-40">
                 <TextPressure text="Thread Overflow" textColor="hsl(var(--primary))" />
             </div>
             <p className="text-2xl text-muted-foreground max-w-lg mx-auto md:mx-0">
               Where your silly thoughts, brilliant ideas, and random musings collide in a big, friendly internet explosion!
             </p>
-            <div className="flex justify-center md:justify-start space-x-4 pt-4">
+            <div className="flex justify-center md:justify-start space-x-4 pt-8">
               <Button asChild size="lg">
                 <Link href="/login">Login</Link>
               </Button>
