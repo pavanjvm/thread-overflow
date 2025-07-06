@@ -46,9 +46,10 @@ export default function NewCommunityPage() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // In a real app, you would send this to your backend.
-    // We will just show a toast and redirect.
+    // TODO: Replace with your API call to create a community.
+    console.log('Form values:', values);
+    
+    // For this prototype, we'll just show a toast and redirect.
     toast({
       title: 'Community Created!',
       description: `The community c/${values.slug} has been successfully created.`,

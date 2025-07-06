@@ -13,7 +13,9 @@ export default function SignupPage() {
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd have account creation logic here.
+    // TODO: Replace with your API call for user signup.
+    console.log('Signup attempt');
+
     // For this prototype, we'll just redirect to the feed.
     router.push('/feed');
   };

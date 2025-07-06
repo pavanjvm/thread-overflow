@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,7 +13,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
@@ -25,14 +23,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog"
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -41,8 +31,6 @@ import {
 } from "@/components/ui/select"
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { suggestPostTitlesAction } from './actions';
-import { Loader2, Wand2 } from 'lucide-react';
 import { communities } from '@/lib/mock-data';
 
 const formSchema = z.object({
@@ -54,9 +42,6 @@ const formSchema = z.object({
 export default function NewPostPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const [isSuggesting, setIsSuggesting] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,44 +53,15 @@ export default function NewPostPage() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    // TODO: Replace with your API call to create a new post.
+    console.log('Form values:', values);
+    
     toast({
       title: 'Post Created!',
       description: 'Your new post has been successfully created.',
     });
     router.push('/feed');
   };
-
-  const handleSuggestTitles = async () => {
-    const content = form.getValues('content');
-    if (content.length < 20) {
-      toast({
-        variant: 'destructive',
-        title: 'Content too short',
-        description: 'Please write at least 20 characters of content to get title suggestions.',
-      });
-      return;
-    }
-    setIsSuggesting(true);
-    try {
-      const result = await suggestPostTitlesAction({ postContent: content });
-      if (result && result.titles) {
-        setSuggestions(result.titles);
-        setIsDialogOpen(true);
-      } else {
-         toast({ variant: 'destructive', title: 'Error', description: 'Could not generate title suggestions.' });
-      }
-    } catch (error) {
-       toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred.' });
-    } finally {
-      setIsSuggesting(false);
-    }
-  };
-
-  const handleSelectSuggestion = (title: string) => {
-    form.setValue('title', title);
-    setIsDialogOpen(false);
-  }
 
   return (
     <>
@@ -147,24 +103,9 @@ export default function NewPostPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Title</FormLabel>
-                    <div className="flex items-center space-x-2">
-                      <FormControl>
-                        <Input placeholder="Enter a descriptive title" {...field} />
-                      </FormControl>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleSuggestTitles}
-                        disabled={isSuggesting}
-                      >
-                        {isSuggesting ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Wand2 className="h-4 w-4" />
-                        )}
-                        <span className="ml-2 hidden sm:inline">Suggest Titles</span>
-                      </Button>
-                    </div>
+                    <FormControl>
+                      <Input placeholder="Enter a descriptive title" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -189,24 +130,6 @@ export default function NewPostPage() {
           </form>
         </Form>
       </Card>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Title Suggestions</DialogTitle>
-            <DialogDescription>
-              Here are some AI-generated titles based on your content. Click one to use it.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {suggestions.map((title, index) => (
-                <Button key={index} variant="outline" className="justify-start text-left h-auto" onClick={() => handleSelectSuggestion(title)}>
-                    {title}
-                </Button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
