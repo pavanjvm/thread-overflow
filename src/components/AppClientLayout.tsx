@@ -61,7 +61,7 @@ export default function AppClientLayout({
             {children}
           </main>
         </div>
-        <AIChatbot />
+        {mounted && <AIChatbot />}
         <Toaster />
       </>
     );
@@ -138,7 +138,7 @@ export default function AppClientLayout({
             {children}
           </div>
         </SidebarInset>
-        <AIChatbot />
+        {mounted && <AIChatbot />}
         <Toaster />
       </SidebarProvider>
     </>
