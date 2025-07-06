@@ -16,8 +16,8 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { communities } from '@/lib/mock-data';
-import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare, FileText } from 'lucide-react';
+import { communities, users } from '@/lib/mock-data';
+import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare, FileText, Trophy, Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
 import AIChatbot from './AIChatbot';
@@ -41,10 +41,12 @@ export default function AppClientLayout({
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   const showAppShell = !isLandingPage && !isAuthPage;
   
+  const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
+
   if (!mounted) {
     return <Loading />;
   }
-
+  
   const topics = [
     { name: 'Finance', slug: 'finance', icon: CircleDollarSign },
     { name: 'AI', slug: 'ai', icon: BrainCircuit },
@@ -55,87 +57,109 @@ export default function AppClientLayout({
 
   return (
     <SidebarProvider>
-      {showAppShell ? (
-        <>
-          <Sidebar>
-            <SidebarContent className="p-2">
-              <SidebarGroup>
-                <SidebarGroupLabel>Discover</SidebarGroupLabel>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={pathname === '/feed'}>
-                            <Link href="/feed"><Newspaper /> All Posts</Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    {topics.map((topic) => (
-                        <SidebarMenuItem key={topic.slug}>
-                            <SidebarMenuButton asChild isActive={pathname === '/search' && searchParams.get('q') === topic.slug}>
-                                <Link href={`/search?q=${topic.slug}`}>
-                                    <topic.icon />
-                                    <span>{topic.name}</span>
-                                </Link>
+        {showAppShell && (
+            <Sidebar>
+                <SidebarContent className="p-2">
+                <SidebarGroup>
+                    <SidebarGroupLabel>Discover</SidebarGroupLabel>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton asChild isActive={pathname === '/feed'}>
+                                <Link href="/feed"><Newspaper /> All Posts</Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
-                    ))}
-                </SidebarMenu>
-              </SidebarGroup>
-               <SidebarGroup>
-                <SidebarGroupLabel>My Content</SidebarGroupLabel>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
-                            <Link href="/drafts"><FileText /> Drafts</Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroup>
-              <SidebarGroup>
-                <SidebarGroupLabel>Communities</SidebarGroupLabel>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
-                            <Link href="/c/new"><Plus /> Create Community</Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    {communities.map((community) => (
-                        <SidebarMenuItem key={community.id}>
-                            <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
-                                <Link href={`/c/${community.slug}`}>
-                                    <Avatar className="size-5"><AvatarImage src={community.iconUrl} data-ai-hint="community icon" /><AvatarFallback>{community.name.charAt(0)}</AvatarFallback></Avatar>
-                                    <span>{community.name}</span>
-                                </Link>
+                        {topics.map((topic) => (
+                            <SidebarMenuItem key={topic.slug}>
+                                <SidebarMenuButton asChild isActive={pathname === '/search' && searchParams.get('q') === topic.slug}>
+                                    <Link href={`/search?q=${topic.slug}`}>
+                                        <topic.icon />
+                                        <span>{topic.name}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+                <SidebarGroup>
+                    <SidebarGroupLabel>My Content</SidebarGroupLabel>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
+                                <Link href="/drafts"><FileText /> Drafts</Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
-                    ))}
-                </SidebarMenu>
-              </SidebarGroup>
-            </SidebarContent>
-          </Sidebar>
-          <SidebarInset>
-            <Header />
-            <main className="container mx-auto px-4 py-8">
-              {children}
+                    </SidebarMenu>
+                </SidebarGroup>
+                <SidebarGroup>
+                  <SidebarGroupLabel>Leaderboard</SidebarGroupLabel>
+                  <SidebarMenu>
+                      <SidebarMenuItem>
+                          <SidebarMenuButton asChild isActive={pathname === '/leaderboard'}>
+                              <Link href="/leaderboard"><Trophy /> View All</Link>
+                          </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      {topUsers.map((user) => (
+                          <SidebarMenuItem key={user.id}>
+                              <SidebarMenuButton asChild isActive={pathname === `/profile`}>
+                                  <Link href={`/profile`}>
+                                      <Avatar className="size-5"><AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" /><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></Avatar>
+                                      <span className="flex-grow">{user.name}</span>
+                                      <div className="flex items-center gap-1 text-xs text-yellow-500">
+                                          <span>{user.stars}</span>
+                                          <Star className="size-3 fill-current" />
+                                      </div>
+                                  </Link>
+                              </SidebarMenuButton>
+                          </SidebarMenuItem>
+                      ))}
+                  </SidebarMenu>
+                </SidebarGroup>
+                <SidebarGroup>
+                    <SidebarGroupLabel>Communities</SidebarGroupLabel>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
+                                <Link href="/c/new"><Plus /> Create Community</Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        {communities.map((community) => (
+                            <SidebarMenuItem key={community.id}>
+                                <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
+                                    <Link href={`/c/${community.slug}`}>
+                                        <Avatar className="size-5"><AvatarImage src={community.iconUrl} data-ai-hint="community icon" /><AvatarFallback>{community.name.charAt(0)}</AvatarFallback></Avatar>
+                                        <span>{community.name}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+                </SidebarContent>
+            </Sidebar>
+        )}
+        <SidebarInset>
+            {showAppShell && <Header />}
+            <main className={cn(
+              "flex-grow",
+              (showAppShell || isLandingPage) && "container mx-auto px-4 py-8",
+              isAuthPage && "flex items-center justify-center w-full py-12"
+            )}>
+                {isLandingPage && (
+                    <div className="absolute top-4 right-4 z-50">
+                        <ThemeToggle />
+                    </div>
+                )}
+                {children}
             </main>
-          </SidebarInset>
-        </>
-      ) : (
-        <div className="flex flex-col min-h-screen w-full relative">
-            <div className="absolute top-4 right-4 z-50">
-              <ThemeToggle />
+        </SidebarInset>
+        
+        {mounted && pathname === '/feed' && (
+            <div className="fixed bottom-6 right-6 z-50">
+                <AIChatbot />
             </div>
-            <main className={cn("flex-grow", isLandingPage ? "container mx-auto px-4 py-8" : "flex items-center justify-center w-full py-12")}>
-              {children}
-            </main>
-        </div>
-      )}
-      
-      {mounted && pathname === '/feed' && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <AIChatbot />
-        </div>
-      )}
+        )}
 
-      {mounted && <Toaster />}
+        {mounted && <Toaster />}
     </SidebarProvider>
   );
 }
