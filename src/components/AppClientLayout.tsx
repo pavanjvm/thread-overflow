@@ -141,7 +141,11 @@ export default function AppClientLayout({
         )}
       </SidebarProvider>
       
-      {mounted && !isLandingPage && <AIChatbot />}
+      {mounted && pathname === '/feed' && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <AIChatbot />
+        </div>
+      )}
       {mounted && <Toaster />}
     </>
   );
