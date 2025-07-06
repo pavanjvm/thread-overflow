@@ -73,7 +73,7 @@ export default function NewPostPage() {
       title: 'Post Created!',
       description: 'Your new post has been successfully created.',
     });
-    router.push('/');
+    router.push('/feed');
   };
 
   const handleSuggestTitles = async () => {

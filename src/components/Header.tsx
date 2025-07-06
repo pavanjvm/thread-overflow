@@ -29,7 +29,7 @@ const Header = () => {
     if (query.trim()) {
       router.push(`/search?q=${encodeURIComponent(query.trim())}`);
     } else {
-      router.push('/');
+      router.push('/feed');
     }
   };
 
@@ -38,7 +38,7 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
           <div className="flex items-center space-x-2 shrink-0">
-            <Link href="/" className="flex items-center space-x-2 text-primary font-bold text-lg">
+            <Link href="/feed" className="flex items-center space-x-2 text-primary font-bold text-lg">
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
             </Link>
