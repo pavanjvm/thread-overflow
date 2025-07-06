@@ -16,13 +16,24 @@ import { Input } from '@/components/ui/input';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import type { FormEvent } from 'react';
 import React from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 const Header = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const defaultSearch = searchParams.get('q') ?? '';
+
+  // Early return for landing page before calling hooks that need context.
+  if (pathname === '/') {
+    return null;
+  }
+
+  // This hook needs to be used within a SidebarProvider.
+  // By checking the pathname first, we ensure this component only uses the hook
+  // when it's rendered within the main app layout that has the provider.
+  const { mounted } = useSidebar();
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,15 +46,11 @@ const Header = () => {
     }
   };
 
-  if (pathname === '/') {
-    return null;
-  }
-
   return (
     <header className="bg-card border-b sticky top-0 z-50">
       <div className="flex items-center justify-between h-16 gap-4 px-4">
         <div className="flex items-center gap-2">
-          <SidebarTrigger />
+          <SidebarTrigger className={cn(!mounted && 'invisible')} />
           <Link href="/feed" className="flex items-center space-x-2 text-primary font-bold text-lg">
             <Ghost className="h-6 w-6" />
             <span className="hidden sm:inline">thread overflow</span>
