@@ -29,26 +29,41 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const [postComments, setPostComments] = useState<Comment[]>(post.comments);
 
   const handleAwardStar = (commentId: string) => {
-    if (availableStars > 0) {
-      setAvailableStars((prev) => prev - 1);
-      setPostComments((prevComments) =>
-        prevComments.map((c) =>
-          c.id === commentId ? { ...c, stars: c.stars + 1 } : c
-        )
-      );
+    if (availableStars <= 0) {
       toast({
-        title: "Star Awarded!",
-        description: "You've awarded a star to a comment.",
+        variant: 'destructive',
+        title: 'No Stars Left',
+        description: 'You have no more stars to award for this post.',
       });
-    } else {
-       toast({
-        variant: "destructive",
-        title: "No Stars Left",
-        description: "You have no more stars to award for this post.",
+      return;
+    }
+
+    let commentFound = false;
+
+    const awardStarRecursively = (comments: Comment[]): Comment[] => {
+      return comments.map(comment => {
+        if (comment.id === commentId) {
+          commentFound = true;
+          return { ...comment, stars: comment.stars + 1 };
+        }
+        if (comment.replies && comment.replies.length > 0) {
+          return { ...comment, replies: awardStarRecursively(comment.replies) };
+        }
+        return comment;
+      });
+    };
+    
+    const newComments = awardStarRecursively(postComments);
+
+    if (commentFound) {
+      setAvailableStars(prev => prev - 1);
+      setPostComments(newComments);
+      toast({
+        title: 'Star Awarded!',
+        description: "You've awarded a star to a comment.",
       });
     }
   };
-
 
   return (
     <div className="max-w-4xl mx-auto grid md:grid-cols-[64px_1fr] gap-4">

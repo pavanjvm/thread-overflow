@@ -21,6 +21,8 @@ export interface Comment {
   author: User;
   createdAt: string;
   stars: number;
+  votes: number;
+  replies?: Comment[];
 }
 
 export interface PollOption {
@@ -43,7 +45,7 @@ export interface Post {
 }
 
 export interface Notification {
-    id: string;
+    id:string;
     text: string;
     createdAt: string;
     read: boolean;

@@ -14,11 +14,20 @@ export const communities: Community[] = [
   { id: 'comm-3', name: 'CSS', slug: 'css', iconUrl: 'https://placehold.co/40x40.png?text=C', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'All things CSS! From basic styling to advanced animations and layout techniques.', members: 45201 },
 ];
 
+const replyToComment2: Comment = {
+  id: 'reply-1',
+  content: 'Thanks, that clarifies things! I was stuck on that for a while.',
+  author: users[0],
+  createdAt: '55 minutes ago',
+  stars: 0,
+  votes: 5,
+};
+
 export const comments: Comment[] = [
-  { id: 'comment-1', content: 'This is a great point, I hadn\'t considered that!', author: users[1], createdAt: '2 hours ago', stars: 2 },
-  { id: 'comment-2', content: 'Could you elaborate on the second part? I am not sure I follow.', author: users[2], createdAt: '1 hour ago', stars: 1 },
-  { id: 'comment-3', content: 'I tried this and it worked perfectly. Thanks for sharing!', author: users[0], createdAt: '30 minutes ago', stars: 3 },
-  { id: 'comment-4', content: 'I have a different perspective on this...', author: users[3], createdAt: '4 hours ago', stars: 0 },
+  { id: 'comment-1', content: 'This is a great point, I hadn\'t considered that!', author: users[1], createdAt: '2 hours ago', stars: 2, votes: 12 },
+  { id: 'comment-2', content: 'Could you elaborate on the second part? I am not sure I follow.', author: users[2], createdAt: '1 hour ago', stars: 1, votes: 8, replies: [replyToComment2] },
+  { id: 'comment-3', content: 'I tried this and it worked perfectly. Thanks for sharing!', author: users[0], createdAt: '30 minutes ago', stars: 3, votes: 25 },
+  { id: 'comment-4', content: 'I have a different perspective on this...', author: users[3], createdAt: '4 hours ago', stars: 0, votes: -2 },
 ];
 
 export const posts: Post[] = [
