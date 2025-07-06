@@ -1,4 +1,6 @@
-import { posts } from '@/lib/mock-data';
+'use client';
+
+import { posts, users } from '@/lib/mock-data';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,13 +9,46 @@ import CommentCard from '@/components/CommentCard';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import PollDisplay from '@/components/PollDisplay';
+import type { Comment } from '@/lib/types';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PostPage({ params }: { params: { id: string } }) {
   const post = posts.find((p) => p.id === params.id);
+  const { toast } = useToast();
 
   if (!post) {
     notFound();
   }
+  
+  // For prototype purposes, assume the logged-in user is the first user.
+  const currentUser = users[0];
+  const isPostAuthor = post.author.id === currentUser.id;
+
+  const [availableStars, setAvailableStars] = useState(post.availableStars);
+  const [postComments, setPostComments] = useState<Comment[]>(post.comments);
+
+  const handleAwardStar = (commentId: string) => {
+    if (availableStars > 0) {
+      setAvailableStars((prev) => prev - 1);
+      setPostComments((prevComments) =>
+        prevComments.map((c) =>
+          c.id === commentId ? { ...c, stars: c.stars + 1 } : c
+        )
+      );
+      toast({
+        title: "Star Awarded!",
+        description: "You've awarded a star to a comment.",
+      });
+    } else {
+       toast({
+        variant: "destructive",
+        title: "No Stars Left",
+        description: "You have no more stars to award for this post.",
+      });
+    }
+  };
+
 
   return (
     <div className="max-w-4xl mx-auto grid md:grid-cols-[64px_1fr] gap-4">
@@ -48,14 +83,25 @@ export default function PostPage({ params }: { params: { id: string } }) {
               <p>{post.content}</p>
             </div>
           </CardContent>
+          {isPostAuthor && (
+            <CardFooter>
+                <div className="text-sm text-muted-foreground">You have <span className="font-bold text-primary">{availableStars}</span> stars left to award on this post.</div>
+            </CardFooter>
+          )}
         </Card>
 
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">{post.comments.length} Comments</h2>
+          <h2 className="text-2xl font-bold mb-4">{postComments.length} Comments</h2>
           <Separator />
           <div className="space-y-6 mt-6">
-            {post.comments.map((comment) => (
-              <CommentCard key={comment.id} comment={comment} />
+            {postComments.map((comment) => (
+              <CommentCard 
+                key={comment.id} 
+                comment={comment}
+                isPostAuthor={isPostAuthor}
+                availableStars={availableStars}
+                onAwardStar={handleAwardStar}
+              />
             ))}
           </div>
         </div>

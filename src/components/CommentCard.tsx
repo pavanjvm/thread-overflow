@@ -11,21 +11,21 @@ import { useToast } from '@/hooks/use-toast';
 
 interface CommentCardProps {
   comment: Comment;
+  isPostAuthor: boolean;
+  availableStars: number;
+  onAwardStar: (commentId: string) => void;
 }
 
-const CommentCard = ({ comment }: CommentCardProps) => {
-  const [stars, setStars] = useState(comment.stars);
-  const [isStarred, setIsStarred] = useState(false);
+const CommentCard = ({ comment, isPostAuthor, availableStars, onAwardStar }: CommentCardProps) => {
+  const [localStars, setLocalStars] = useState(comment.stars);
   const { toast } = useToast();
 
-  const handleStar = () => {
-    const newStarredState = !isStarred;
-    setIsStarred(newStarredState);
-    setStars(stars + (newStarredState ? 1 : -1));
-    toast({
-        title: newStarredState ? "Star Awarded!" : "Star Removed",
-        description: `You've ${newStarredState ? 'awarded a star to' : 'removed your star from'} ${comment.author.name}'s comment.`,
-    })
+  const handleAward = () => {
+    onAwardStar(comment.id);
+    // Optimistically update the star count
+    if (availableStars > 0) {
+        setLocalStars(prev => prev + 1);
+    }
   };
 
   return (
@@ -47,15 +47,17 @@ const CommentCard = ({ comment }: CommentCardProps) => {
             <p className="text-foreground">{comment.content}</p>
           </CardContent>
           <CardFooter>
-             <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleStar}
-                className={cn(isStarred && 'text-yellow-500')}
-              >
-                <Star className={cn('h-4 w-4 mr-2', isStarred && 'fill-current')} />
-                {stars} Star{stars !== 1 ? 's' : ''}
-              </Button>
+             {isPostAuthor ? (
+                <Button variant="outline" size="sm" onClick={handleAward} disabled={availableStars <= 0}>
+                    <Star className="h-4 w-4 mr-2 text-yellow-500 fill-yellow-400" />
+                    Award Star
+                </Button>
+             ) : (
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground font-medium">
+                   <Star className={cn('h-4 w-4', localStars > 0 ? 'text-yellow-500 fill-yellow-400' : 'text-muted-foreground')} />
+                   <span>{localStars} Star{localStars !== 1 ? 's' : ''}</span>
+                </div>
+             )}
           </CardFooter>
         </div>
       </div>

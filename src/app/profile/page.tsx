@@ -2,6 +2,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Star, MessageSquare, Edit } from 'lucide-react';
+import { posts } from '@/lib/mock-data';
+import PostCard from '@/components/PostCard';
+
 
 export default function ProfilePage() {
   const user = {
@@ -13,6 +16,8 @@ export default function ProfilePage() {
     posts: 12,
     comments: 42,
   };
+
+  const userPosts = posts.filter(post => post.author.name === 'Alice');
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -55,7 +60,15 @@ export default function ProfilePage() {
           <CardDescription>Your recent posts and comments.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No recent activity to show.</p>
+          {userPosts.length > 0 ? (
+            <div className="space-y-6">
+              {userPosts.map(post => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">No recent activity to show.</p>
+          )}
         </CardContent>
       </Card>
     </div>

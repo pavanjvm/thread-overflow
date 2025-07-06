@@ -38,4 +38,13 @@ export interface Post {
   votes: number;
   comments: Comment[];
   pollOptions?: PollOption[];
+  availableStars: number;
+}
+
+export interface Notification {
+    id: string;
+    text: string;
+    createdAt: string;
+    read: boolean;
+    href: string;
 }

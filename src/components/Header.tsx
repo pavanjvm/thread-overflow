@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Ghost, Plus, Trophy, User, LogOut, Settings, Users, Search } from 'lucide-react';
+import { Ghost, Plus, Trophy, User, LogOut, Settings, Users, Search, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,14 +18,15 @@ import type { FormEvent } from 'react';
 import React from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
+import { notifications } from '@/lib/mock-data';
 
 const Header = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const defaultSearch = searchParams.get('q') ?? '';
 
   const { mounted } = useSidebar();
+  const unreadNotificationCount = notifications.filter(n => !n.read).length;
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -70,6 +71,39 @@ const Header = () => {
               New Post
             </Link>
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Bell className="h-6 w-6" />
+                  {unreadNotificationCount > 0 && (
+                      <span className="absolute top-1 right-1 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                      </span>
+                  )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80" align="end">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {notifications.length > 0 ? (
+                    notifications.map(notification => (
+                        <DropdownMenuItem key={notification.id} asChild className={cn(!notification.read && 'font-bold')}>
+                           <Link href={notification.href} className="flex gap-3">
+                                <div className="w-full">
+                                    <p className="text-sm leading-snug whitespace-normal">{notification.text}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">{notification.createdAt}</p>
+                                </div>
+                                {!notification.read && <div className="self-center h-2 w-2 rounded-full bg-primary shrink-0"></div>}
+                           </Link>
+                        </DropdownMenuItem>
+                    ))
+                ) : (
+                    <DropdownMenuItem disabled>You have no new notifications.</DropdownMenuItem>
+                )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">

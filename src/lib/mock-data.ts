@@ -1,4 +1,4 @@
-import { User, Post, Comment, Community } from './types';
+import { User, Post, Comment, Community, Notification } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125 },
@@ -31,6 +31,7 @@ export const posts: Post[] = [
     createdAt: '4 hours ago',
     votes: 24,
     comments: [comments[0], comments[1]],
+    availableStars: 10,
   },
   {
     id: 'post-2',
@@ -41,6 +42,7 @@ export const posts: Post[] = [
     createdAt: '1 day ago',
     votes: 102,
     comments: [comments[2]],
+    availableStars: 10,
   },
   {
     id: 'post-3',
@@ -51,6 +53,7 @@ export const posts: Post[] = [
     createdAt: '3 days ago',
     votes: 56,
     comments: [],
+    availableStars: 10,
   },
   {
     id: 'post-4',
@@ -66,6 +69,13 @@ export const posts: Post[] = [
       { text: 'Vue', votes: 8 },
       { text: 'Svelte', votes: 12 },
       { text: 'Other', votes: 2 },
-    ]
+    ],
+    availableStars: 10,
   },
+];
+
+export const notifications: Notification[] = [
+    { id: 'notif-1', text: 'Alice awarded you a star on your comment.', createdAt: '5 minutes ago', read: false, href: '/posts/post-2' },
+    { id: 'notif-2', text: 'Your post in c/nextjs is trending!', createdAt: '1 hour ago', read: false, href: '/posts/post-1' },
+    { id: 'notif-3', text: 'Charlie replied to your post.', createdAt: '3 hours ago', read: true, href: '/posts/post-1' },
 ];
