@@ -1,0 +1,24 @@
+export interface User {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  stars: number;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  stars: number;
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  votes: number;
+  comments: Comment[];
+}
