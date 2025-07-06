@@ -1,8 +1,9 @@
-import { posts, communities } from '@/lib/mock-data';
+import { posts, communities, users } from '@/lib/mock-data';
 import PostCard from '@/components/PostCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { Star } from 'lucide-react';
 
 export default function SearchPage({
   searchParams,
@@ -27,6 +28,12 @@ export default function SearchPage({
       )
     : [];
 
+  const filteredUsers = query
+    ? users.filter((user) =>
+        user.name.toLowerCase().includes(query.toLowerCase())
+      )
+    : [];
+
   return (
     <div className="space-y-8">
       <Card>
@@ -38,7 +45,7 @@ export default function SearchPage({
             </CardDescription>
           ) : (
             <CardDescription>
-              Please enter a search term in the bar above to find posts and communities.
+              Please enter a search term in the bar above to find posts, communities, and users.
             </CardDescription>
           )}
         </CardHeader>
@@ -58,28 +65,58 @@ export default function SearchPage({
               )}
             </div>
           </div>
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold tracking-tight">Communities ({filteredCommunities.length})</h2>
-            <Card>
-              <CardContent className="p-4 space-y-4">
-                {filteredCommunities.length > 0 ? (
-                  filteredCommunities.map((community) => (
-                    <Link key={community.id} href={`/c/${community.slug}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
-                        <AvatarFallback>{community.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold text-foreground">c/{community.slug}</p>
-                        <p className="text-sm text-muted-foreground">{community.name}</p>
-                      </div>
-                    </Link>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground p-2">No communities found.</p>
-                )}
-              </CardContent>
-            </Card>
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold tracking-tight">Communities ({filteredCommunities.length})</h2>
+              <Card>
+                <CardContent className="p-4 space-y-4">
+                  {filteredCommunities.length > 0 ? (
+                    filteredCommunities.map((community) => (
+                      <Link key={community.id} href={`/c/${community.slug}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
+                          <AvatarFallback>{community.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold text-foreground">c/{community.slug}</p>
+                          <p className="text-sm text-muted-foreground">{community.name}</p>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground p-2">No communities found.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold tracking-tight">Users ({filteredUsers.length})</h2>
+              <Card>
+                <CardContent className="p-4 space-y-4">
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map((user) => (
+                      <Link key={user.id} href={`/profile`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
+                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold text-foreground">{user.name}</p>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Star className="h-4 w-4 fill-current text-primary" />
+                            <span>{user.stars}</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground p-2">No users found.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
           </div>
         </div>
       )}
