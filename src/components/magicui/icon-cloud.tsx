@@ -131,7 +131,7 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
       <div className="absolute h-full w-full" style={{ transformStyle: "preserve-3d" }}>
         {iconData.map((icon, i) => (
           <div
-            key={icon.slug}
+            key={`${icon.slug}-${i}`}
             ref={(el) => (iconRefs.current[i] = el)}
             className="absolute flex h-[50px] w-[50px] items-center justify-center"
             style={{
