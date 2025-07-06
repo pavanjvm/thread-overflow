@@ -67,86 +67,84 @@ export default function AppClientLayout({
   ];
 
   return (
-    <>
-      <SidebarProvider>
-        {showAppShell ? (
-          <>
-            <Sidebar>
-              <SidebarContent className="p-2">
-                <SidebarGroup>
-                  <SidebarGroupLabel>Discover</SidebarGroupLabel>
-                  <SidebarMenu>
-                      <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={pathname === '/feed'}>
-                              <Link href="/feed"><Newspaper /> All Posts</Link>
-                          </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      {topics.map((topic) => (
-                          <SidebarMenuItem key={topic.slug}>
-                              <SidebarMenuButton asChild isActive={pathname === '/search' && searchParams.get('q') === topic.slug}>
-                                  <Link href={`/search?q=${topic.slug}`}>
-                                      <topic.icon />
-                                      <span>{topic.name}</span>
-                                  </Link>
-                              </SidebarMenuButton>
-                          </SidebarMenuItem>
-                      ))}
-                  </SidebarMenu>
-                </SidebarGroup>
-                 <SidebarGroup>
-                  <SidebarGroupLabel>My Content</SidebarGroupLabel>
-                  <SidebarMenu>
-                      <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
-                              <Link href="/drafts"><FileText /> Drafts</Link>
-                          </SidebarMenuButton>
-                      </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroup>
-                <SidebarGroup>
-                  <SidebarGroupLabel>Communities</SidebarGroupLabel>
-                  <SidebarMenu>
-                      <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
-                              <Link href="/c/new"><Plus /> Create Community</Link>
-                          </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      {communities.map((community) => (
-                          <SidebarMenuItem key={community.id}>
-                              <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
-                                  <Link href={`/c/${community.slug}`}>
-                                      <Avatar className="size-5"><AvatarImage src={community.iconUrl} data-ai-hint="community icon" /><AvatarFallback>{community.name.charAt(0)}</AvatarFallback></Avatar>
-                                      <span>{community.name}</span>
-                                  </Link>
-                              </SidebarMenuButton>
-                          </SidebarMenuItem>
-                      ))}
-                  </SidebarMenu>
-                </SidebarGroup>
-              </SidebarContent>
-            </Sidebar>
-            <SidebarInset>
-              <Header />
-              <div className="container mx-auto px-4 py-8">
-                {children}
-              </div>
-            </SidebarInset>
-          </>
-        ) : (
-          <div className="flex flex-col min-h-screen">
-            <main className={cn("flex-grow", isLandingPage ? "container mx-auto px-4 py-8" : "")}>
+    <SidebarProvider>
+      {showAppShell ? (
+        <>
+          <Sidebar>
+            <SidebarContent className="p-2">
+              <SidebarGroup>
+                <SidebarGroupLabel>Discover</SidebarGroupLabel>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={pathname === '/feed'}>
+                            <Link href="/feed"><Newspaper /> All Posts</Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    {topics.map((topic) => (
+                        <SidebarMenuItem key={topic.slug}>
+                            <SidebarMenuButton asChild isActive={pathname === '/search' && searchParams.get('q') === topic.slug}>
+                                <Link href={`/search?q=${topic.slug}`}>
+                                    <topic.icon />
+                                    <span>{topic.name}</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
+              </SidebarGroup>
+               <SidebarGroup>
+                <SidebarGroupLabel>My Content</SidebarGroupLabel>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
+                            <Link href="/drafts"><FileText /> Drafts</Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Communities</SidebarGroupLabel>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
+                            <Link href="/c/new"><Plus /> Create Community</Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    {communities.map((community) => (
+                        <SidebarMenuItem key={community.id}>
+                            <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
+                                <Link href={`/c/${community.slug}`}>
+                                    <Avatar className="size-5"><AvatarImage src={community.iconUrl} data-ai-hint="community icon" /><AvatarFallback>{community.name.charAt(0)}</AvatarFallback></Avatar>
+                                    <span>{community.name}</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+          <SidebarInset>
+            <Header />
+            <div className="container mx-auto px-4 py-8">
               {children}
-            </main>
-          </div>
-        )}
-      </SidebarProvider>
-      
+            </div>
+          </SidebarInset>
+        </>
+      ) : (
+        <div className="flex flex-col min-h-screen w-full">
+          <main className={cn("flex-grow", isLandingPage ? "container mx-auto px-4 py-8" : "")}>
+            {children}
+          </main>
+        </div>
+      )}
+
       {mounted && pathname === '/feed' && (
         <div className="fixed bottom-6 right-6 z-50">
-          <AIChatbot />
+           <AIChatbot />
         </div>
       )}
       {mounted && <Toaster />}
-    </>
+    </SidebarProvider>
   );
 }
