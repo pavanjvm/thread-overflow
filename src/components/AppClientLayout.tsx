@@ -28,11 +28,6 @@ export default function AppClientLayout({
 }>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
 
   const isLandingPage = pathname === '/';
   const isAuthPage = pathname === '/login' || pathname === '/signup';
@@ -49,10 +44,6 @@ export default function AppClientLayout({
     }
   }, [isLandingPage]);
 
-  if (!isClient) {
-    return null;
-  }
-  
   if (isLandingPage || isAuthPage) {
      const mainContainerClass = isLandingPage ? "container mx-auto px-4 py-8" : "";
      return (
