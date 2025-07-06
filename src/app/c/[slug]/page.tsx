@@ -22,7 +22,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     };
   }
   
-  const communityPosts = posts.filter((post) => post.community.id === community!.id);
+  const communityPosts = posts.filter((post) => post.community.id === community!.id && post.status !== 'draft');
 
   return (
     <div className="space-y-6">

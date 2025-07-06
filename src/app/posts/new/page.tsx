@@ -101,16 +101,24 @@ export default function NewPostPage() {
     }
   }, [mediaPreview]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof formSchema>, status: 'published' | 'draft' = 'published') => {
     // TODO: Replace with your API call to create a new post.
-    // This will now include `values.media` and `values.pollOptions`.
-    console.log('Form values:', values);
+    // This will now include `values.media`, `values.pollOptions`, and status.
+    console.log('Form values:', { ...values, status });
     
-    toast({
-      title: 'Post Created!',
-      description: 'Your new post has been successfully created.',
-    });
-    router.push('/feed');
+    if (status === 'published') {
+      toast({
+        title: 'Post Created!',
+        description: 'Your new post has been successfully created.',
+      });
+      router.push('/feed');
+    } else {
+      toast({
+        title: 'Draft Saved!',
+        description: 'Your post has been saved as a draft.',
+      });
+      router.push('/drafts');
+    }
   };
 
   return (
@@ -121,7 +129,7 @@ export default function NewPostPage() {
           <CardDescription>Share your thoughts with the community.</CardDescription>
         </CardHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(values => onSubmit(values, 'published'))}>
             <CardContent className="space-y-6">
               <FormField
                 control={form.control}
@@ -239,8 +247,9 @@ export default function NewPostPage() {
               </div>
 
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex gap-2">
               <Button type="submit">Create Post</Button>
+              <Button type="button" variant="outline" onClick={form.handleSubmit(values => onSubmit(values, 'draft'))}>Save as Draft</Button>
             </CardFooter>
           </form>
         </Form>

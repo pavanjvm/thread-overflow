@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import VoteButtons from './VoteButtons';
 import { MessageSquare } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface PostCardProps {
   post: Post;
@@ -31,10 +32,11 @@ const PostCard = ({ post }: PostCardProps) => {
               <span>•</span>
               <span>{post.createdAt}</span>
             </div>
-            <CardTitle>
+            <CardTitle className="flex items-center">
               <Link href={`/posts/${post.id}`} className="hover:text-primary transition-colors">
                 {post.title}
               </Link>
+              {post.status === 'draft' && <Badge variant="secondary" className="ml-2">Draft</Badge>}
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -39,6 +39,7 @@ export interface Post {
   comments: Comment[];
   pollOptions?: PollOption[];
   availableStars: number;
+  status?: 'published' | 'draft';
 }
 
 export interface Notification {

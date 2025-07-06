@@ -17,7 +17,7 @@ export default function ProfilePage() {
     comments: 42,
   };
 
-  const userPosts = posts.filter(post => post.author.name === 'Alice');
+  const userPosts = posts.filter(post => post.author.name === 'Alice' && post.status !== 'draft');
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">

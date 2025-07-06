@@ -17,7 +17,7 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { communities } from '@/lib/mock-data';
-import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare } from 'lucide-react';
+import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare, FileText } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
 
@@ -98,6 +98,16 @@ export default function AppClientLayout({
                           </SidebarMenuButton>
                       </SidebarMenuItem>
                   ))}
+              </SidebarMenu>
+            </SidebarGroup>
+             <SidebarGroup>
+              <SidebarGroupLabel>My Content</SidebarGroupLabel>
+              <SidebarMenu>
+                  <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
+                          <Link href="/drafts"><FileText /> Drafts</Link>
+                      </SidebarMenuButton>
+                  </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroup>
             <SidebarGroup>

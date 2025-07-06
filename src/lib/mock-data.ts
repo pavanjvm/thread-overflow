@@ -32,6 +32,7 @@ export const posts: Post[] = [
     votes: 24,
     comments: [comments[0], comments[1]],
     availableStars: 10,
+    status: 'published',
   },
   {
     id: 'post-2',
@@ -43,6 +44,7 @@ export const posts: Post[] = [
     votes: 102,
     comments: [comments[2]],
     availableStars: 10,
+    status: 'published',
   },
   {
     id: 'post-3',
@@ -54,6 +56,7 @@ export const posts: Post[] = [
     votes: 56,
     comments: [],
     availableStars: 10,
+    status: 'published',
   },
   {
     id: 'post-4',
@@ -71,7 +74,20 @@ export const posts: Post[] = [
       { text: 'Other', votes: 2 },
     ],
     availableStars: 10,
+    status: 'published',
   },
+  {
+    id: 'post-5-draft',
+    title: 'This is a draft post',
+    content: 'I am still working on this brilliant idea... It involves lasers and kittens.',
+    author: users[0], 
+    community: communities[0],
+    createdAt: '10 minutes ago',
+    votes: 0,
+    comments: [],
+    availableStars: 10,
+    status: 'draft',
+  }
 ];
 
 export const notifications: Notification[] = [

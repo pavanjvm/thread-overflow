@@ -15,8 +15,9 @@ export default function SearchPage({
   const filteredPosts = query
     ? posts.filter(
         (post) =>
-          post.title.toLowerCase().includes(query.toLowerCase()) ||
-          post.content.toLowerCase().includes(query.toLowerCase())
+          post.status !== 'draft' &&
+          (post.title.toLowerCase().includes(query.toLowerCase()) ||
+          post.content.toLowerCase().includes(query.toLowerCase()))
       )
     : [];
 
