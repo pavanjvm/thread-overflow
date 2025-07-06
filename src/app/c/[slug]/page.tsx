@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Users } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
-export default function CommunityPage({ params }: { params: { slug: string } }) {
+export default async function CommunityPage({ params }: { params: { slug: string } }) {
   const community = communities.find((c) => c.slug === params.slug);
   
   if (!community) {
