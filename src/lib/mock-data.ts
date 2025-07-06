@@ -1,4 +1,4 @@
-import { User, Post, Comment, Community, Notification } from './types';
+import { User, Post, Comment, Community, Notification, ChatMessage, Conversation } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125 },
@@ -103,4 +103,41 @@ export const notifications: Notification[] = [
     { id: 'notif-1', text: 'Alice awarded you a star on your comment.', createdAt: '5 minutes ago', read: false, href: '/posts/post-2' },
     { id: 'notif-2', text: 'Your post in c/techtalk is trending!', createdAt: '1 hour ago', read: false, href: '/posts/post-1' },
     { id: 'notif-3', text: 'Charlie replied to your post.', createdAt: '3 hours ago', read: true, href: '/posts/post-1' },
+];
+
+const bobMessages: ChatMessage[] = [
+    { id: 'msg-1', senderId: 'user-1', receiverId: 'user-2', content: 'Hey Bob, how is it going?', timestamp: '10:30 AM', read: true },
+    { id: 'msg-2', senderId: 'user-2', receiverId: 'user-1', content: 'Hey Alice! Going well, just working on that new feature.', timestamp: '10:31 AM', read: true },
+    { id: 'msg-3', senderId: 'user-1', receiverId: 'user-2', content: 'Nice! Let me know if you need any help.', timestamp: '10:32 AM', read: true },
+    { id: 'msg-4', senderId: 'user-2', receiverId: 'user-1', content: 'Will do, thanks!', timestamp: '10:33 AM', read: false },
+];
+
+const charlieMessages: ChatMessage[] = [
+    { id: 'msg-5', senderId: 'user-3', receiverId: 'user-1', content: 'Quick question about the CSS Grid post.', timestamp: '11:00 AM', read: true },
+    { id: 'msg-6', senderId: 'user-1', receiverId: 'user-3', content: 'Sure, what is it?', timestamp: '11:01 AM', read: true },
+];
+
+const dianaMessages: ChatMessage[] = [
+    { id: 'msg-7', senderId: 'user-4', receiverId: 'user-1', content: 'Love the app!', timestamp: 'Yesterday', read: true },
+];
+
+export const conversations: Conversation[] = [
+    {
+        id: 'conv-1',
+        participant: users[1], // Bob
+        messages: bobMessages,
+        lastMessage: bobMessages[bobMessages.length - 1],
+    },
+    {
+        id: 'conv-2',
+        participant: users[2], // Charlie
+        messages: charlieMessages,
+        lastMessage: charlieMessages[charlieMessages.length - 1],
+    },
+    {
+        id: 'conv-3',
+        participant: users[3], // Diana
+        messages: dianaMessages,
+        lastMessage: dianaMessages[dianaMessages.length - 1],
+    }
 ];

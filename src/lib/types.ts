@@ -51,3 +51,19 @@ export interface Notification {
     read: boolean;
     href: string;
 }
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  timestamp: string;
+  read: boolean;
+}
+
+export interface Conversation {
+    id: string;
+    participant: User;
+    messages: ChatMessage[];
+    lastMessage: ChatMessage;
+}
