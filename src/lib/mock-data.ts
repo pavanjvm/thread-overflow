@@ -9,9 +9,9 @@ export const users: User[] = [
 ];
 
 export const communities: Community[] = [
-  { id: 'comm-1', name: 'Next.js', slug: 'nextjs', iconUrl: 'https://placehold.co/40x40.png?text=N', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'The official community for Next.js enthusiasts. Discuss features, ask questions, and share your projects.', members: 12845 },
-  { id: 'comm-2', name: 'React', slug: 'react', iconUrl: 'https://placehold.co/40x40.png?text=R', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'A community for learning and developing with React. All skill levels are welcome.', members: 98321 },
-  { id: 'comm-3', name: 'CSS', slug: 'css', iconUrl: 'https://placehold.co/40x40.png?text=C', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'All things CSS! From basic styling to advanced animations and layout techniques.', members: 45201 },
+  { id: 'comm-1', name: 'Tech Talk', slug: 'techtalk', iconUrl: 'https://placehold.co/40x40.png?text=T', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'General discussions about technology, software, and hardware.', members: 12845 },
+  { id: 'comm-2', name: 'Investments', slug: 'investments', iconUrl: 'https://placehold.co/40x40.png?text=I', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'A community for discussing stocks, crypto, and other investment strategies.', members: 98321 },
+  { id: 'comm-3', name: 'Full-stack Devs', slug: 'fullstack', iconUrl: 'https://placehold.co/40x40.png?text=F', coverImageUrl: 'https://placehold.co/1200x300.png', description: 'For developers who do it all, from front-end to back-end.', members: 45201 },
 ];
 
 const replyToComment2: Comment = {
@@ -101,6 +101,6 @@ export const posts: Post[] = [
 
 export const notifications: Notification[] = [
     { id: 'notif-1', text: 'Alice awarded you a star on your comment.', createdAt: '5 minutes ago', read: false, href: '/posts/post-2' },
-    { id: 'notif-2', text: 'Your post in c/nextjs is trending!', createdAt: '1 hour ago', read: false, href: '/posts/post-1' },
+    { id: 'notif-2', text: 'Your post in c/techtalk is trending!', createdAt: '1 hour ago', read: false, href: '/posts/post-1' },
     { id: 'notif-3', text: 'Charlie replied to your post.', createdAt: '3 hours ago', read: true, href: '/posts/post-1' },
 ];
