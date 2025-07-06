@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface IconCloudProps {
@@ -19,6 +20,7 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const [isMounted, setIsMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   const iconData = useMemo(() => {
     const phi = Math.PI * (3.0 - Math.sqrt(5.0)); // golden angle in radians
@@ -119,6 +121,8 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
       cancelAnimationFrame(animationFrameId);
     };
   }, [isMounted, iconData, isHovered]);
+  
+  const iconColor = resolvedTheme === 'dark' ? 'white' : 'black';
 
   return (
     <div
@@ -143,7 +147,7 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
             }}
           >
              <img
-              src={`https://cdn.simpleicons.org/${icon.slug}/white`}
+              src={`https://cdn.simpleicons.org/${icon.slug}/${iconColor}`}
               alt={icon.slug}
               className="h-full w-full"
             />

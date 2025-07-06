@@ -20,6 +20,7 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { notifications, conversations } from '@/lib/mock-data';
 import ChatPanel from '@/components/ChatPanel';
+import { ThemeToggle } from './ThemeToggle';
 
 const Header = () => {
   const router = useRouter();
@@ -120,6 +121,8 @@ const Header = () => {
                   )}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <ThemeToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

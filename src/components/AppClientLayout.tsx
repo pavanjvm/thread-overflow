@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
 import AIChatbot from './AIChatbot';
 import Loading from '@/app/loading';
+import { ThemeToggle } from './ThemeToggle';
 
 export default function AppClientLayout({
   children,
@@ -39,20 +40,6 @@ export default function AppClientLayout({
   const isLandingPage = pathname === '/';
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   const showAppShell = !isLandingPage && !isAuthPage;
-  
-  useEffect(() => {
-    if (!mounted) return;
-
-    if (isLandingPage) {
-      document.body.classList.add('landing-theme');
-    } else {
-      document.body.classList.remove('landing-theme');
-    }
-
-    return () => {
-      document.body.classList.remove('landing-theme');
-    }
-  }, [isLandingPage, mounted]);
   
   if (!mounted) {
     return <Loading />;
@@ -126,24 +113,28 @@ export default function AppClientLayout({
           </Sidebar>
           <SidebarInset>
             <Header />
-            <div className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 py-8">
               {children}
-            </div>
+            </main>
           </SidebarInset>
         </>
       ) : (
-        <div className="flex flex-col min-h-screen w-full">
-          <main className={cn("flex-grow", isLandingPage ? "container mx-auto px-4 py-8" : "")}>
-            {children}
-          </main>
+        <div className="flex flex-col min-h-screen w-full relative">
+            <div className="absolute top-4 right-4 z-50">
+              <ThemeToggle />
+            </div>
+            <main className={cn("flex-grow", isLandingPage ? "container mx-auto px-4 py-8" : "flex items-center justify-center w-full py-12")}>
+              {children}
+            </main>
+        </div>
+      )}
+      
+      {mounted && pathname === '/feed' && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <AIChatbot />
         </div>
       )}
 
-      {mounted && pathname === '/feed' && (
-        <div className="fixed bottom-6 right-6 z-50">
-           <AIChatbot />
-        </div>
-      )}
       {mounted && <Toaster />}
     </SidebarProvider>
   );
