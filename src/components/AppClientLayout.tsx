@@ -129,8 +129,8 @@ export default function AppClientLayout({
           <div className="container mx-auto px-4 py-8">
             {children}
           </div>
-          <AIChatbot />
         </SidebarInset>
+        <AIChatbot />
         <Toaster />
       </SidebarProvider>
     </>
