@@ -83,14 +83,16 @@ export default function AIChatbot() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild className="fixed bottom-6 right-6 z-50">
-        <Button
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg"
-        >
-          <Bot className="h-7 w-7" />
-          <span className="sr-only">Open AI Chat</span>
-        </Button>
+      <DialogTrigger asChild>
+        <div className="fixed bottom-6 right-6 z-50">
+            <Button
+              size="icon"
+              className="h-14 w-14 rounded-full shadow-lg"
+            >
+              <Bot className="h-7 w-7" />
+              <span className="sr-only">Open AI Chat</span>
+            </Button>
+        </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] md:max-w-lg lg:max-w-2xl h-[80vh] flex flex-col p-0">
         <DialogHeader className="p-4 border-b">
