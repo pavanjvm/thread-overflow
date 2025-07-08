@@ -75,8 +75,8 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
           containerRef.current.getBoundingClientRect();
 
         // Update velocity based on mouse position
-        state.velocityX = (state.mouseX - width / 2) / width * 0.5;
-        state.velocityY = (state.mouseY - height / 2) / height * 0.5;
+        state.velocityX = (state.mouseX - width / 2) * width * 0.5;
+        state.velocityY = (state.mouseY - height / 2) * height * 0.5;
 
         state.rotationY += state.velocityX * 0.01;
         state.rotationX -= state.velocityY * 0.01;
@@ -123,6 +123,10 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
   }, [isMounted, iconData, isHovered]);
   
   const iconColor = resolvedTheme === 'dark' ? 'white' : 'black';
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div
