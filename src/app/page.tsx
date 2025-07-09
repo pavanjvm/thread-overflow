@@ -22,9 +22,9 @@ export default function LandingPage() {
     return (
       <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden bg-background">
         <div className="z-10 flex flex-col items-center text-center px-4">
-          <div className="h-24 w-full max-w-4xl" />
-          <p className="mt-12 text-2xl text-muted-foreground max-w-2xl">
-            Where your silly thoughts, brilliant ideas, and random musings collide in a big, friendly internet explosion!
+          <div className="h-32 w-full max-w-5xl" />
+          <p className="mt-4 text-xl text-muted-foreground max-w-3xl">
+            From community forums to ideation and hackathon portals, we connect brilliant minds with real-world challenges.
           </p>
           <div className="flex space-x-4 pt-8">
             <Button asChild size="lg">
@@ -41,24 +41,25 @@ export default function LandingPage() {
 
   const lightColors = ["#BEB2FF", "#D9F4FF", "#BEB2FF"];
   const darkColors = ['#8f908f', '#726e6f', '#8f908f'];
-  const auroraColors = resolvedTheme === 'dark' ? darkColors : lightColors;
+  const isLight = resolvedTheme === 'light';
+  const auroraColors = isLight ? lightColors : darkColors;
 
   const textColor = resolvedTheme === 'dark' ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))';
 
   return (
     <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <Aurora colorStops={auroraColors} blend={1} />
+        <Aurora colorStops={auroraColors} isLight={isLight} />
       </div>
       <div className="z-10 flex flex-col items-center text-center px-4">
-        <div className="h-24 w-full max-w-4xl">
+        <div className="h-32 w-full max-w-5xl">
           <TextPressure
             text="Thread Overflow"
             textColor={textColor}
           />
         </div>
-        <p className="mt-12 text-2xl text-muted-foreground max-w-2xl">
-          Where your silly thoughts, brilliant ideas, and random musings collide in a big, friendly internet explosion!
+        <p className="mt-4 text-xl text-muted-foreground max-w-3xl">
+          From community forums to ideation and hackathon portals, we connect brilliant minds with real-world challenges.
         </p>
         <div className="flex space-x-4 pt-8">
           <Button asChild size="lg">
