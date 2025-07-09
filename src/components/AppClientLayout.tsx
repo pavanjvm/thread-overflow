@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -18,7 +19,10 @@ import IdeationSidebar from './IdeationSidebar';
 import dynamic from 'next/dynamic';
 
 const AIChatbot = dynamic(() => import('./AIChatbot'), { ssr: false });
-const ChatPanel = dynamic(() => import('./ChatPanel'), { ssr: false });
+const ChatPanel = dynamic(() => import('./ChatPanel'), { 
+  ssr: false,
+  loading: () => <div className="fixed inset-0 bg-black/50 z-50" />
+});
 
 export default function AppClientLayout({
   children,
@@ -34,17 +38,17 @@ export default function AppClientLayout({
   }, []);
 
   const isLandingPage = pathname === '/';
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname);
   const isDashboardPage = pathname === '/dashboard';
-  const showAppShell = !isLandingPage && !isAuthPage && !isDashboardPage;
-  
-  const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
   
   const isIdeationSection = pathname.startsWith('/ideation');
   const isHackathonSection = pathname.startsWith('/hackathons');
 
+  const showAppShell = !isLandingPage && !isAuthPage && !isDashboardPage;
   const showSidebar = showAppShell && !isHackathonSection && !isIdeationSection;
 
+  const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
+  
   return (
     <SidebarProvider mounted={mounted}>
         {showSidebar && (
@@ -62,8 +66,7 @@ export default function AppClientLayout({
             {(showAppShell || isDashboardPage) && <Header showSidebar={showSidebar} setIsChatOpen={setIsChatOpen} />}
             <main className={cn(
               "flex-grow",
-              (showAppShell || isLandingPage || isDashboardPage) && "container mx-auto px-4 py-8",
-              isAuthPage && "flex items-center justify-center w-full py-12"
+              (showAppShell || isLandingPage || isDashboardPage) && "container mx-auto px-4 py-8"
             )}>
                 {isLandingPage && (
                     <div className="absolute top-4 right-4 z-50">
