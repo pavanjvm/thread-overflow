@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -66,4 +67,38 @@ export interface Conversation {
     participant: User;
     messages: ChatMessage[];
     lastMessage: ChatMessage;
+}
+
+export interface Idea {
+  id: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  votes: number;
+}
+
+export interface Prototype {
+  id: string;
+  title: string;
+  description: string;
+  author: User;
+  createdAt: string;
+  imageUrl: string;
+  liveUrl?: string;
+  votes: number;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  author: User;
+  createdAt: string;
+  status: 'Ideation' | 'Prototyping' | 'Completed';
+  rewards: {
+    ideation: number;
+    prototype: number;
+  };
+  ideas: Idea[];
+  prototypes: Prototype[];
 }

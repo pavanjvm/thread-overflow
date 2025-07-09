@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -51,7 +52,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 gap-4 px-4">
           <div className="flex items-center gap-2">
             <SidebarTrigger className={cn(!mounted && 'invisible')} />
-            <Link href="/feed" className="flex items-center space-x-2 text-primary font-bold text-lg">
+            <Link href="/dashboard" className="flex items-center space-x-2 text-primary font-bold text-lg">
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
             </Link>

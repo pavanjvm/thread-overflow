@@ -1,4 +1,5 @@
-import { User, Post, Comment, Community, Notification, ChatMessage, Conversation } from './types';
+
+import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Idea, Prototype, Project } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125 },
@@ -140,4 +141,52 @@ export const conversations: Conversation[] = [
         messages: dianaMessages,
         lastMessage: dianaMessages[dianaMessages.length - 1],
     }
+];
+
+// --- Ideation Portal Data ---
+
+const ideas: Idea[] = [
+    { id: 'idea-1', content: 'We could use a service worker to cache the assets and make it available offline.', author: users[1], createdAt: '1 day ago', votes: 15 },
+    { id: 'idea-2', content: 'Maybe we can use WebSockets for real-time updates instead of polling.', author: users[2], createdAt: '2 days ago', votes: 8 },
+    { id: 'idea-3', content: 'Let\'s build it with a serverless architecture on Firebase Functions to keep costs low.', author: users[4], createdAt: '1 day ago', votes: 22 },
+];
+
+const prototypes: Prototype[] = [
+    { id: 'proto-1', title: 'PWA Offline-First App', description: 'A working prototype using service workers to provide offline functionality.', author: users[0], createdAt: '3 hours ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10 },
+];
+
+export const projects: Project[] = [
+    {
+        id: 'proj-1',
+        title: 'Build a Real-Time Collaborative Whiteboard',
+        description: 'We need a whiteboard app where multiple users can draw and share ideas simultaneously. It should support basic shapes, text, and freeform drawing. The primary challenge is ensuring low latency and synchronized state across all clients.',
+        author: users[3],
+        createdAt: '3 days ago',
+        status: 'Prototyping',
+        rewards: { ideation: 50, prototype: 200 },
+        ideas: [ideas[1], ideas[2]],
+        prototypes: [prototypes[0]],
+    },
+    {
+        id: 'proj-2',
+        title: 'AI-Powered Recipe Generator',
+        description: 'Create an application that suggests recipes based on the ingredients a user has in their fridge. The AI should be able to handle substitutions and dietary restrictions. The user should be able to input ingredients via text or by uploading a photo.',
+        author: users[0],
+        createdAt: '1 week ago',
+        status: 'Ideation',
+        rewards: { ideation: 75, prototype: 300 },
+        ideas: [ideas[0]],
+        prototypes: [],
+    },
+    {
+        id: 'proj-3',
+        title: 'Gamified Fitness Challenge App',
+        description: 'An app that allows friends to create fitness challenges (e.g., run 50km in a month) and track their progress. It should include leaderboards, badges, and social sharing features to keep users motivated.',
+        author: users[2],
+        createdAt: '2 weeks ago',
+        status: 'Completed',
+        rewards: { ideation: 40, prototype: 150 },
+        ideas: [],
+        prototypes: [],
+    },
 ];

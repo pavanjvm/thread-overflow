@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -17,7 +18,7 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { communities, users } from '@/lib/mock-data';
-import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare, FileText, Trophy, Star } from 'lucide-react';
+import { Newspaper, Plus, CircleDollarSign, BrainCircuit, Bug, Lightbulb, MessageSquare, FileText, Trophy, Star, Rocket } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
 import AIChatbot from './AIChatbot';
@@ -39,7 +40,8 @@ export default function AppClientLayout({
 
   const isLandingPage = pathname === '/';
   const isAuthPage = pathname === '/login' || pathname === '/signup';
-  const showAppShell = !isLandingPage && !isAuthPage;
+  const isDashboardPage = pathname === '/dashboard';
+  const showAppShell = !isLandingPage && !isAuthPage && !isDashboardPage;
   
   const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
 
@@ -63,6 +65,11 @@ export default function AppClientLayout({
                 <SidebarGroup>
                     <SidebarGroupLabel>Discover</SidebarGroupLabel>
                     <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton asChild isActive={pathname.startsWith('/ideation')}>
+                                <Link href="/ideation"><Rocket /> Ideation Portal</Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild isActive={pathname === '/feed'}>
                                 <Link href="/feed"><Newspaper /> All Posts</Link>
@@ -138,10 +145,10 @@ export default function AppClientLayout({
             </Sidebar>
         )}
         <SidebarInset>
-            {showAppShell && <Header />}
+            {(showAppShell || isDashboardPage) && <Header />}
             <main className={cn(
               "flex-grow",
-              (showAppShell || isLandingPage) && "container mx-auto px-4 py-8",
+              (showAppShell || isLandingPage || isDashboardPage) && "container mx-auto px-4 py-8",
               isAuthPage && "flex items-center justify-center w-full py-12"
             )}>
                 {isLandingPage && (
@@ -153,13 +160,13 @@ export default function AppClientLayout({
             </main>
         </SidebarInset>
         
-        {mounted && pathname === '/feed' && (
+        {pathname === '/feed' && (
             <div className="fixed bottom-6 right-6 z-50">
                 <AIChatbot />
             </div>
         )}
 
-        {mounted && <Toaster />}
+        {<Toaster />}
     </SidebarProvider>
   );
 }

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -16,8 +17,8 @@ export default function LoginPage() {
     // TODO: Replace with your API call for authentication.
     console.log('Login attempt');
     
-    // For this prototype, we'll just redirect to the feed.
-    router.push('/feed');
+    // For this prototype, we'll just redirect to the dashboard.
+    router.push('/dashboard');
   };
 
   return (
