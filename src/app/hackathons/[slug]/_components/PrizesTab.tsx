@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Trophy } from 'lucide-react';
 
 export default function PrizesTab({ hackathon }: { hackathon: Hackathon }) {
-  const prizeColors = ['text-yellow-500', 'text-slate-400', 'text-orange-400'];
+  const prizeColors = ['text-slate-200', 'text-slate-400', 'text-slate-500'];
 
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

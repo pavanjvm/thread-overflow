@@ -8,9 +8,9 @@ const LeaderboardPage = () => {
   const sortedUsers = [...users].sort((a, b) => b.stars - a.stars);
 
   const rankIcons = [
-    <Crown key="gold" className="h-6 w-6 text-yellow-500" />,
+    <Crown key="gold" className="h-6 w-6 text-slate-200" />,
     <Medal key="silver" className="h-6 w-6 text-slate-400" />,
-    <Trophy key="bronze" className="h-6 w-6 text-orange-400" />,
+    <Trophy key="bronze" className="h-6 w-6 text-slate-500" />,
   ];
 
   const getRankIndicator = (rank: number) => {
@@ -35,9 +35,9 @@ const LeaderboardPage = () => {
                 className={cn(
                   'flex items-center justify-between p-4 transition-colors',
                   index < 3 && 'bg-card',
-                  index === 0 && 'rounded-t-lg bg-yellow-500/10',
-                  index === 1 && 'bg-slate-500/10',
-                  index === 2 && 'bg-orange-500/10'
+                  index === 0 && 'rounded-t-lg bg-slate-500/10',
+                  index === 1 && 'bg-slate-600/10',
+                  index === 2 && 'bg-slate-700/10'
                 )}
               >
                 <div className="flex items-center space-x-4">
