@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CircleDollarSign, Lightbulb, Wrench } from 'lucide-react';
+import { Star, Lightbulb, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const statusConfig = {
@@ -71,8 +71,8 @@ export default function IdeationPortalPage() {
                               <span>{project.prototypes.length} Prototypes</span>
                           </div>
                       </div>
-                      <div className="flex items-center gap-1 font-bold text-green-600">
-                          <CircleDollarSign className="h-4 w-4" />
+                      <div className="flex items-center gap-1 font-bold text-yellow-500">
+                          <Star className="h-4 w-4 fill-current" />
                           <span>{project.rewards.ideation + project.rewards.prototype}</span>
                       </div>
                    </div>

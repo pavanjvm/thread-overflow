@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Wrench, CircleDollarSign } from 'lucide-react';
+import { Lightbulb, Wrench, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import VoteButtons from '@/components/VoteButtons';
@@ -74,11 +74,11 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
                 <CardContent className="space-y-4">
                     <div className="flex justify-between items-center">
                         <span className="flex items-center gap-2 text-muted-foreground"><Lightbulb className="h-5 w-5 text-blue-500" /> Best Idea</span>
-                        <span className="font-bold flex items-center gap-1">{project.rewards.ideation} <CircleDollarSign className="h-4 w-4 text-green-600" /></span>
+                        <span className="font-bold flex items-center gap-1">{project.rewards.ideation} <Star className="h-4 w-4 text-yellow-500 fill-current" /></span>
                     </div>
                      <div className="flex justify-between items-center">
                         <span className="flex items-center gap-2 text-muted-foreground"><Wrench className="h-5 w-5 text-yellow-500" /> Best Prototype</span>
-                        <span className="font-bold flex items-center gap-1">{project.rewards.prototype} <CircleDollarSign className="h-4 w-4 text-green-600" /></span>
+                        <span className="font-bold flex items-center gap-1">{project.rewards.prototype} <Star className="h-4 w-4 text-yellow-500 fill-current" /></span>
                     </div>
                 </CardContent>
             </Card>
