@@ -1,4 +1,3 @@
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -15,7 +14,6 @@ import { communities, users } from '@/lib/mock-data';
 import { useState, useEffect } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import ForumSidebar from './ForumSidebar';
-import IdeationSidebar from './IdeationSidebar';
 import dynamic from 'next/dynamic';
 
 const AIChatbot = dynamic(() => import('./AIChatbot'), { ssr: false });
@@ -40,6 +38,7 @@ export default function AppClientLayout({
   const isLandingPage = pathname === '/';
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname);
   
+  // Render simple layout for landing and auth pages
   if (isLandingPage || isAuthPage) {
     return (
       <>
@@ -48,31 +47,32 @@ export default function AppClientLayout({
             <ThemeToggle />
           </div>
         )}
-        <main>{children}</main>
+        <main className="container mx-auto px-4 py-8">{children}</main>
         <Toaster />
       </>
     );
   }
 
-  // Full App Shell for dashboard, feed, ideation, etc.
+  // Determine if the full app shell should be used
   const isDashboardPage = pathname === '/dashboard';
   const isIdeationSection = pathname.startsWith('/ideation');
   const isHackathonSection = pathname.startsWith('/hackathons');
-
-  const showSidebar = !isDashboardPage && !isHackathonSection && !isIdeationSection;
-  const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
+  
+  // Sidebar should only show on forum-like pages
+  const showForumSidebar = !isDashboardPage && !isHackathonSection && !isIdeationSection;
   
   return (
     <SidebarProvider mounted={mounted}>
-        {showSidebar && (
+        {showForumSidebar && (
             <Sidebar>
                 <SidebarContent className="p-2">
                     <ForumSidebar pathname={pathname} communities={communities} />
                 </SidebarContent>
             </Sidebar>
         )}
+        
         <SidebarInset>
-            <Header showSidebar={showSidebar} setIsChatOpen={setIsChatOpen} />
+            <Header showSidebar={showForumSidebar} setIsChatOpen={setIsChatOpen} />
             <main className={cn("flex-grow", "container mx-auto px-4 py-8")}>
                 {children}
             </main>
