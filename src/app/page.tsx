@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -49,7 +48,7 @@ export default function LandingPage() {
   return (
     <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <Aurora colorStops={auroraColors} />
+        <Aurora colorStops={auroraColors} blend={1} />
       </div>
       <div className="z-10 flex flex-col items-center text-center px-4">
         <div className="h-24 w-full max-w-4xl">
