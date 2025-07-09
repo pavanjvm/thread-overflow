@@ -70,7 +70,8 @@ export interface Conversation {
 
 export interface Idea {
   id: string;
-  content: string;
+  title: string;
+  description: string;
   author: User;
   createdAt: string;
   votes: number;
@@ -78,6 +79,7 @@ export interface Idea {
 
 export interface Prototype {
   id: string;
+  ideaId: string;
   title: string;
   description: string;
   author: User;

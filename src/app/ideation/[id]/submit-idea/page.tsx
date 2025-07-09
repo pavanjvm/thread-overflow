@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -31,7 +32,8 @@ import type { Project } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
-  idea: z.string().min(20, 'Your idea must be at least 20 characters long.').max(1000, "Your idea can't be longer than 1000 characters."),
+  title: z.string().min(10, 'Title must be at least 10 characters.').max(100),
+  description: z.string().min(20, 'Description must be at least 20 characters.').max(1000),
 });
 
 export default function SubmitIdeaPage() {
@@ -53,7 +55,8 @@ export default function SubmitIdeaPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      idea: '',
+      title: '',
+      description: '',
     },
   });
 
@@ -79,8 +82,9 @@ export default function SubmitIdeaPage() {
                     <Skeleton className="h-8 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
                 </CardHeader>
-                <CardContent>
-                    <Skeleton className="h-32 w-full" />
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-24 w-full" />
                 </CardContent>
                 <CardFooter>
                     <Skeleton className="h-10 w-24" />
@@ -109,13 +113,26 @@ export default function SubmitIdeaPage() {
                 You are submitting an idea for the project: <span className="font-semibold text-foreground">{project.title}</span>
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <FormField
+            <CardContent className="space-y-4">
+               <FormField
                 control={form.control}
-                name="idea"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Idea</FormLabel>
+                    <FormLabel>Idea Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="A short, descriptive title for your idea" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Describe your brilliant idea. How would you solve the problem? What features would it have?"

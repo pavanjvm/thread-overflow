@@ -1,4 +1,5 @@
 
+
 import { projects } from '@/lib/mock-data';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -82,29 +83,50 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                   </Button>
                 </div>
                 {project.ideas.length > 0 ? (
-                  project.ideas.map(idea => (
-                      <Card key={idea.id} className="flex gap-4 p-4">
-                          <VoteButtons initialVotes={idea.votes} />
-                          <div className="flex-grow">
-                              <p className="text-foreground">{idea.content}</p>
-                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                                  <Avatar className="h-5 w-5">
-                                      <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
-                                      <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  <span>{idea.author.name}</span>
-                                  <span>•</span>
-                                  <span>{idea.createdAt}</span>
-                              </div>
-                          </div>
+                  project.ideas.map(idea => {
+                    const protoCount = project.prototypes.filter(p => p.ideaId === idea.id).length;
+                    return (
+                      <Card key={idea.id}>
+                        <CardHeader>
+                          <CardTitle>{idea.title}</CardTitle>
+                          <CardDescription>
+                            <div className="flex items-center gap-2 text-xs pt-1">
+                                <Avatar className="h-5 w-5">
+                                    <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
+                                    <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span>{idea.author.name}</span>
+                                <span>•</span>
+                                <span>{idea.createdAt}</span>
+                            </div>
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground line-clamp-3">{idea.description}</p>
+                        </CardContent>
+                        <CardFooter className="justify-between">
+                            <VoteButtons initialVotes={idea.votes} />
+                            <div>
+                              {protoCount > 0 ? (
+                                  <Button variant="link" asChild className="p-0 h-auto">
+                                      <Link href={`/ideation/${project.id}#prototypes`}>
+                                          {protoCount} Prototype{protoCount > 1 ? 's' : ''}
+                                      </Link>
+                                  </Button>
+                              ) : (
+                                  <p className="text-sm text-muted-foreground">No prototypes yet</p>
+                              )}
+                            </div>
+                        </CardFooter>
                       </Card>
-                  ))
+                    )
+                  })
                 ) : (
                   <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
                 )}
               </div>
             </TabsContent>
-            <TabsContent value="prototypes">
+            <TabsContent value="prototypes" id="prototypes">
                <div className="space-y-6">
                   <div className="flex justify-end">
                     <Button asChild>

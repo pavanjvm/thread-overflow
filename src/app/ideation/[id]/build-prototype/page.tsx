@@ -31,8 +31,12 @@ import { projects } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
 import type { Project } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Combobox } from '@/components/ui/combobox';
 
 const formSchema = z.object({
+  ideaId: z.string({
+    required_error: 'Please select an idea to build upon.',
+  }),
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(1000),
   imageUrl: z.string().url('Please enter a valid image URL.').optional().or(z.literal('')),
@@ -89,6 +93,7 @@ export default function BuildPrototypePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-24 w-full" />
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
@@ -100,6 +105,11 @@ export default function BuildPrototypePage() {
         </div>
       );
   }
+
+  const ideaOptions = project.ideas.map(idea => ({
+      label: idea.title,
+      value: idea.id,
+  }));
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -121,6 +131,23 @@ export default function BuildPrototypePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="ideaId"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Based on Idea</FormLabel>
+                    <Combobox 
+                        options={ideaOptions}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select an idea..."
+                        searchPlaceholder="Search ideas..."
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="title"

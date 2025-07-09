@@ -140,16 +140,6 @@ export const conversations: Conversation[] = [
 
 // --- Ideation Portal Data ---
 
-const ideas: Idea[] = [
-    { id: 'idea-1', content: 'We could use a service worker to cache the assets and make it available offline.', author: users[1], createdAt: '1 day ago', votes: 15 },
-    { id: 'idea-2', content: 'Maybe we can use WebSockets for real-time updates instead of polling.', author: users[2], createdAt: '2 days ago', votes: 8 },
-    { id: 'idea-3', content: 'Let\'s build it with a serverless architecture on Firebase Functions to keep costs low.', author: users[4], createdAt: '1 day ago', votes: 22 },
-];
-
-const prototypes: Prototype[] = [
-    { id: 'proto-1', title: 'PWA Offline-First App', description: 'A working prototype using service workers to provide offline functionality.', author: users[0], createdAt: '3 hours ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10 },
-];
-
 export const projects: Project[] = [
     {
         id: 'proj-1',
@@ -159,8 +149,13 @@ export const projects: Project[] = [
         createdAt: '3 days ago',
         status: 'Prototyping',
         type: 'Solution Request',
-        ideas: [ideas[1], ideas[2]],
-        prototypes: [prototypes[0]],
+        ideas: [
+          { id: 'idea-1', title: 'Use WebSockets for Real-Time', description: 'Instead of polling, we can use WebSockets (like Socket.IO or a managed service) for instant, bidirectional communication between clients and the server. This will significantly reduce latency.', author: users[1], createdAt: '2 days ago', votes: 18 },
+          { id: 'idea-2', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12 },
+        ],
+        prototypes: [
+          { id: 'proto-1', ideaId: 'idea-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[0], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10 },
+        ],
     },
     {
         id: 'proj-2',
@@ -170,7 +165,9 @@ export const projects: Project[] = [
         createdAt: '1 week ago',
         status: 'Ideation',
         type: 'Solution Request',
-        ideas: [ideas[0]],
+        ideas: [
+          { id: 'idea-3', title: 'Use a Vision API for Ingredient Detection', description: 'We can use an existing Vision API to analyze photos of a user\'s fridge or pantry to automatically detect ingredients, making the input process much easier.', author: users[4], createdAt: '4 days ago', votes: 25 },
+        ],
         prototypes: [],
     },
     {
