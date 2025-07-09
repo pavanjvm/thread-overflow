@@ -44,7 +44,7 @@ export default function LandingPage() {
   const darkColors = ['#8f908f', '#726e6f', '#8f908f'];
   const auroraColors = resolvedTheme === 'dark' ? darkColors : lightColors;
 
-  const textColor = resolvedTheme === 'dark' ? 'hsl(var(--primary))' : 'hsl(var(--foreground))';
+  const textColor = resolvedTheme === 'dark' ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))';
 
   return (
     <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden">
