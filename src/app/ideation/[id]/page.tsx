@@ -4,7 +4,7 @@ import { projects } from '@/lib/mock-data';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { Badge, badgeVariants } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Lightbulb, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -88,7 +88,12 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                     return (
                       <Card key={idea.id}>
                         <CardHeader>
-                          <CardTitle>{idea.title}</CardTitle>
+                           <CardTitle className="flex items-baseline justify-between">
+                            <span>{idea.title}</span>
+                            <Link href={`/ideation/${project.id}#prototypes`} className={cn(badgeVariants({ variant: 'secondary' }), 'font-mono text-xs font-medium')}>
+                                {idea.id}
+                            </Link>
+                          </CardTitle>
                           <CardDescription>
                             <div className="flex items-center gap-2 text-xs pt-1">
                                 <Avatar className="h-5 w-5">
