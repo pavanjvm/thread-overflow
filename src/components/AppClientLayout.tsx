@@ -3,7 +3,6 @@
 
 import { usePathname } from 'next/navigation';
 import { Toaster } from "@/components/ui/toaster"
-import Header from '@/components/Header';
 import { cn } from '@/lib/utils';
 import {
   SidebarProvider,
@@ -17,6 +16,30 @@ import { ThemeToggle } from './ThemeToggle';
 import ForumSidebar from './ForumSidebar';
 import IdeationSidebar from './IdeationSidebar';
 import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const Header = dynamic(() => import('@/components/Header'), { 
+    ssr: false,
+    loading: () => (
+        <header className="bg-card border-b sticky top-0 z-50">
+            <div className="flex items-center justify-between h-16 gap-4 px-4">
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-7 w-7" />
+                    <Skeleton className="h-6 w-32 hidden sm:inline" />
+                </div>
+                <div className="flex-1 max-w-lg mx-4">
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                </div>
+            </div>
+        </header>
+    )
+});
 
 const AIChatbot = dynamic(() => import('./AIChatbot'), { ssr: false });
 const ChatPanel = dynamic(() => import('./ChatPanel'), { 
