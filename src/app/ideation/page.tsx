@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { projects } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +8,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 const typeConfig = {
-  'Solution Request': { icon: HelpCircle, color: 'bg-blue-500', label: 'Solution Request' },
-  'Idea': { icon: Lightbulb, color: 'bg-accent', label: 'Idea' },
+  'Solution Request': { icon: HelpCircle, variant: 'default' as const, label: 'Solution Request' },
+  'Idea': { icon: Lightbulb, variant: 'secondary' as const, label: 'Idea' },
 };
 
 
@@ -43,11 +42,8 @@ export default function IdeationPortalPage() {
                   <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{project.title}</CardTitle>
                        <Badge
-                          className={cn(
-                              typeConfig[projectType].color,
-                              'text-primary-foreground',
-                              'flex items-center gap-1 border-transparent'
-                          )}
+                          variant={typeConfig[projectType].variant}
+                          className={cn('flex items-center gap-1')}
                           >
                           <TypeIcon className="h-3 w-3" />
                           {typeConfig[projectType].label}
@@ -70,11 +66,11 @@ export default function IdeationPortalPage() {
                    <div className="w-full flex justify-start items-center text-sm text-muted-foreground">
                       <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
-                              <Lightbulb className="h-4 w-4 text-blue-500" />
+                              <Lightbulb className="h-4 w-4 text-secondary" />
                               <span>{project.ideas.length} Ideas</span>
                           </div>
                           <div className="flex items-center gap-1">
-                              <Wrench className="h-4 w-4 text-yellow-500" />
+                              <Wrench className="h-4 w-4 text-primary" />
                               <span>{project.prototypes.length} Prototypes</span>
                           </div>
                       </div>
