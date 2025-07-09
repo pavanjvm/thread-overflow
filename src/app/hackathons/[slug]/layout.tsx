@@ -1,7 +1,12 @@
 import { notFound } from 'next/navigation';
 import { hackathons } from '@/lib/mock-data';
 import Image from 'next/image';
-import ApplyDialog from './_components/ApplyDialog';
+import dynamic from 'next/dynamic';
+
+const ApplyDialog = dynamic(() => import('./_components/ApplyDialog'), {
+  ssr: false,
+  loading: () => <div className="h-11 w-[125px] rounded-md bg-primary/80 animate-pulse" />
+});
 
 export default function HackathonLayout({
   children,

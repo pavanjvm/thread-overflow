@@ -16,21 +16,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import type { FormEvent } from 'react';
-import React, { useState } from 'react';
+import React from 'react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { notifications, conversations } from '@/lib/mock-data';
-import ChatPanel from '@/components/ChatPanel';
 import { ThemeToggle } from './ThemeToggle';
 
-const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
+const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, setIsChatOpen: (open: boolean) => void }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultSearch = searchParams.get('q') ?? '';
   const pathname = usePathname();
 
   const { mounted } = useSidebar();
-  const [isChatOpen, setIsChatOpen] = useState(false);
   
   const unreadNotificationCount = notifications.filter(n => !n.read).length;
   const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
@@ -185,7 +183,6 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
           </div>
         </div>
       </header>
-      <ChatPanel open={isChatOpen} onOpenChange={setIsChatOpen} />
     </>
   );
 };
