@@ -23,16 +23,18 @@ import { notifications, conversations } from '@/lib/mock-data';
 import ChatPanel from '@/components/ChatPanel';
 import { ThemeToggle } from './ThemeToggle';
 
-const Header = () => {
+const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultSearch = searchParams.get('q') ?? '';
+  const pathname = usePathname();
 
   const { mounted } = useSidebar();
   const [isChatOpen, setIsChatOpen] = useState(false);
   
   const unreadNotificationCount = notifications.filter(n => !n.read).length;
   const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
+  const isHackathonSection = pathname.startsWith('/hackathons');
 
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -51,7 +53,7 @@ const Header = () => {
       <header className="bg-card border-b sticky top-0 z-50">
         <div className="flex items-center justify-between h-16 gap-4 px-4">
           <div className="flex items-center gap-2">
-            <SidebarTrigger className={cn(!mounted && 'invisible')} />
+            {showSidebar && <SidebarTrigger className={cn(!mounted && 'invisible')} />}
             <Link href="/dashboard" className="flex items-center space-x-2 text-primary font-bold text-lg">
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
@@ -73,12 +75,14 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button asChild className="hidden md:inline-flex">
-              <Link href="/posts/new">
-                <Plus className="mr-2" />
-                New Post
-              </Link>
-            </Button>
+            {!isHackathonSection && (
+              <Button asChild className="hidden md:inline-flex">
+                <Link href="/posts/new">
+                  <Plus className="mr-2" />
+                  New Post
+                </Link>
+              </Button>
+            )}
             
             <Button variant="ghost" className="relative h-10 w-10 rounded-full" onClick={() => setIsChatOpen(true)}>
                 <MessageSquare className="h-6 w-6" />
@@ -142,9 +146,11 @@ const Header = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="md:hidden">
-                  <Link href="/posts/new"><Plus className="mr-2" />New Post</Link>
-                </DropdownMenuItem>
+                {!isHackathonSection && (
+                  <DropdownMenuItem asChild className="md:hidden">
+                    <Link href="/posts/new"><Plus className="mr-2" />New Post</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link href="/c/new"><Users className="mr-2" />Create Community</Link>
                 </DropdownMenuItem>

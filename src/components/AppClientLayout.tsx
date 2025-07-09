@@ -37,10 +37,13 @@ export default function AppClientLayout({
   const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
   
   const isIdeationSection = pathname.startsWith('/ideation');
+  const isHackathonSection = pathname.startsWith('/hackathons');
+
+  const showSidebar = showAppShell && !isHackathonSection;
 
   return (
     <SidebarProvider mounted={mounted}>
-        {showAppShell && (
+        {showSidebar && (
             <Sidebar>
                 <SidebarContent className="p-2">
                   {isIdeationSection ? (
@@ -52,7 +55,7 @@ export default function AppClientLayout({
             </Sidebar>
         )}
         <SidebarInset>
-            {(showAppShell || isDashboardPage) && <Header />}
+            {(showAppShell || isDashboardPage) && <Header showSidebar={showSidebar} />}
             <main className={cn(
               "flex-grow",
               (showAppShell || isLandingPage || isDashboardPage) && "container mx-auto px-4 py-8",
