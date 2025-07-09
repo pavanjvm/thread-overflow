@@ -1,14 +1,34 @@
-import { notFound } from 'next/navigation';
-import { hackathons } from '@/lib/mock-data';
+'use client';
+
+import { notFound, useParams } from 'next/navigation';
+import { hackathons as mockHackathons } from '@/lib/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './_components/OverviewTab';
 import PrizesTab from './_components/PrizesTab';
 import SpeakersAndJudgesTab from './_components/SpeakersAndJudgesTab';
 import ScheduleTab from './_components/ScheduleTab';
 import ProjectsTab from './_components/ProjectsTab';
+import { useEffect, useState } from 'react';
+import type { Hackathon } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function HackathonPage({ params }: { params: { slug: string } }) {
-  const hackathon = hackathons.find((h) => h.slug === params.slug);
+export default function HackathonPage() {
+  const params = useParams();
+  const slug = params.slug as string;
+  const [hackathon, setHackathon] = useState<Hackathon | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (slug) {
+      const foundHackathon = mockHackathons.find((h) => h.slug === slug);
+      setHackathon(foundHackathon || null);
+      setLoading(false);
+    }
+  }, [slug]);
+
+  if (loading) {
+    return <Skeleton className="h-96 w-full" />;
+  }
 
   if (!hackathon) {
     notFound();

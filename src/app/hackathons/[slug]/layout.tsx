@@ -1,7 +1,12 @@
-import { notFound } from 'next/navigation';
-import { hackathons } from '@/lib/mock-data';
+'use client';
+
+import { notFound, useParams } from 'next/navigation';
+import { hackathons as mockHackathons } from '@/lib/mock-data';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
+import type { Hackathon } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ApplyDialog = dynamic(() => import('./_components/ApplyDialog'), {
   ssr: false,
@@ -10,12 +15,41 @@ const ApplyDialog = dynamic(() => import('./_components/ApplyDialog'), {
 
 export default function HackathonLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: { slug: string };
 }) {
-  const hackathon = hackathons.find((h) => h.slug === params.slug);
+  const params = useParams();
+  const slug = params.slug as string;
+  const [hackathon, setHackathon] = useState<Hackathon | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (slug) {
+      const foundHackathon = mockHackathons.find((h) => h.slug === slug);
+      setHackathon(foundHackathon || null);
+      setLoading(false);
+    }
+  }, [slug]);
+
+  if (loading) {
+    return (
+        <div className="space-y-6">
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <div className="flex justify-center border-b">
+                <div className="flex bg-transparent p-0 rounded-none space-x-4">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-32" />
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                </div>
+            </div>
+            <div className="py-6">
+                <Skeleton className="h-96 w-full" />
+            </div>
+        </div>
+    );
+  }
 
   if (!hackathon) {
     notFound();

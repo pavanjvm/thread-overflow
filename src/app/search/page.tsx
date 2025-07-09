@@ -1,39 +1,50 @@
-import { posts, communities, users } from '@/lib/mock-data';
+'use client';
+
+import { posts as mockPosts, communities as mockCommunities, users as mockUsers } from '@/lib/mock-data';
 import PostCard from '@/components/PostCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import type { Post, Community, User } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function SearchPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
-  const query = typeof searchParams?.q === 'string' ? searchParams.q : '';
+export default function SearchPage() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get('q') || '';
+  
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
+  const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredPosts = query
-    ? posts.filter(
+  useEffect(() => {
+    setLoading(true);
+    if (query) {
+      const lowerCaseQuery = query.toLowerCase();
+      setFilteredPosts(mockPosts.filter(
         (post) =>
           post.status !== 'draft' &&
-          (post.title.toLowerCase().includes(query.toLowerCase()) ||
-          post.content.toLowerCase().includes(query.toLowerCase()))
-      )
-    : [];
-
-  const filteredCommunities = query
-    ? communities.filter(
+          (post.title.toLowerCase().includes(lowerCaseQuery) ||
+          post.content.toLowerCase().includes(lowerCaseQuery))
+      ));
+      setFilteredCommunities(mockCommunities.filter(
         (community) =>
-          community.name.toLowerCase().includes(query.toLowerCase()) ||
-          community.slug.toLowerCase().includes(query.toLowerCase())
-      )
-    : [];
-
-  const filteredUsers = query
-    ? users.filter((user) =>
-        user.name.toLowerCase().includes(query.toLowerCase())
-      )
-    : [];
+          community.name.toLowerCase().includes(lowerCaseQuery) ||
+          community.slug.toLowerCase().includes(lowerCaseQuery)
+      ));
+      setFilteredUsers(mockUsers.filter((user) =>
+        user.name.toLowerCase().includes(lowerCaseQuery)
+      ));
+    } else {
+      setFilteredPosts([]);
+      setFilteredCommunities([]);
+      setFilteredUsers([]);
+    }
+    setLoading(false);
+  }, [query]);
 
   return (
     <div className="space-y-8">
@@ -55,9 +66,11 @@ export default function SearchPage({
       {query && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
-            <h2 className="text-2xl font-bold tracking-tight">Posts ({filteredPosts.length})</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Posts ({loading ? '...' : filteredPosts.length})</h2>
             <div className="grid gap-6">
-              {filteredPosts.length > 0 ? (
+              {loading ? (
+                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)
+              ) : filteredPosts.length > 0 ? (
                 filteredPosts.map((post) => (
                   <PostCard key={post.id} post={post} />
                 ))
@@ -68,10 +81,20 @@ export default function SearchPage({
           </div>
           <div className="space-y-8">
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold tracking-tight">Communities ({filteredCommunities.length})</h2>
+              <h2 className="text-2xl font-bold tracking-tight">Communities ({loading ? '...' : filteredCommunities.length})</h2>
               <Card>
                 <CardContent className="p-4 space-y-4">
-                  {filteredCommunities.length > 0 ? (
+                  {loading ? (
+                    Array.from({ length: 2 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-3 w-20" />
+                        </div>
+                      </div>
+                    ))
+                  ) : filteredCommunities.length > 0 ? (
                     filteredCommunities.map((community) => (
                       <Link key={community.id} href={`/c/${community.slug}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10">
@@ -92,10 +115,20 @@ export default function SearchPage({
             </div>
             
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold tracking-tight">Users ({filteredUsers.length})</h2>
+              <h2 className="text-2xl font-bold tracking-tight">Users ({loading ? '...' : filteredUsers.length})</h2>
               <Card>
                 <CardContent className="p-4 space-y-4">
-                  {filteredUsers.length > 0 ? (
+                  {loading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-3 w-16" />
+                        </div>
+                      </div>
+                    ))
+                  ) : filteredUsers.length > 0 ? (
                     filteredUsers.map((user) => (
                       <Link key={user.id} href={`/profile`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10">
