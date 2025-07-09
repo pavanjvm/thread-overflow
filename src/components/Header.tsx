@@ -33,7 +33,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
   const unreadNotificationCount = notifications.filter(n => !n.read).length;
   const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
   const isHackathonSection = pathname.startsWith('/hackathons');
-  const isIdeationSection = pathname.startsWith('/ideation');
+  const isIdeationSection = pathname.startsWith('/ideation') || pathname === '/leaderboard';
   const isDashboardPage = pathname === '/dashboard';
 
 
@@ -61,7 +61,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
           </div>
           
           <div className="flex-1 max-w-lg mx-4">
-            {!isDashboardPage && (
+            {!isDashboardPage && !isIdeationSection && (
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
