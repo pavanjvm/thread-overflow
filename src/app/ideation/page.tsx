@@ -4,14 +4,13 @@ import { projects } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star, Lightbulb, Wrench } from 'lucide-react';
+import { Star, Lightbulb, Wrench, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-const statusConfig = {
-    Ideation: { icon: Lightbulb, color: 'bg-blue-500', label: 'Ideation' },
-    Prototyping: { icon: Wrench, color: 'bg-yellow-500', label: 'Prototyping' },
-    Completed: { icon: Wrench, color: 'bg-green-500', label: 'Completed' },
+const typeConfig = {
+  'Solution Request': { icon: HelpCircle, color: 'bg-blue-500', label: 'Solution Request' },
+  'Idea': { icon: Lightbulb, color: 'bg-accent', label: 'Idea' },
 };
 
 
@@ -25,7 +24,7 @@ export default function IdeationPortalPage() {
           </div>
           <div className="flex items-center gap-4">
             <Button asChild variant="outline">
-                <Link href="/ideation">Contribute an Idea</Link>
+                <Link href="/ideation/post-idea">Contribute an Idea</Link>
             </Button>
             <Button asChild>
                 <Link href="/ideation/request-solution">Request a Solution</Link>
@@ -35,7 +34,8 @@ export default function IdeationPortalPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => {
-          const StatusIcon = statusConfig[project.status].icon;
+          const projectType = project.type || 'Solution Request';
+          const TypeIcon = typeConfig[projectType].icon;
           return (
             <Link href={`/ideation/${project.id}`} key={project.id} className="block">
               <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300">
@@ -44,13 +44,13 @@ export default function IdeationPortalPage() {
                       <CardTitle className="text-lg">{project.title}</CardTitle>
                        <Badge
                           className={cn(
-                              statusConfig[project.status].color,
+                              typeConfig[projectType].color,
                               'text-primary-foreground',
                               'flex items-center gap-1 border-transparent'
                           )}
                           >
-                          <StatusIcon className="h-3 w-3" />
-                          {statusConfig[project.status].label}
+                          <TypeIcon className="h-3 w-3" />
+                          {typeConfig[projectType].label}
                       </Badge>
                   </div>
                   <CardDescription className="flex items-center gap-2 text-xs pt-2">

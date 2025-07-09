@@ -96,6 +96,7 @@ export interface Project {
   author: User;
   createdAt: string;
   status: 'Ideation' | 'Prototyping' | 'Completed';
+  type?: 'Solution Request' | 'Idea';
   rewards: {
     ideation: number;
     prototype: number;

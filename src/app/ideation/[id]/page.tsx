@@ -25,6 +25,49 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
     notFound();
   }
 
+  const projectType = project.type || 'Solution Request';
+
+  if (projectType === 'Idea') {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8">
+        <header>
+          <Badge variant="secondary" className="bg-accent text-accent-foreground mb-2 inline-flex items-center gap-1">
+            <Lightbulb className="h-3 w-3" />
+            Idea
+          </Badge>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">{project.title}</h1>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+            <Avatar className="h-5 w-5">
+              <AvatarImage src={project.author.avatarUrl} data-ai-hint="user avatar" />
+              <AvatarFallback>{project.author.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <span>Posted by {project.author.name}</span>
+            <span>•</span>
+            <span>{project.createdAt}</span>
+          </div>
+        </header>
+        <Card>
+          <CardHeader>
+            <CardTitle>Idea Description</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{project.description}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Discussion</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-center py-8">
+              No comments yet. Be the first to share your thoughts!
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const StatusIcon = statusConfig[project.status].icon;
 
   return (
