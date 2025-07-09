@@ -1,3 +1,4 @@
+
 'use client';
 
 import { projects } from '@/lib/mock-data';
@@ -155,7 +156,7 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
                         <SelectContent>
                             <SelectItem value="all">All Ideas</SelectItem>
                             {project.ideas.map(idea => (
-                                <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
+                                <SelectItem key={idea.id} value={idea.id}>{idea.id} ({idea.title})</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

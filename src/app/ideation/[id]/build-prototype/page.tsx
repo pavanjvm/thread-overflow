@@ -107,7 +107,7 @@ export default function BuildPrototypePage() {
   }
 
   const ideaOptions = project.ideas.map(idea => ({
-      label: idea.title,
+      label: `${idea.id} (${idea.title})`,
       value: idea.id,
   }));
 
