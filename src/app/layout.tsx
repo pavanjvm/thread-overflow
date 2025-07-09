@@ -1,11 +1,11 @@
 import type {Metadata} from 'next';
-import { Inter } from 'next/font/google';
+import { Manrope } from 'next/font/google';
 import './globals.css';
 import AppClientLayout from '@/components/AppClientLayout';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-body',
 });
@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <body className={cn("font-body antialiased", inter.variable)}>
+      <body className={cn("font-body antialiased", manrope.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
