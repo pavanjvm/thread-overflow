@@ -96,9 +96,6 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
                             Leaderboard
                         </Link>
                     </Button>
-                    <Button asChild>
-                        <Link href="/ideation/request-solution">Request a Solution</Link>
-                    </Button>
                 </div>
             )}
             

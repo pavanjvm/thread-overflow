@@ -23,9 +23,14 @@ export default function IdeationPortalPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Ideation Portal</h1>
             <p className="text-muted-foreground mt-1">Solve challenges, build prototypes, and earn rewards.</p>
           </div>
-          <Button asChild>
-            <Link href="/ideation/request-solution">Request a Solution</Link>
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button asChild variant="outline">
+                <Link href="/ideation">Contribute an Idea</Link>
+            </Button>
+            <Button asChild>
+                <Link href="/ideation/request-solution">Request a Solution</Link>
+            </Button>
+          </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
