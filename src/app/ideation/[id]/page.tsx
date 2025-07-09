@@ -1,4 +1,4 @@
-
+'use client';
 
 import { projects } from '@/lib/mock-data';
 import { notFound } from 'next/navigation';
@@ -12,6 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VoteButtons from '@/components/VoteButtons';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statusConfig = {
     Ideation: { icon: Lightbulb, color: 'bg-blue-500', label: 'Ideation' },
@@ -19,12 +27,17 @@ const statusConfig = {
     Completed: { icon: Wrench, color: 'bg-green-500', label: 'Completed' },
 };
 
-export default async function ProjectDetailsPage({ params }: { params: { id: string } }) {
+export default function ProjectDetailsPage({ params }: { params: { id: string } }) {
   const project = projects.find((p) => p.id === params.id);
+  const [selectedIdea, setSelectedIdea] = useState('all');
 
   if (!project) {
     notFound();
   }
+
+  const filteredPrototypes = selectedIdea === 'all'
+    ? project.prototypes
+    : project.prototypes.filter(p => p.ideaId === selectedIdea);
 
   const StatusIcon = statusConfig[project.status].icon;
 
@@ -133,7 +146,20 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
             </TabsContent>
             <TabsContent value="prototypes" id="prototypes">
                <div className="space-y-6">
-                  <div className="flex justify-end">
+                  <div className="flex justify-between items-center">
+                    <div className="w-full max-w-xs">
+                       <Select value={selectedIdea} onValueChange={setSelectedIdea}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Filter by idea..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Ideas</SelectItem>
+                            {project.ideas.map(idea => (
+                                <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    </div>
                     <Button asChild>
                       <Link href={`/ideation/${project.id}/build-prototype`}>
                         <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
@@ -141,8 +167,8 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                     </Button>
                   </div>
                    <div className="grid md:grid-cols-2 gap-6">
-                        {project.prototypes.length > 0 ? (
-                          project.prototypes.map(proto => (
+                        {filteredPrototypes.length > 0 ? (
+                          filteredPrototypes.map(proto => (
                               <Card key={proto.id}>
                                   <CardHeader>
                                       <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
@@ -183,7 +209,11 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                               </Card>
                           ))
                         ) : (
-                          <p className="md:col-span-2 text-muted-foreground text-center py-8">No prototypes built yet. Be the first!</p>
+                          <p className="md:col-span-2 text-muted-foreground text-center py-8">
+                            {selectedIdea === 'all'
+                              ? 'No prototypes built yet. Be the first!'
+                              : 'No prototypes found for this idea.'}
+                          </p>
                         )}
                    </div>
                </div>
