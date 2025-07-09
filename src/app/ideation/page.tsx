@@ -4,7 +4,7 @@ import { projects } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star, Lightbulb, Wrench, HelpCircle } from 'lucide-react';
+import { Lightbulb, Wrench, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -67,7 +67,7 @@ export default function IdeationPortalPage() {
                   <p className="text-sm text-muted-foreground line-clamp-3">{project.description}</p>
                 </CardContent>
                 <CardFooter>
-                   <div className="w-full flex justify-between items-center text-sm text-muted-foreground">
+                   <div className="w-full flex justify-start items-center text-sm text-muted-foreground">
                       <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
                               <Lightbulb className="h-4 w-4 text-blue-500" />
@@ -77,10 +77,6 @@ export default function IdeationPortalPage() {
                               <Wrench className="h-4 w-4 text-yellow-500" />
                               <span>{project.prototypes.length} Prototypes</span>
                           </div>
-                      </div>
-                      <div className="flex items-center gap-1 font-bold text-yellow-500">
-                          <Star className="h-4 w-4 fill-current" />
-                          <span>{project.rewards.ideation + project.rewards.prototype}</span>
                       </div>
                    </div>
                 </CardFooter>

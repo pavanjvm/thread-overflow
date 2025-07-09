@@ -95,10 +95,6 @@ export interface Project {
   createdAt: string;
   status: 'Ideation' | 'Prototyping' | 'Completed';
   type?: 'Solution Request' | 'Idea';
-  rewards: {
-    ideation: number;
-    prototype: number;
-  };
   ideas: Idea[];
   prototypes: Prototype[];
 }
