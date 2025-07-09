@@ -63,6 +63,7 @@ export default function LandingPage() {
             alpha={false}
             stroke={false}
             scale={false}
+            defaultWidth={30}
           />
         </div>
         <p className="mt-4 text-xl text-muted-foreground max-w-3xl">

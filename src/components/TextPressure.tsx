@@ -20,6 +20,7 @@ interface TextPressureProps {
   strokeWidth?: number;
   className?: string;
   minFontSize?: number;
+  defaultWidth?: number;
 }
 
 const TextPressure: FC<TextPressureProps> = ({
@@ -43,7 +44,7 @@ const TextPressure: FC<TextPressureProps> = ({
   className = '',
 
   minFontSize = 24,
-
+  defaultWidth = 100,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -150,7 +151,7 @@ const TextPressure: FC<TextPressureProps> = ({
             return Math.max(minVal, val + minVal);
           };
 
-          const wdth = width ? Math.floor(getAttr(d, 5, 200)) : 100;
+          const wdth = width ? Math.floor(getAttr(d, 5, 200)) : defaultWidth;
           const wght = weight ? Math.floor(getAttr(d, 300, 600)) : 400;
           const italVal = italic ? getAttr(d, 0, 1).toFixed(2) : 0;
           const alphaVal = alpha ? getAttr(d, 0, 1).toFixed(2) : 1;
@@ -165,7 +166,7 @@ const TextPressure: FC<TextPressureProps> = ({
 
     animate();
     return () => cancelAnimationFrame(rafId);
-  }, [width, weight, italic, alpha, chars.length]);
+  }, [width, weight, italic, alpha, chars.length, defaultWidth]);
 
   return (
     <div
