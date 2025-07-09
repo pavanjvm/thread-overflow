@@ -38,7 +38,7 @@ export default function IdeationPortalPage() {
           const TypeIcon = typeConfig[projectType].icon;
           return (
             <Link href={`/ideation/${project.id}`} key={project.id} className="block">
-              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300">
+              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 dark:bg-secondary">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{project.title}</CardTitle>
