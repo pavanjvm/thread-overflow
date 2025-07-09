@@ -49,7 +49,7 @@ export default function LandingPage() {
   return (
     <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <Aurora colorStops={auroraColors} isLight={isLight} />
+        <Aurora colorStops={auroraColors} isLight={isLight} blend={isLight ? 0.4 : 1.0} />
       </div>
       <div className="z-10 flex flex-col items-center text-center px-4">
         <div className="h-32 w-full max-w-5xl">
