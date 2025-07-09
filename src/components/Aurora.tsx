@@ -1,4 +1,3 @@
-
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef } from "react";
 
@@ -106,7 +105,7 @@ void main() {
   vec3 auroraColor = rampColor;
 
   if (uIsLight) {
-    vec3 backgroundColor = vec3(1.0, 1.0, 1.0);
+    vec3 backgroundColor = vec3(0.96, 0.96, 0.96);
     vec3 finalColor = mix(backgroundColor, auroraColor, auroraAlpha);
     fragColor = vec4(finalColor, 1.0);
   } else {
