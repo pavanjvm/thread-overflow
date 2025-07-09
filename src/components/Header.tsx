@@ -19,6 +19,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { notifications, conversations } from '@/lib/mock-data';
 import { ThemeToggle } from './ThemeToggle';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, setIsChatOpen: (open: boolean) => void }) => {
   const router = useRouter();
@@ -26,10 +27,17 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
   const defaultSearch = searchParams.get('q') ?? '';
   const pathname = usePathname();
   
-  const [isMounted, setIsMounted] = useState(false);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    setIsMounted(true);
+    setMounted(true);
   }, []);
+
+  const isHackathonSection = pathname.startsWith('/hackathons');
+  const isIdeationSection = pathname.startsWith('/ideation') || pathname === '/leaderboard';
+  const isDashboardPage = pathname === '/dashboard';
+  
+  const unreadNotificationCount = notifications.filter(n => !n.read).length;
+  const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -42,21 +50,14 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
     }
   };
 
-  // Variables that depend on `pathname`
-  const isHackathonSection = pathname.startsWith('/hackathons');
-  const isIdeationSection = pathname.startsWith('/ideation') || pathname === '/leaderboard';
-  const isDashboardPage = pathname === '/dashboard';
-  
-  // Static data
-  const unreadNotificationCount = notifications.filter(n => !n.read).length;
-  const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
-
   return (
     <>
       <header className="bg-card border-b sticky top-0 z-50">
         <div className="flex items-center justify-between h-16 gap-4 px-4">
           <div className="flex items-center gap-2">
-            {isMounted && showSidebar && <SidebarTrigger />}
+            {showSidebar ? (
+              mounted ? <SidebarTrigger /> : <Skeleton className="h-7 w-7" />
+            ) : null}
             <Link href="/dashboard" className="flex items-center space-x-2 text-primary font-bold text-lg">
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
@@ -64,40 +65,50 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
           </div>
           
           <div className="flex-1 max-w-lg mx-4">
-            {isMounted && !isDashboardPage && !isIdeationSection && !isHackathonSection && (
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  name="search"
-                  type="search"
-                  placeholder="Search..."
-                  className="pl-10 w-full"
-                  defaultValue={defaultSearch}
-                  key={defaultSearch}
-                />
-              </form>
+            {mounted ? (
+              !isDashboardPage && !isIdeationSection && !isHackathonSection && (
+                <form onSubmit={handleSearch} className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    name="search"
+                    type="search"
+                    placeholder="Search..."
+                    className="pl-10 w-full"
+                    defaultValue={defaultSearch}
+                    key={defaultSearch}
+                  />
+                </form>
+              )
+            ) : (
+               <Skeleton className="h-10 w-full" />
             )}
           </div>
 
           <div className="flex items-center space-x-2">
-            {isMounted && !isHackathonSection && !isIdeationSection && !isDashboardPage && (
-              <Button asChild className="hidden md:inline-flex">
-                <Link href="/posts/new">
-                  <Plus className="mr-2" />
-                  New Post
-                </Link>
-              </Button>
-            )}
+            {mounted ? (
+              <>
+                {!isHackathonSection && !isIdeationSection && !isDashboardPage && (
+                  <Button asChild className="hidden md:inline-flex">
+                    <Link href="/posts/new">
+                      <Plus className="mr-2" />
+                      New Post
+                    </Link>
+                  </Button>
+                )}
 
-            {isMounted && isIdeationSection && (
-                <div className="hidden md:flex gap-2">
-                    <Button asChild variant="outline">
-                        <Link href="/leaderboard">
-                            <Trophy className="mr-2" />
-                            Leaderboard
-                        </Link>
-                    </Button>
-                </div>
+                {isIdeationSection && (
+                    <div className="hidden md:flex gap-2">
+                        <Button asChild variant="outline">
+                            <Link href="/leaderboard">
+                                <Trophy className="mr-2" />
+                                Leaderboard
+                            </Link>
+                        </Button>
+                    </div>
+                )}
+              </>
+            ) : (
+               <Skeleton className="h-10 w-24 hidden md:inline-flex" />
             )}
             
             <Button variant="ghost" className="relative h-10 w-10 rounded-full" onClick={() => setIsChatOpen(true)}>
@@ -162,7 +173,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {isMounted && !isHackathonSection && !isIdeationSection && !isDashboardPage &&(
+                {mounted && !isHackathonSection && !isIdeationSection && !isDashboardPage &&(
                   <DropdownMenuItem asChild className="md:hidden">
                     <Link href="/posts/new"><Plus className="mr-2" />New Post</Link>
                   </DropdownMenuItem>
