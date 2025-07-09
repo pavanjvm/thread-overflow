@@ -21,15 +21,14 @@ const replyToComment2: Comment = {
   content: 'Thanks, that clarifies things! I was stuck on that for a while.',
   author: users[0],
   createdAt: '55 minutes ago',
-  stars: 0,
   votes: 5,
 };
 
 export const comments: Comment[] = [
-  { id: 'comment-1', content: 'This is a great point, I hadn\'t considered that!', author: users[1], createdAt: '2 hours ago', stars: 2, votes: 12 },
-  { id: 'comment-2', content: 'Could you elaborate on the second part? I am not sure I follow.', author: users[2], createdAt: '1 hour ago', stars: 1, votes: 8, replies: [replyToComment2] },
-  { id: 'comment-3', content: 'I tried this and it worked perfectly. Thanks for sharing!', author: users[0], createdAt: '30 minutes ago', stars: 3, votes: 25 },
-  { id: 'comment-4', content: 'I have a different perspective on this...', author: users[3], createdAt: '4 hours ago', stars: 0, votes: -2 },
+  { id: 'comment-1', content: 'This is a great point, I hadn\'t considered that!', author: users[1], createdAt: '2 hours ago', votes: 12 },
+  { id: 'comment-2', content: 'Could you elaborate on the second part? I am not sure I follow.', author: users[2], createdAt: '1 hour ago', votes: 8, replies: [replyToComment2] },
+  { id: 'comment-3', content: 'I tried this and it worked perfectly. Thanks for sharing!', author: users[0], createdAt: '30 minutes ago', votes: 25 },
+  { id: 'comment-4', content: 'I have a different perspective on this...', author: users[3], createdAt: '4 hours ago', votes: -2 },
 ];
 
 export const posts: Post[] = [
@@ -42,7 +41,6 @@ export const posts: Post[] = [
     createdAt: '4 hours ago',
     votes: 24,
     comments: [comments[0], comments[1]],
-    availableStars: 10,
     status: 'published',
   },
   {
@@ -54,7 +52,6 @@ export const posts: Post[] = [
     createdAt: '1 day ago',
     votes: 102,
     comments: [comments[2]],
-    availableStars: 10,
     status: 'published',
   },
   {
@@ -66,7 +63,6 @@ export const posts: Post[] = [
     createdAt: '3 days ago',
     votes: 56,
     comments: [],
-    availableStars: 10,
     status: 'published',
   },
   {
@@ -84,7 +80,6 @@ export const posts: Post[] = [
       { text: 'Svelte', votes: 12 },
       { text: 'Other', votes: 2 },
     ],
-    availableStars: 10,
     status: 'published',
   },
   {
@@ -96,7 +91,6 @@ export const posts: Post[] = [
     createdAt: '10 minutes ago',
     votes: 0,
     comments: [],
-    availableStars: 10,
     status: 'draft',
   }
 ];

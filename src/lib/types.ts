@@ -22,7 +22,6 @@ export interface Comment {
   content: string;
   author: User;
   createdAt: string;
-  stars: number;
   votes: number;
   replies?: Comment[];
 }
@@ -42,7 +41,6 @@ export interface Post {
   votes: number;
   comments: Comment[];
   pollOptions?: PollOption[];
-  availableStars: number;
   status?: 'published' | 'draft';
 }
 
