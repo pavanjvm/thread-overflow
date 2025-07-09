@@ -87,6 +87,7 @@ export interface Prototype {
   imageUrl: string;
   liveUrl?: string;
   votes: number;
+  comments?: Comment[];
 }
 
 export interface Project {

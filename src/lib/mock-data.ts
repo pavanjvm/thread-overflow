@@ -154,7 +154,7 @@ export const projects: Project[] = [
           { id: 'idea-2', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12 },
         ],
         prototypes: [
-          { id: 'proto-1', ideaId: 'idea-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[0], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10 },
+          { id: 'proto-1', ideaId: 'idea-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[0], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10, comments: [comments[2], comments[3]] },
         ],
     },
     {

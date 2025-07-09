@@ -90,7 +90,7 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                         <CardHeader>
                            <CardTitle className="flex items-baseline justify-between">
                             <span>{idea.title}</span>
-                            <Link href={`/ideation/${project.id}#prototypes`} className={cn(badgeVariants({ variant: 'secondary' }), 'font-mono text-xs font-medium')}>
+                            <Link href={`/ideation/${project.id}#idea-${idea.id}`} className={cn(badgeVariants({ variant: 'secondary' }), 'font-mono text-xs font-medium')}>
                                 {idea.id}
                             </Link>
                           </CardTitle>
@@ -171,7 +171,14 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                                   </CardContent>
                                   <CardFooter className="justify-between">
                                       <VoteButtons initialVotes={proto.votes} />
-                                      {proto.liveUrl && <Button asChild><Link href={proto.liveUrl} target="_blank">View Live</Link></Button>}
+                                      <div className="flex items-center gap-2">
+                                        {proto.liveUrl && <Button asChild variant="outline"><Link href={proto.liveUrl} target="_blank">View Live</Link></Button>}
+                                        <Button asChild>
+                                            <Link href={`/ideation/${project.id}/prototypes/${proto.id}`}>
+                                            View Details
+                                            </Link>
+                                        </Button>
+                                      </div>
                                   </CardFooter>
                               </Card>
                           ))
