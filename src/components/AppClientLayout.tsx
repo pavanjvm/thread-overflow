@@ -64,15 +64,23 @@ export default function AppClientLayout({
   const isLandingPage = pathname === '/';
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname);
   
-  // Render simple layout for landing and auth pages
-  if (isLandingPage || isAuthPage) {
+  // Render simple layout for landing page
+  if (isLandingPage) {
     return (
       <>
-        {isLandingPage && (
-          <div className="absolute top-4 right-4 z-50">
-            <ThemeToggle />
-          </div>
-        )}
+        <div className="absolute top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
+        <main>{children}</main>
+        <Toaster />
+      </>
+    );
+  }
+
+  // Render simple layout for auth pages
+  if (isAuthPage) {
+    return (
+      <>
         <main className="container mx-auto px-4 py-8">{children}</main>
         <Toaster />
       </>

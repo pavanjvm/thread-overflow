@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -21,7 +20,8 @@ export default function LandingPage() {
   // depend on client-side theme information.
   if (!mounted) {
     return (
-       <div className="flex flex-col items-center justify-center text-center py-24">
+      <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden bg-background">
+        <div className="z-10 flex flex-col items-center text-center px-4">
           <div className="h-24 w-full max-w-4xl" />
           <p className="mt-12 text-2xl text-muted-foreground max-w-2xl">
             Where your silly thoughts, brilliant ideas, and random musings collide in a big, friendly internet explosion!
@@ -35,6 +35,7 @@ export default function LandingPage() {
             </Button>
           </div>
         </div>
+      </div>
     );
   }
 
@@ -45,7 +46,7 @@ export default function LandingPage() {
   const textColor = resolvedTheme === 'dark' ? 'hsl(var(--primary))' : 'hsl(var(--foreground))';
 
   return (
-    <div className="relative h-[calc(100vh-10rem)] w-full flex items-center justify-center">
+    <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Aurora colorStops={auroraColors} />
       </div>
