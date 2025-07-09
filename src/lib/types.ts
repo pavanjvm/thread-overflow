@@ -1,4 +1,5 @@
 
+
 export interface User {
   id: string;
   name: string;
@@ -101,4 +102,62 @@ export interface Project {
   };
   ideas: Idea[];
   prototypes: Prototype[];
+}
+
+// --- Hackathon Types ---
+export interface HackathonPrize {
+  rank: string;
+  reward: string;
+  description: string;
+}
+
+export interface HackathonPerson {
+  name: string;
+  title: string;
+  avatarUrl: string;
+}
+
+export interface HackathonScheduleItem {
+  id: string;
+  time: string;
+  title: string;
+  description: string;
+  speaker?: HackathonPerson;
+}
+
+export interface HackathonProject {
+  id: string;
+  name: string;
+  tagline: string;
+  thumbnailUrl: string;
+  team: User[];
+}
+
+export interface Hackathon {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  coverImageUrl: string;
+  overview: string;
+  prizes: HackathonPrize[];
+  speakers: HackathonPerson[];
+  judges: HackathonPerson[];
+  schedule: {
+    date: string;
+    events: HackathonScheduleItem[];
+  }[];
+  projects: HackathonProject[];
+  timeline: {
+    start: string;
+    end: string;
+  };
+  eventDates: {
+    start: string;
+    end: string;
+  };
+  prizeAnnouncement: {
+    start: string;
+    end: string;
+  };
 }

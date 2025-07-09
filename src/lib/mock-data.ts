@@ -1,5 +1,6 @@
 
-import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Idea, Prototype, Project } from './types';
+
+import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Idea, Prototype, Project, Hackathon, HackathonPerson, HackathonProject } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125 },
@@ -189,4 +190,64 @@ export const projects: Project[] = [
         ideas: [],
         prototypes: [],
     },
+];
+
+// --- Hackathon Data ---
+
+const speakers: HackathonPerson[] = [
+    { name: 'Grace Hopper', title: 'Rear Admiral, U.S. Navy', avatarUrl: 'https://placehold.co/128x128.png?text=GH' },
+    { name: 'Linus Torvalds', title: 'Creator of Linux', avatarUrl: 'https://placehold.co/128x128.png?text=LT' },
+    { name: 'Ada Lovelace', title: 'First Computer Programmer', avatarUrl: 'https://placehold.co/128x128.png?text=AL' },
+    { name: 'Satoshi Nakamoto', title: 'Creator of Bitcoin', avatarUrl: 'https://placehold.co/128x128.png?text=SN' },
+];
+
+const judges: HackathonPerson[] = [
+    { name: 'Margaret Hamilton', title: 'Lead Apollo Flight Software Engineer', avatarUrl: 'https://placehold.co/128x128.png?text=MH' },
+    { name: 'Vint Cerf', title: '"Father of the Internet"', avatarUrl: 'https://placehold.co/128x128.png?text=VC' },
+];
+
+const hackathonProjects: HackathonProject[] = [
+    { id: 'hp-1', name: 'AI-Doc', tagline: 'Your personal AI health assistant.', thumbnailUrl: 'https://placehold.co/600x400.png', team: [users[0], users[1]] },
+    { id: 'hp-2', name: 'EcoTracker', tagline: 'Monitor and reduce your carbon footprint.', thumbnailUrl: 'https://placehold.co/600x400.png', team: [users[2], users[3]] },
+];
+
+export const hackathons: Hackathon[] = [
+    {
+        id: 'hack-1',
+        slug: 'ai-for-good-2025',
+        title: 'AI for Good Hackathon 2025',
+        subtitle: 'Build innovative AI projects to solve real-world problems.',
+        coverImageUrl: 'https://placehold.co/1600x400.png',
+        overview: 'The AI for Good Hackathon is a 48-hour event where developers, designers, and innovators come together to create solutions for social and environmental challenges using artificial intelligence. This year, we are focusing on healthcare, education, and sustainability.',
+        prizes: [
+            { rank: '1st Place', reward: '10,000 Points', description: 'Awarded to the most innovative and impactful project.' },
+            { rank: '2nd Place', reward: '5,000 Points', description: 'Awarded to the project with the best technical implementation.' },
+            { rank: '3rd Place', reward: '2,500 Points', description: 'Awarded to the project with the best user experience.' },
+        ],
+        speakers,
+        judges,
+        schedule: [
+            {
+                date: '17 MAY 2025 (SAT)',
+                events: [
+                    { id: 'se-1', time: '09:00 AM', title: 'Opening Ceremony & Keynote', description: 'Welcome and keynote by Grace Hopper.', speaker: speakers[0] },
+                    { id: 'se-2', time: '10:00 AM', title: 'Hacking Begins', description: 'Time to start building!' },
+                    { id: 'se-3', time: '01:00 PM', title: 'Workshop: Intro to Generative AI', description: 'A hands-on workshop by Linus Torvalds.', speaker: speakers[1] },
+                    { id: 'se-4', time: '07:00 PM', title: 'Team Mixer & Dinner', description: 'Network with other participants.' },
+                ]
+            },
+            {
+                date: '18 MAY 2025 (SUN)',
+                events: [
+                    { id: 'se-5', time: '10:00 AM', title: 'Project Submissions Due', description: 'Final call for project submissions.' },
+                    { id: 'se-6', time: '11:00 AM', title: 'Judging Begins', description: 'Judges will review the projects.' },
+                    { id: 'se-7', time: '03:00 PM', title: 'Closing Ceremony & Prize Announcement', description: 'Announcement of winners and closing remarks.' },
+                ]
+            }
+        ],
+        projects: hackathonProjects,
+        timeline: { start: '17 Mar', end: '11 Jun' },
+        eventDates: { start: '8 Apr', end: '6 Jun' },
+        prizeAnnouncement: { start: '17 May', end: '11 Jun' },
+    }
 ];

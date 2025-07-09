@@ -1,7 +1,8 @@
 
+
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { MessageSquare, Rocket } from 'lucide-react';
+import { MessageSquare, Rocket, Swords } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
@@ -10,7 +11,7 @@ export default function DashboardPage() {
         <h1 className="text-4xl font-bold tracking-tight text-foreground">Welcome Back!</h1>
         <p className="text-muted-foreground mt-2 text-lg">Where would you like to go today?</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
         <Link href="/feed" className="block">
           <Card className="h-full hover:border-primary/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <CardHeader className="items-center text-center p-8">
@@ -33,6 +34,19 @@ export default function DashboardPage() {
               <CardTitle className="text-2xl">Ideation Portal</CardTitle>
               <CardDescription className="text-base mt-2">
                 Submit problems, share ideas, and build prototypes to solve real-world challenges.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
+        <Link href="/hackathons" className="block">
+          <Card className="h-full hover:border-blue-500/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+            <CardHeader className="items-center text-center p-8">
+              <div className="p-4 bg-blue-500/10 rounded-full mb-4">
+                <Swords className="h-10 w-10 text-blue-500" />
+              </div>
+              <CardTitle className="text-2xl">Hackathon Portal</CardTitle>
+              <CardDescription className="text-base mt-2">
+                Join hackathons, build projects, and compete for amazing prizes and recognition.
               </CardDescription>
             </CardHeader>
           </Card>
