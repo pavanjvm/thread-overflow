@@ -1,3 +1,5 @@
+'use client';
+
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef } from "react";
 
@@ -109,7 +111,9 @@ void main() {
     vec3 finalColor = mix(backgroundColor, auroraColor, auroraAlpha);
     fragColor = vec4(finalColor, 1.0);
   } else {
-    fragColor = vec4(auroraColor * auroraAlpha, auroraAlpha);
+    vec3 backgroundColor = vec3(0.0, 0.0, 0.0);
+    vec3 finalColor = mix(backgroundColor, auroraColor, auroraAlpha);
+    fragColor = vec4(finalColor, 1.0);
   }
 }
 `;
