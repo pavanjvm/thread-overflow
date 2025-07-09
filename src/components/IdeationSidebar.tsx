@@ -20,6 +20,7 @@ import {
   Trophy,
   Star,
   Rocket,
+  Swords,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -44,16 +45,23 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
         <SidebarGroupLabel>Navigate</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={false}>
-              <Link href="/feed">
-                <MessageSquare /> Community Forum
+            <SidebarMenuButton asChild isActive={pathname.startsWith('/ideation')}>
+              <Link href="/ideation">
+                <Rocket /> All Projects
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname === '/ideation'}>
-              <Link href="/ideation">
-                <Rocket /> All Projects
+            <SidebarMenuButton asChild isActive={pathname.startsWith('/hackathons')}>
+              <Link href="/hackathons">
+                <Swords /> Hackathon Portal
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname === '/feed'}>
+              <Link href="/feed">
+                <MessageSquare /> Community Forum
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

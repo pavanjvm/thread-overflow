@@ -18,6 +18,7 @@ import {
   Code,
   Flame,
   FileText,
+  Swords,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Community } from '@/lib/types';
@@ -42,9 +43,16 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
         <SidebarGroupLabel>Navigate</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={false}>
+            <SidebarMenuButton asChild isActive={pathname.startsWith('/ideation')}>
               <Link href="/ideation">
                 <Rocket /> Ideation Portal
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname.startsWith('/hackathons')}>
+              <Link href="/hackathons">
+                <Swords /> Hackathon Portal
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
