@@ -130,50 +130,54 @@ export default function AppClientLayout({
                           </SidebarMenuItem>
                       </SidebarMenu>
                   </SidebarGroup>
-                  <SidebarGroup>
-                    <SidebarGroupLabel>Leaderboard</SidebarGroupLabel>
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton asChild isActive={pathname === '/leaderboard'}>
-                                <Link href="/leaderboard"><Trophy /> View All</Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        {topUsers.map((user) => (
-                            <SidebarMenuItem key={user.id}>
-                                <SidebarMenuButton asChild isActive={pathname === `/profile`}>
-                                    <Link href={`/profile`}>
-                                        <Avatar className="size-5"><AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" /><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></Avatar>
-                                        <span className="flex-grow">{user.name}</span>
-                                        <div className="flex items-center gap-1 text-xs text-yellow-500">
-                                            <span>{user.stars}</span>
-                                            <Star className="size-3 fill-current" />
-                                        </div>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        ))}
-                    </SidebarMenu>
-                  </SidebarGroup>
-                  <SidebarGroup>
-                      <SidebarGroupLabel>Communities</SidebarGroupLabel>
+                  {isIdeationSection && (
+                    <SidebarGroup>
+                      <SidebarGroupLabel>Leaderboard</SidebarGroupLabel>
                       <SidebarMenu>
                           <SidebarMenuItem>
-                              <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
-                                  <Link href="/c/new"><Plus /> Create Community</Link>
+                              <SidebarMenuButton asChild isActive={pathname === '/leaderboard'}>
+                                  <Link href="/leaderboard"><Trophy /> View All</Link>
                               </SidebarMenuButton>
                           </SidebarMenuItem>
-                          {communities.map((community) => (
-                              <SidebarMenuItem key={community.id}>
-                                  <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
-                                      <Link href={`/c/${community.slug}`}>
-                                          <Avatar className="size-5"><AvatarImage src={community.iconUrl} data-ai-hint="community icon" /><AvatarFallback>{community.name.charAt(0)}</AvatarFallback></Avatar>
-                                          <span>{community.name}</span>
+                          {topUsers.map((user) => (
+                              <SidebarMenuItem key={user.id}>
+                                  <SidebarMenuButton asChild isActive={pathname === `/profile`}>
+                                      <Link href={`/profile`}>
+                                          <Avatar className="size-5"><AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" /><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></Avatar>
+                                          <span className="flex-grow">{user.name}</span>
+                                          <div className="flex items-center gap-1 text-xs text-yellow-500">
+                                              <span>{user.stars}</span>
+                                              <Star className="size-3 fill-current" />
+                                          </div>
                                       </Link>
                                   </SidebarMenuButton>
                               </SidebarMenuItem>
                           ))}
                       </SidebarMenu>
-                  </SidebarGroup>
+                    </SidebarGroup>
+                  )}
+                  {!isIdeationSection && (
+                    <SidebarGroup>
+                        <SidebarGroupLabel>Communities</SidebarGroupLabel>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
+                                    <Link href="/c/new"><Plus /> Create Community</Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            {communities.map((community) => (
+                                <SidebarMenuItem key={community.id}>
+                                    <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
+                                        <Link href={`/c/${community.slug}`}>
+                                            <Avatar className="size-5"><AvatarImage src={community.iconUrl} data-ai-hint="community icon" /><AvatarFallback>{community.name.charAt(0)}</AvatarFallback></Avatar>
+                                            <span>{community.name}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroup>
+                  )}
                 </SidebarContent>
             </Sidebar>
         )}
