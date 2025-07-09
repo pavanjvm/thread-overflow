@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -53,7 +52,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
       <header className="bg-card border-b sticky top-0 z-50">
         <div className="flex items-center justify-between h-16 gap-4 px-4">
           <div className="flex items-center gap-2">
-            {showSidebar && <SidebarTrigger className={cn(!mounted && 'invisible')} />}
+            {mounted && showSidebar && <SidebarTrigger />}
             <Link href="/dashboard" className="flex items-center space-x-2 text-primary font-bold text-lg">
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
@@ -61,7 +60,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
           </div>
           
           <div className="flex-1 max-w-lg mx-4">
-            {mounted && !isDashboardPage && !isIdeationSection && (
+            {mounted && !isDashboardPage && !isIdeationSection && !isHackathonSection && (
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
