@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 const typeConfig = {
-  'Solution Request': { icon: HelpCircle, variant: 'default' as const, label: 'Solution Request' },
-  'Idea': { icon: Lightbulb, variant: 'secondary' as const, label: 'Idea' },
+  'Solution Request': { icon: HelpCircle, variant: 'secondary' as const, label: 'Solution Request' },
+  'Idea': { icon: Lightbulb, variant: 'default' as const, label: 'Idea' },
 };
 
 
@@ -37,7 +37,7 @@ export default function IdeationPortalPage() {
           const TypeIcon = typeConfig[projectType].icon;
           return (
             <Link href={`/ideation/${project.id}`} key={project.id} className="block">
-              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 bg-muted">
+              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 hover:bg-muted">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{project.title}</CardTitle>
@@ -66,11 +66,11 @@ export default function IdeationPortalPage() {
                    <div className="w-full flex justify-start items-center text-sm text-muted-foreground">
                       <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
-                              <Lightbulb className="h-4 w-4 text-secondary" />
+                              <Lightbulb className="h-4 w-4 text-primary" />
                               <span>{project.ideas.length} Ideas</span>
                           </div>
                           <div className="flex items-center gap-1">
-                              <Wrench className="h-4 w-4 text-primary" />
+                              <Wrench className="h-4 w-4 text-secondary" />
                               <span>{project.prototypes.length} Prototypes</span>
                           </div>
                       </div>
