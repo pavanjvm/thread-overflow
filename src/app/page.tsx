@@ -52,7 +52,7 @@ export default function LandingPage() {
         <Aurora colorStops={auroraColors} isLight={isLight} blend={isLight ? 0.4 : 1.0} />
       </div>
       <div className="z-10 flex flex-col items-center text-center px-4">
-        <div className="h-32 w-full max-w-5xl">
+        <div className="h-32 w-full max-w-4xl">
           <TextPressure
             text="Thread Overflow"
             textColor={textColor}
