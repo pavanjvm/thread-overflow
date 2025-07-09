@@ -218,7 +218,7 @@ export const hackathons: Hackathon[] = [
         title: 'AI for Good Hackathon 2025',
         subtitle: 'Build innovative AI projects to solve real-world problems.',
         coverImageUrl: 'https://placehold.co/1600x400.png',
-        overview: 'The AI for Good Hackathon is a 48-hour event where developers, designers, and innovators come together to create solutions for social and environmental challenges using artificial intelligence. This year, we are focusing on healthcare, education, and sustainability.',
+        overview: 'The AI for Good Hackathon is a hybrid event where developers, designers, and innovators come together to create solutions for social and environmental challenges using artificial intelligence. Participants first apply with their ideas. Accepted teams will participate in an online hacking period, culminating in an offline event for final reviews and prize distribution. This year, we are focusing on healthcare, education, and sustainability.',
         prizes: [
             { rank: '1st Place', reward: '10,000 Points', description: 'Awarded to the most innovative and impactful project.' },
             { rank: '2nd Place', reward: '5,000 Points', description: 'Awarded to the project with the best technical implementation.' },
@@ -228,26 +228,19 @@ export const hackathons: Hackathon[] = [
         judges,
         schedule: [
             {
-                date: '17 MAY 2025 (SAT)',
+                date: 'Key Dates',
                 events: [
-                    { id: 'se-1', time: '09:00 AM', title: 'Opening Ceremony & Keynote', description: 'Welcome and keynote by Grace Hopper.', speaker: speakers[0] },
-                    { id: 'se-2', time: '10:00 AM', title: 'Hacking Begins', description: 'Time to start building!' },
-                    { id: 'se-3', time: '01:00 PM', title: 'Workshop: Intro to Generative AI', description: 'A hands-on workshop by Linus Torvalds.', speaker: speakers[1] },
-                    { id: 'se-4', time: '07:00 PM', title: 'Team Mixer & Dinner', description: 'Network with other participants.' },
-                ]
-            },
-            {
-                date: '18 MAY 2025 (SUN)',
-                events: [
-                    { id: 'se-5', time: '10:00 AM', title: 'Project Submissions Due', description: 'Final call for project submissions.' },
-                    { id: 'se-6', time: '11:00 AM', title: 'Judging Begins', description: 'Judges will review the projects.' },
-                    { id: 'se-7', time: '03:00 PM', title: 'Closing Ceremony & Prize Announcement', description: 'Announcement of winners and closing remarks.' },
+                    { id: 'se-1', time: '17 Mar', title: 'Registration Opens', description: 'Submit your ideas and form your teams.' },
+                    { id: 'se-2', time: '17 Apr', title: 'Registration Ends', description: 'Final day for applications.' },
+                    { id: 'se-3', time: '18 Apr', title: 'Hacking Period Starts', description: 'Accepted teams can start building their prototypes online.'},
+                    { id: 'se-4', time: '10 Jun', title: 'Project Submission Deadline', description: 'Submit your final project for review.'},
+                    { id: 'se-5', time: '11 Jun', title: 'Offline Demos & Awards', description: 'In-person project demos, judging, and prize ceremony.'},
                 ]
             }
         ],
         projects: hackathonProjects,
-        timeline: { start: '17 Mar', end: '11 Jun' },
-        eventDates: { start: '8 Apr', end: '6 Jun' },
-        prizeAnnouncement: { start: '17 May', end: '11 Jun' },
+        timeline: { start: '17 Mar', end: '17 Apr' },
+        eventDates: { start: '18 Apr', end: '10 Jun' },
+        prizeAnnouncement: { start: '11 Jun', end: '11 Jun' },
     }
 ];

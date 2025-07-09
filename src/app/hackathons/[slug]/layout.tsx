@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { hackathons } from '@/lib/mock-data';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import ApplyDialog from './_components/ApplyDialog';
 
 export default function HackathonLayout({
   children,
@@ -32,7 +32,7 @@ export default function HackathonLayout({
           <p className="text-lg mt-1">{hackathon.subtitle}</p>
         </div>
         <div className="absolute top-6 right-6">
-            <Button size="lg">Join Hackathon</Button>
+          <ApplyDialog />
         </div>
       </div>
       {children}
