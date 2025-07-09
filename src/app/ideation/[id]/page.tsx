@@ -18,7 +18,7 @@ const statusConfig = {
     Completed: { icon: Wrench, color: 'bg-green-500', label: 'Completed' },
 };
 
-export default function ProjectDetailsPage({ params }: { params: { id: string } }) {
+export default async function ProjectDetailsPage({ params }: { params: { id: string } }) {
   const project = projects.find((p) => p.id === params.id);
 
   if (!project) {
