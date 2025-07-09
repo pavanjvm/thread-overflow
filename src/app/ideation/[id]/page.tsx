@@ -86,7 +86,7 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                   project.ideas.map(idea => {
                     const protoCount = project.prototypes.filter(p => p.ideaId === idea.id).length;
                     return (
-                      <Card key={idea.id}>
+                      <Card key={idea.id} id={`idea-${idea.id}`}>
                         <CardHeader>
                            <CardTitle className="flex items-baseline justify-between">
                             <span>{idea.title}</span>
@@ -148,7 +148,14 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                                       <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
                                           <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />
                                       </div>
-                                      <CardTitle>{proto.title}</CardTitle>
+                                      <CardTitle className="flex items-baseline justify-between">
+                                        <span>{proto.title}</span>
+                                        {proto.ideaId && (
+                                          <Link href={`/ideation/${project.id}#idea-${proto.ideaId}`} className={cn(badgeVariants({ variant: 'secondary' }), 'font-mono text-xs font-medium')}>
+                                              {proto.ideaId}
+                                          </Link>
+                                        )}
+                                      </CardTitle>
                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                           <Avatar className="h-5 w-5">
                                               <AvatarImage src={proto.author.avatarUrl} data-ai-hint="user avatar" />
