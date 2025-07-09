@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -54,7 +55,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
     <>
       <header className="bg-card border-b sticky top-0 z-50">
         <div className="flex items-center justify-between h-16 gap-4 px-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" suppressHydrationWarning>
             {showSidebar ? (
               mounted ? <SidebarTrigger /> : <Skeleton className="h-7 w-7" />
             ) : null}
@@ -64,7 +65,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
             </Link>
           </div>
           
-          <div className="flex-1 max-w-lg mx-4">
+          <div className="flex-1 max-w-lg mx-4" suppressHydrationWarning>
             {mounted ? (
               !isDashboardPage && !isIdeationSection && !isHackathonSection && (
                 <form onSubmit={handleSearch} className="relative">
@@ -84,7 +85,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2" suppressHydrationWarning>
             {mounted ? (
               <>
                 {!isHackathonSection && !isIdeationSection && !isDashboardPage && (
@@ -165,7 +166,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56" align="end" forceMount suppressHydrationWarning>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">Test User</p>
