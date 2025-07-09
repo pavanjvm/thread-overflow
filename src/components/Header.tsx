@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { notifications, conversations } from '@/lib/mock-data';
 import ChatPanel from '@/components/ChatPanel';
 import { ThemeToggle } from './ThemeToggle';
+import RequestSolutionDialog from '@/app/ideation/_components/RequestSolutionDialog';
 
 const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
   const router = useRouter();
@@ -36,6 +37,7 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
   const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
   const isHackathonSection = pathname.startsWith('/hackathons');
   const isIdeationSection = pathname.startsWith('/ideation');
+  const isDashboardPage = pathname === '/dashboard';
 
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -62,21 +64,23 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
           </div>
           
           <div className="flex-1 max-w-lg mx-4">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                name="search"
-                type="search"
-                placeholder="Search..."
-                className="pl-10 w-full"
-                defaultValue={defaultSearch}
-                key={defaultSearch}
-              />
-            </form>
+            {!isDashboardPage && (
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  name="search"
+                  type="search"
+                  placeholder="Search..."
+                  className="pl-10 w-full"
+                  defaultValue={defaultSearch}
+                  key={defaultSearch}
+                />
+              </form>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
-            {!isHackathonSection && !isIdeationSection && (
+            {!isHackathonSection && !isIdeationSection && !isDashboardPage && (
               <Button asChild className="hidden md:inline-flex">
                 <Link href="/posts/new">
                   <Plus className="mr-2" />
@@ -86,12 +90,15 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
             )}
 
             {isIdeationSection && (
-                <Button asChild className="hidden md:inline-flex" variant="outline">
-                    <Link href="/leaderboard">
-                        <Trophy className="mr-2" />
-                        Leaderboard
-                    </Link>
-                </Button>
+                <div className="hidden md:flex gap-2">
+                    <Button asChild variant="outline">
+                        <Link href="/leaderboard">
+                            <Trophy className="mr-2" />
+                            Leaderboard
+                        </Link>
+                    </Button>
+                    <RequestSolutionDialog />
+                </div>
             )}
             
             <Button variant="ghost" className="relative h-10 w-10 rounded-full" onClick={() => setIsChatOpen(true)}>
@@ -156,7 +163,7 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {!isHackathonSection && !isIdeationSection && (
+                {!isHackathonSection && !isIdeationSection && !isDashboardPage &&(
                   <DropdownMenuItem asChild className="md:hidden">
                     <Link href="/posts/new"><Plus className="mr-2" />New Post</Link>
                   </DropdownMenuItem>

@@ -1,8 +1,6 @@
 
-
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { MessageSquare, Rocket, Swords } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
@@ -15,9 +13,6 @@ export default function DashboardPage() {
         <Link href="/feed" className="block">
           <Card className="h-full hover:border-primary/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <CardHeader className="items-center text-center p-8">
-              <div className="p-4 bg-primary/10 rounded-full mb-4">
-                <MessageSquare className="h-10 w-10 text-primary" />
-              </div>
               <CardTitle className="text-2xl">Community Forum</CardTitle>
               <CardDescription className="text-base mt-2">
                 Engage in discussions, ask questions, and share your knowledge with the community.
@@ -28,9 +23,6 @@ export default function DashboardPage() {
         <Link href="/ideation" className="block">
           <Card className="h-full hover:border-accent/80 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <CardHeader className="items-center text-center p-8">
-              <div className="p-4 bg-accent/10 rounded-full mb-4">
-                <Rocket className="h-10 w-10 text-accent" />
-              </div>
               <CardTitle className="text-2xl">Ideation Portal</CardTitle>
               <CardDescription className="text-base mt-2">
                 Submit problems, share ideas, and build prototypes to solve real-world challenges.
@@ -41,9 +33,6 @@ export default function DashboardPage() {
         <Link href="/hackathons" className="block">
           <Card className="h-full hover:border-blue-500/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <CardHeader className="items-center text-center p-8">
-              <div className="p-4 bg-blue-500/10 rounded-full mb-4">
-                <Swords className="h-10 w-10 text-blue-500" />
-              </div>
               <CardTitle className="text-2xl">Hackathon Portal</CardTitle>
               <CardDescription className="text-base mt-2">
                 Join hackathons, build projects, and compete for amazing prizes and recognition.
