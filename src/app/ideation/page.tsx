@@ -27,57 +27,60 @@ export default function IdeationPortalPage() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <Link href={`/ideation/${project.id}`} key={project.id} className="block">
-            <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">{project.title}</CardTitle>
-                     <Badge
-                        className={cn(
-                            statusConfig[project.status].color,
-                            'text-primary-foreground',
-                            'flex items-center gap-1 border-transparent'
-                        )}
-                        >
-                        <statusConfig[project.status].icon className="h-3 w-3" />
-                        {statusConfig[project.status].label}
-                    </Badge>
-                </div>
-                <CardDescription className="flex items-center gap-2 text-xs pt-2">
-                    <Avatar className="h-5 w-5">
-                        <AvatarImage src={project.author.avatarUrl} data-ai-hint="user avatar" />
-                        <AvatarFallback>{project.author.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span>{project.author.name}</span>
-                    <span>•</span>
-                    <span>{project.createdAt}</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground line-clamp-3">{project.description}</p>
-              </CardContent>
-              <CardFooter>
-                 <div className="w-full flex justify-between items-center text-sm text-muted-foreground">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                            <Lightbulb className="h-4 w-4 text-blue-500" />
-                            <span>{project.ideas.length} Ideas</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Wrench className="h-4 w-4 text-yellow-500" />
-                            <span>{project.prototypes.length} Prototypes</span>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-1 font-bold text-green-600">
-                        <CircleDollarSign className="h-4 w-4" />
-                        <span>{project.rewards.ideation + project.rewards.prototype}</span>
-                    </div>
-                 </div>
-              </CardFooter>
-            </Card>
-          </Link>
-        ))}
+        {projects.map((project) => {
+          const StatusIcon = statusConfig[project.status].icon;
+          return (
+            <Link href={`/ideation/${project.id}`} key={project.id} className="block">
+              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{project.title}</CardTitle>
+                       <Badge
+                          className={cn(
+                              statusConfig[project.status].color,
+                              'text-primary-foreground',
+                              'flex items-center gap-1 border-transparent'
+                          )}
+                          >
+                          <StatusIcon className="h-3 w-3" />
+                          {statusConfig[project.status].label}
+                      </Badge>
+                  </div>
+                  <CardDescription className="flex items-center gap-2 text-xs pt-2">
+                      <Avatar className="h-5 w-5">
+                          <AvatarImage src={project.author.avatarUrl} data-ai-hint="user avatar" />
+                          <AvatarFallback>{project.author.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span>{project.author.name}</span>
+                      <span>•</span>
+                      <span>{project.createdAt}</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-sm text-muted-foreground line-clamp-3">{project.description}</p>
+                </CardContent>
+                <CardFooter>
+                   <div className="w-full flex justify-between items-center text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                              <Lightbulb className="h-4 w-4 text-blue-500" />
+                              <span>{project.ideas.length} Ideas</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                              <Wrench className="h-4 w-4 text-yellow-500" />
+                              <span>{project.prototypes.length} Prototypes</span>
+                          </div>
+                      </div>
+                      <div className="flex items-center gap-1 font-bold text-green-600">
+                          <CircleDollarSign className="h-4 w-4" />
+                          <span>{project.rewards.ideation + project.rewards.prototype}</span>
+                      </div>
+                   </div>
+                </CardFooter>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

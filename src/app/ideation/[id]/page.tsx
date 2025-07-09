@@ -25,6 +25,8 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
     notFound();
   }
 
+  const StatusIcon = statusConfig[project.status].icon;
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Project Header */}
@@ -37,7 +39,7 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
             'inline-flex items-center gap-1'
           )}
         >
-          <statusConfig[project.status].icon className="h-3 w-3" />
+          <StatusIcon className="h-3 w-3" />
           {statusConfig[project.status].label}
         </Badge>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">{project.title}</h1>
