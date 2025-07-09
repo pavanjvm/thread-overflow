@@ -39,14 +39,27 @@ export default function AppClientLayout({
 
   const isLandingPage = pathname === '/';
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname);
-  const isDashboardPage = pathname === '/dashboard';
   
+  if (isLandingPage || isAuthPage) {
+    return (
+      <>
+        {isLandingPage && (
+          <div className="absolute top-4 right-4 z-50">
+            <ThemeToggle />
+          </div>
+        )}
+        <main>{children}</main>
+        <Toaster />
+      </>
+    );
+  }
+
+  // Full App Shell for dashboard, feed, ideation, etc.
+  const isDashboardPage = pathname === '/dashboard';
   const isIdeationSection = pathname.startsWith('/ideation');
   const isHackathonSection = pathname.startsWith('/hackathons');
 
-  const showAppShell = !isLandingPage && !isAuthPage && !isDashboardPage;
-  const showSidebar = showAppShell && !isHackathonSection && !isIdeationSection;
-
+  const showSidebar = !isDashboardPage && !isHackathonSection && !isIdeationSection;
   const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
   
   return (
@@ -54,25 +67,13 @@ export default function AppClientLayout({
         {showSidebar && (
             <Sidebar>
                 <SidebarContent className="p-2">
-                  {isIdeationSection ? (
-                    <IdeationSidebar pathname={pathname} topUsers={topUsers} />
-                  ) : (
                     <ForumSidebar pathname={pathname} communities={communities} />
-                  )}
                 </SidebarContent>
             </Sidebar>
         )}
         <SidebarInset>
-            {(showAppShell || isDashboardPage) && <Header showSidebar={showSidebar} setIsChatOpen={setIsChatOpen} />}
-            <main className={cn(
-              "flex-grow",
-              (showAppShell || isLandingPage || isDashboardPage) && "container mx-auto px-4 py-8"
-            )}>
-                {isLandingPage && (
-                    <div className="absolute top-4 right-4 z-50">
-                        <ThemeToggle />
-                    </div>
-                )}
+            <Header showSidebar={showSidebar} setIsChatOpen={setIsChatOpen} />
+            <main className={cn("flex-grow", "container mx-auto px-4 py-8")}>
                 {children}
             </main>
         </SidebarInset>
@@ -84,7 +85,7 @@ export default function AppClientLayout({
         )}
 
         <ChatPanel open={isChatOpen} onOpenChange={setIsChatOpen} />
-        {<Toaster />}
+        <Toaster />
     </SidebarProvider>
   );
 }
