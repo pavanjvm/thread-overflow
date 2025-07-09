@@ -56,6 +56,13 @@ export default function LandingPage() {
           <TextPressure
             text="Thread Overflow"
             textColor={textColor}
+            flex={true}
+            width={false}
+            weight={false}
+            italic={false}
+            alpha={false}
+            stroke={false}
+            scale={false}
           />
         </div>
         <p className="mt-4 text-xl text-muted-foreground max-w-3xl">
