@@ -23,7 +23,7 @@ export default function IdeationPortalPage() {
             <p className="text-muted-foreground mt-1">Solve challenges, build prototypes, and earn rewards.</p>
           </div>
           <div className="flex items-center gap-4">
-            <Button asChild variant="outline">
+            <Button asChild variant="secondary">
                 <Link href="/ideation/post-idea">Contribute an Idea</Link>
             </Button>
             <Button asChild>
@@ -38,7 +38,7 @@ export default function IdeationPortalPage() {
           const TypeIcon = typeConfig[projectType].icon;
           return (
             <Link href={`/ideation/${project.id}`} key={project.id} className="block">
-              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 dark:bg-secondary">
+              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{project.title}</CardTitle>
