@@ -14,10 +14,6 @@ export default function SignupPage() {
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Replace with your API call for user signup.
-    console.log('Signup attempt');
-
-    // For this prototype, we'll just redirect to the dashboard.
     router.push('/dashboard');
   };
 

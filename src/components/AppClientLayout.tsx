@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -14,6 +15,7 @@ import { communities, users } from '@/lib/mock-data';
 import { useState, useEffect } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import ForumSidebar from './ForumSidebar';
+import IdeationSidebar from './IdeationSidebar';
 import dynamic from 'next/dynamic';
 
 const AIChatbot = dynamic(() => import('./AIChatbot'), { ssr: false });
@@ -30,6 +32,7 @@ export default function AppClientLayout({
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
 
   useEffect(() => {
     setMounted(true);
@@ -55,24 +58,28 @@ export default function AppClientLayout({
 
   // Determine if the full app shell should be used
   const isDashboardPage = pathname === '/dashboard';
-  const isIdeationSection = pathname.startsWith('/ideation');
   const isHackathonSection = pathname.startsWith('/hackathons');
   
-  // Sidebar should only show on forum-like pages
-  const showForumSidebar = !isDashboardPage && !isHackathonSection && !isIdeationSection;
+  // Determine which sidebar to show
+  const isIdeationSection = pathname.startsWith('/ideation') || pathname === '/leaderboard';
+  const showSidebar = !isDashboardPage && !isHackathonSection;
   
   return (
     <SidebarProvider mounted={mounted}>
-        {showForumSidebar && (
+        {showSidebar && (
             <Sidebar>
                 <SidebarContent className="p-2">
-                    <ForumSidebar pathname={pathname} communities={communities} />
+                    {isIdeationSection ? (
+                        <IdeationSidebar pathname={pathname} topUsers={topUsers} />
+                    ) : (
+                        <ForumSidebar pathname={pathname} communities={communities} />
+                    )}
                 </SidebarContent>
             </Sidebar>
         )}
         
         <SidebarInset>
-            <Header showSidebar={showForumSidebar} setIsChatOpen={setIsChatOpen} />
+            <Header showSidebar={showSidebar} setIsChatOpen={setIsChatOpen} />
             <main className={cn("flex-grow", "container mx-auto px-4 py-8")}>
                 {children}
             </main>

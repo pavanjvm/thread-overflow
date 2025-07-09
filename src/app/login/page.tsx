@@ -14,10 +14,6 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Replace with your API call for authentication.
-    console.log('Login attempt');
-    
-    // For this prototype, we'll just redirect to the dashboard.
     router.push('/dashboard');
   };
 
