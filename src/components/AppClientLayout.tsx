@@ -13,7 +13,6 @@ import {
 import { communities, users } from '@/lib/mock-data';
 import { useState, useEffect } from 'react';
 import AIChatbot from './AIChatbot';
-import Loading from '@/app/loading';
 import { ThemeToggle } from './ThemeToggle';
 import ForumSidebar from './ForumSidebar';
 import IdeationSidebar from './IdeationSidebar';
@@ -36,15 +35,11 @@ export default function AppClientLayout({
   const showAppShell = !isLandingPage && !isAuthPage && !isDashboardPage;
   
   const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
-
-  if (!mounted) {
-    return <Loading />;
-  }
   
   const isIdeationSection = pathname.startsWith('/ideation');
 
   return (
-    <SidebarProvider>
+    <SidebarProvider mounted={mounted}>
         {showAppShell && (
             <Sidebar>
                 <SidebarContent className="p-2">

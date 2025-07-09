@@ -54,6 +54,7 @@ const SidebarProvider = React.forwardRef<
     defaultOpen?: boolean
     open?: boolean
     onOpenChange?: (open: boolean) => void
+    mounted: boolean
   }
 >(
   (
@@ -64,17 +65,13 @@ const SidebarProvider = React.forwardRef<
       className,
       style,
       children,
+      mounted,
       ...props
     },
     ref
   ) => {
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
-    const [mounted, setMounted] = React.useState(false)
-
-    React.useEffect(() => {
-      setMounted(true)
-    }, [])
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
@@ -208,7 +205,11 @@ const Sidebar = React.forwardRef<
       )
     }
 
-    if (isMobile && mounted) {
+    if (!mounted) {
+      return null;
+    }
+
+    if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
           <SheetContent
@@ -279,7 +280,9 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, mounted } = useSidebar()
+  
+  if (!mounted) return null;
 
   return (
     <Button
