@@ -98,7 +98,7 @@ void main() {
   
   float height = snoise(vec2(uv.x * 2.0 + uTime * 0.1, uTime * 0.25)) * 0.5 * uAmplitude;
   height = exp(height);
-  height = (uv.y * 2.0 - height + 0.6);
+  height = (uv.y * 2.0 - height + 0.8);
   float intensity = 0.6 * height;
   
   float midPoint = 0.20;
@@ -122,7 +122,7 @@ export default function Aurora(props) {
   const {
     colorStops = ["#5227FF", "#7cff67", "#5227FF"],
     amplitude = 1.0,
-    blend = 0.5,
+    blend = 0.4,
     isLight = false,
   } = props;
   const propsRef = useRef(props);
