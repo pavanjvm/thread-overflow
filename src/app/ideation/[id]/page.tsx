@@ -32,6 +32,7 @@ export default function ProjectDetailsPage() {
   const id = params.id as string;
   const project = projects.find((p) => p.id === id);
   const [selectedIdea, setSelectedIdea] = useState('all');
+  const [activeTab, setActiveTab] = useState('ideas');
 
   if (!project) {
     notFound();
@@ -42,6 +43,12 @@ export default function ProjectDetailsPage() {
     : project.prototypes.filter(p => p.ideaId === selectedIdea);
 
   const StatusIcon = statusConfig[project.status].icon;
+
+  const handleViewPrototypes = (ideaId: string) => {
+    setActiveTab('prototypes');
+    setSelectedIdea(ideaId);
+    document.getElementById('prototypes')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -80,7 +87,7 @@ export default function ProjectDetailsPage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="ideas" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-start border-b">
             <TabsList className="bg-transparent p-0 rounded-none">
               <TabsTrigger value="ideas" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Ideas ({project.ideas.length})</TabsTrigger>
@@ -128,10 +135,8 @@ export default function ProjectDetailsPage() {
                             <VoteButtons initialVotes={idea.votes} />
                             <div>
                               {protoCount > 0 ? (
-                                  <Button variant="link" asChild className="p-0 h-auto">
-                                      <Link href={`/ideation/${project.id}#prototypes`}>
-                                          {protoCount} Prototype{protoCount > 1 ? 's' : ''}
-                                      </Link>
+                                  <Button variant="link" onClick={() => handleViewPrototypes(idea.id)} className="p-0 h-auto">
+                                      {protoCount} Prototype{protoCount > 1 ? 's' : ''}
                                   </Button>
                               ) : (
                                   <p className="text-sm text-muted-foreground">No prototypes yet</p>
