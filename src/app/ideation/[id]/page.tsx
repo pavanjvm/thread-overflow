@@ -96,7 +96,11 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
             <TabsContent value="ideas">
               <div className="space-y-6">
                 <div className="flex justify-end">
-                  <Button><Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea</Button>
+                  <Button asChild>
+                    <Link href={`/ideation/${project.id}/submit-idea`}>
+                      <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
+                    </Link>
+                  </Button>
                 </div>
                 {project.ideas.length > 0 ? (
                   project.ideas.map(idea => (

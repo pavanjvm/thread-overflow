@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, Lightbulb, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import RequestSolutionDialog from './_components/RequestSolutionDialog';
+import { Button } from '@/components/ui/button';
 
 const statusConfig = {
     Ideation: { icon: Lightbulb, color: 'bg-blue-500', label: 'Ideation' },
@@ -23,7 +23,9 @@ export default function IdeationPortalPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Ideation Portal</h1>
             <p className="text-muted-foreground mt-1">Solve challenges, build prototypes, and earn rewards.</p>
           </div>
-          <RequestSolutionDialog />
+          <Button asChild>
+            <Link href="/ideation/request-solution">Request a Solution</Link>
+          </Button>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

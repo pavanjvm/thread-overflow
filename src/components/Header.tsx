@@ -22,7 +22,6 @@ import { cn } from '@/lib/utils';
 import { notifications, conversations } from '@/lib/mock-data';
 import ChatPanel from '@/components/ChatPanel';
 import { ThemeToggle } from './ThemeToggle';
-import RequestSolutionDialog from '@/app/ideation/_components/RequestSolutionDialog';
 
 const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
   const router = useRouter();
@@ -97,7 +96,9 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
                             Leaderboard
                         </Link>
                     </Button>
-                    <RequestSolutionDialog />
+                    <Button asChild>
+                        <Link href="/ideation/request-solution">Request a Solution</Link>
+                    </Button>
                 </div>
             )}
             
