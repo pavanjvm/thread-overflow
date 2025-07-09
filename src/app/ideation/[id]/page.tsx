@@ -1,8 +1,7 @@
-
 'use client';
 
 import { projects } from '@/lib/mock-data';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge, badgeVariants } from '@/components/ui/badge';
@@ -28,8 +27,10 @@ const statusConfig = {
     Completed: { icon: Wrench, color: 'bg-green-500', label: 'Completed' },
 };
 
-export default function ProjectDetailsPage({ params }: { params: { id: string } }) {
-  const project = projects.find((p) => p.id === params.id);
+export default function ProjectDetailsPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const project = projects.find((p) => p.id === id);
   const [selectedIdea, setSelectedIdea] = useState('all');
 
   if (!project) {
