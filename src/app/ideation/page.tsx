@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { projects } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, Lightbulb, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import RequestSolutionDialog from './_components/RequestSolutionDialog';
 
 const statusConfig = {
     Ideation: { icon: Lightbulb, color: 'bg-blue-500', label: 'Ideation' },
@@ -23,7 +23,7 @@ export default function IdeationPortalPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Ideation Portal</h1>
             <p className="text-muted-foreground mt-1">Solve challenges, build prototypes, and earn rewards.</p>
           </div>
-          <Button>Request a Solution</Button>
+          <RequestSolutionDialog />
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

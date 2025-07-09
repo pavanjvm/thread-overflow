@@ -39,7 +39,7 @@ export default function AppClientLayout({
   const isIdeationSection = pathname.startsWith('/ideation');
   const isHackathonSection = pathname.startsWith('/hackathons');
 
-  const showSidebar = showAppShell && !isHackathonSection;
+  const showSidebar = showAppShell && !isHackathonSection && !isIdeationSection;
 
   return (
     <SidebarProvider mounted={mounted}>

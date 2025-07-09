@@ -35,6 +35,7 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
   const unreadNotificationCount = notifications.filter(n => !n.read).length;
   const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
   const isHackathonSection = pathname.startsWith('/hackathons');
+  const isIdeationSection = pathname.startsWith('/ideation');
 
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -75,13 +76,22 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
           </div>
 
           <div className="flex items-center space-x-2">
-            {!isHackathonSection && (
+            {!isHackathonSection && !isIdeationSection && (
               <Button asChild className="hidden md:inline-flex">
                 <Link href="/posts/new">
                   <Plus className="mr-2" />
                   New Post
                 </Link>
               </Button>
+            )}
+
+            {isIdeationSection && (
+                <Button asChild className="hidden md:inline-flex" variant="outline">
+                    <Link href="/leaderboard">
+                        <Trophy className="mr-2" />
+                        Leaderboard
+                    </Link>
+                </Button>
             )}
             
             <Button variant="ghost" className="relative h-10 w-10 rounded-full" onClick={() => setIsChatOpen(true)}>
@@ -146,7 +156,7 @@ const Header = ({ showSidebar = true }: { showSidebar?: boolean }) => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {!isHackathonSection && (
+                {!isHackathonSection && !isIdeationSection && (
                   <DropdownMenuItem asChild className="md:hidden">
                     <Link href="/posts/new"><Plus className="mr-2" />New Post</Link>
                   </DropdownMenuItem>
