@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Lightbulb, Wrench, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VoteButtons from '@/components/VoteButtons';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -85,70 +85,83 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
         </div>
       </div>
 
-      {/* Ideas Section */}
-      <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Ideas ({project.ideas.length})</h2>
-            <Button><Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea</Button>
-          </div>
-          <div className="space-y-6">
-            {project.ideas.map(idea => (
-                <Card key={idea.id} className="flex gap-4 p-4">
-                    <VoteButtons initialVotes={idea.votes} />
-                    <div className="flex-grow">
-                        <p className="text-foreground">{idea.content}</p>
-                         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                            <Avatar className="h-5 w-5">
-                                <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
-                                <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span>{idea.author.name}</span>
-                            <span>•</span>
-                            <span>{idea.createdAt}</span>
-                        </div>
-                    </div>
-                </Card>
-            ))}
-          </div>
-      </section>
-
-      <Separator />
-
-      {/* Prototypes Section */}
-      <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Prototypes ({project.prototypes.length})</h2>
-            <Button><Wrench className="mr-2 h-4 w-4" /> Build a Prototype</Button>
-          </div>
-           <div className="grid md:grid-cols-2 gap-6">
-                {project.prototypes.map(proto => (
-                    <Card key={proto.id}>
-                        <CardHeader>
-                            <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
-                                <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />
-                            </div>
-                            <CardTitle>{proto.title}</CardTitle>
-                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Avatar className="h-5 w-5">
-                                    <AvatarImage src={proto.author.avatarUrl} data-ai-hint="user avatar" />
-                                    <AvatarFallback>{proto.author.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <span>{proto.author.name}</span>
-                                <span>•</span>
-                                <span>{proto.createdAt}</span>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
-                        </CardContent>
-                        <CardFooter className="justify-between">
-                            <VoteButtons initialVotes={proto.votes} />
-                            {proto.liveUrl && <Button asChild><Link href={proto.liveUrl} target="_blank">View Live</Link></Button>}
-                        </CardFooter>
-                    </Card>
-                ))}
-           </div>
-      </section>
+      <Tabs defaultValue="ideas" className="w-full">
+        <div className="flex justify-start border-b">
+            <TabsList className="bg-transparent p-0 rounded-none">
+              <TabsTrigger value="ideas" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Ideas ({project.ideas.length})</TabsTrigger>
+              <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({project.prototypes.length})</TabsTrigger>
+            </TabsList>
+        </div>
+        <div className="py-6">
+            <TabsContent value="ideas">
+              <div className="space-y-6">
+                <div className="flex justify-end">
+                  <Button><Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea</Button>
+                </div>
+                {project.ideas.length > 0 ? (
+                  project.ideas.map(idea => (
+                      <Card key={idea.id} className="flex gap-4 p-4">
+                          <VoteButtons initialVotes={idea.votes} />
+                          <div className="flex-grow">
+                              <p className="text-foreground">{idea.content}</p>
+                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                                  <Avatar className="h-5 w-5">
+                                      <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
+                                      <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                  <span>{idea.author.name}</span>
+                                  <span>•</span>
+                                  <span>{idea.createdAt}</span>
+                              </div>
+                          </div>
+                      </Card>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
+                )}
+              </div>
+            </TabsContent>
+            <TabsContent value="prototypes">
+               <div className="space-y-6">
+                  <div className="flex justify-end">
+                    <Button><Wrench className="mr-2 h-4 w-4" /> Build a Prototype</Button>
+                  </div>
+                   <div className="grid md:grid-cols-2 gap-6">
+                        {project.prototypes.length > 0 ? (
+                          project.prototypes.map(proto => (
+                              <Card key={proto.id}>
+                                  <CardHeader>
+                                      <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
+                                          <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />
+                                      </div>
+                                      <CardTitle>{proto.title}</CardTitle>
+                                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                          <Avatar className="h-5 w-5">
+                                              <AvatarImage src={proto.author.avatarUrl} data-ai-hint="user avatar" />
+                                              <AvatarFallback>{proto.author.name.charAt(0)}</AvatarFallback>
+                                          </Avatar>
+                                          <span>{proto.author.name}</span>
+                                          <span>•</span>
+                                          <span>{proto.createdAt}</span>
+                                      </div>
+                                  </CardHeader>
+                                  <CardContent>
+                                      <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
+                                  </CardContent>
+                                  <CardFooter className="justify-between">
+                                      <VoteButtons initialVotes={proto.votes} />
+                                      {proto.liveUrl && <Button asChild><Link href={proto.liveUrl} target="_blank">View Live</Link></Button>}
+                                  </CardFooter>
+                              </Card>
+                          ))
+                        ) : (
+                          <p className="md:col-span-2 text-muted-foreground text-center py-8">No prototypes built yet. Be the first!</p>
+                        )}
+                   </div>
+               </div>
+            </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }
