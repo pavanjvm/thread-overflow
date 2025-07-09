@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -40,7 +41,7 @@ export default function LandingPage() {
   }
 
   const lightColors = ["#BEB2FF", "#D9F4FF", "#BEB2FF"];
-  const darkColors = ["#5227FF", "#7cff67", "#5227FF"];
+  const darkColors = ['#8f908f', '#726e6f', '#8f908f'];
   const auroraColors = resolvedTheme === 'dark' ? darkColors : lightColors;
 
   const textColor = resolvedTheme === 'dark' ? 'hsl(var(--primary))' : 'hsl(var(--foreground))';
