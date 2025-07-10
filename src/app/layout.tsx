@@ -1,9 +1,11 @@
+
 import type {Metadata} from 'next';
 import { Manrope } from 'next/font/google';
 import './globals.css';
 import AppClientLayout from '@/components/AppClientLayout';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { AuthProvider } from '@/context/AuthContext';
 
 const manrope = Manrope({
   subsets: ['latin'],
@@ -31,9 +33,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppClientLayout>
-            {children}
-          </AppClientLayout>
+          <AuthProvider>
+            <AppClientLayout>
+              {children}
+            </AppClientLayout>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

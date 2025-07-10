@@ -5,6 +5,7 @@ export interface User {
   name: string;
   avatarUrl: string;
   stars: number;
+  role: 'admin' | 'user';
 }
 
 export interface Community {

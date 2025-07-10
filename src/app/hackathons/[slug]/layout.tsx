@@ -1,3 +1,4 @@
+
 'use client';
 
 import { notFound, useParams } from 'next/navigation';
@@ -7,6 +8,10 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import type { Hackathon } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Edit } from 'lucide-react';
 
 const ApplyDialog = dynamic(() => import('./_components/ApplyDialog'), {
   ssr: false,
@@ -22,6 +27,7 @@ export default function HackathonLayout({
   const slug = params.slug as string;
   const [hackathon, setHackathon] = useState<Hackathon | null>(null);
   const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (slug) {
@@ -70,8 +76,16 @@ export default function HackathonLayout({
           <h1 className="text-4xl font-bold">{hackathon.title}</h1>
           <p className="text-lg mt-1">{hackathon.subtitle}</p>
         </div>
-        <div className="absolute top-6 right-6">
-          <ApplyDialog />
+        <div className="absolute top-6 right-6 flex gap-2">
+          {currentUser?.role === 'admin' ? (
+             <Button asChild variant="secondary">
+                <Link href={`/hackathons/${hackathon.slug}/edit`}>
+                  <Edit className="mr-2 h-4 w-4" /> Edit
+                </Link>
+              </Button>
+          ) : (
+            <ApplyDialog />
+          )}
         </div>
       </div>
       {children}

@@ -1,17 +1,21 @@
+
 'use client';
 
 import Link from 'next/link';
 import { hackathons as mockHackathons } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Users } from 'lucide-react';
+import { Calendar, Users, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { Hackathon } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
 
 export default function HackathonsPage() {
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     // Simulating API call
@@ -21,9 +25,18 @@ export default function HackathonsPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Hackathons</h1>
-        <p className="text-muted-foreground mt-1">Join challenges, build amazing projects, and win prizes.</p>
+      <header className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Hackathons</h1>
+          <p className="text-muted-foreground mt-1">Join challenges, build amazing projects, and win prizes.</p>
+        </div>
+        {currentUser?.role === 'admin' && (
+          <Button asChild>
+            <Link href="/hackathons/new">
+              <Plus className="mr-2 h-4 w-4" /> Create Hackathon
+            </Link>
+          </Button>
+        )}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
