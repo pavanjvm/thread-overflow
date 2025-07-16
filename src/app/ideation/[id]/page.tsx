@@ -19,6 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import VoteButtons from '@/components/VoteButtons';
 import { useState } from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
@@ -180,8 +181,25 @@ export default function IdeaDetailsPage() {
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
                               </CardContent>
-                              <CardFooter>
+                              <CardFooter className="flex justify-between items-center">
                                 <VoteButtons initialVotes={proto.votes} />
+                                <div className="flex -space-x-2">
+                                  <TooltipProvider>
+                                    {proto.team.map(member => (
+                                      <Tooltip key={member.id}>
+                                        <TooltipTrigger>
+                                          <Avatar className="h-8 w-8 border-2 border-card">
+                                              <AvatarImage src={member.avatarUrl} data-ai-hint="user avatar" />
+                                              <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                          </Avatar>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          {member.name}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    ))}
+                                  </TooltipProvider>
+                                </div>
                               </CardFooter>
                           </Card>
                         </Link>
