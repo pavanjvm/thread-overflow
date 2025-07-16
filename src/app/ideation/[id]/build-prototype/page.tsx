@@ -27,25 +27,27 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Wrench } from 'lucide-react';
-import { projects, users } from '@/lib/mock-data';
+import { ideas, users } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
-import type { Project, User } from '@/lib/types';
+import type { Idea, User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Combobox } from '@/components/ui/combobox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   proposalId: z.string({
-    required_error: 'Please select a proposal to build upon.',
+    required_error: 'Please select your accepted proposal.',
   }),
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(1000),
+  team: z.array(z.string()).min(1, 'You must be on the team.').optional(),
   imageUrl: z.string().url('Please enter a valid image URL.').optional().or(z.literal('')),
   liveUrl: z.string().url('Please enter a valid live URL.').optional().or(z.literal('')),
-  team: z.array(z.string()).optional(),
 });
 
 const MultiSelect = ({
@@ -129,31 +131,37 @@ export default function BuildPrototypePage() {
   const router = useRouter();
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const [project, setProject] = useState<Project | null>(null);
+  const [idea, setIdea] = useState<Idea | null>(null);
+  const { currentUser } = useAuth();
   
-  useEffect(() => {
-    const foundProject = projects.find(p => p.id === id);
-    if (foundProject) {
-      setProject(foundProject);
-    } else {
-        console.error("Project not found");
-    }
-  }, [id]);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       description: '',
+      team: currentUser ? [currentUser.id] : [],
       imageUrl: '',
       liveUrl: '',
-      team: [],
     },
   });
+  
+  useEffect(() => {
+    const foundIdea = ideas.find(p => p.id === id);
+    if (foundIdea) {
+      setIdea(foundIdea);
+      // Pre-select the user's accepted proposal
+      const userProposal = foundIdea.proposals.find(p => p.author.id === currentUser?.id && p.status === 'Accepted');
+      if (userProposal) {
+        form.setValue('proposalId', userProposal.id);
+      }
+    } else {
+        console.error("Idea not found");
+    }
+  }, [id, currentUser, form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     // TODO: Replace with your API call to submit a prototype for the project.
-    console.log('Submitting prototype for project', id, values);
+    console.log('Submitting prototype for idea', id, values);
 
     toast({
       title: 'Prototype Submitted!',
@@ -162,7 +170,7 @@ export default function BuildPrototypePage() {
     router.push(`/ideation/${id}`);
   };
   
-  if (!project) {
+  if (!idea) {
       return (
         <div className="max-w-2xl mx-auto">
             <div className="mb-4">
@@ -188,11 +196,10 @@ export default function BuildPrototypePage() {
       );
   }
 
-  const proposalOptions = project.proposals.map(proposal => ({
-      label: `${proposal.id} (${proposal.title})`,
-      value: proposal.id,
-  }));
-  
+  const acceptedProposals = idea.proposals
+    .filter(p => p.status === 'Accepted' && p.author.id === currentUser?.id)
+    .map(p => ({ label: p.title, value: p.id }));
+
   const userOptions = users.map(user => ({ label: user.name, value: user.id }));
 
   return (
@@ -201,7 +208,7 @@ export default function BuildPrototypePage() {
             <Button variant="ghost" asChild>
                 <Link href={`/ideation/${id}`}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Project
+                    Back to Idea
                 </Link>
             </Button>
         </div>
@@ -211,7 +218,7 @@ export default function BuildPrototypePage() {
             <CardHeader>
               <CardTitle className="flex items-center"><Wrench className="mr-2 h-6 w-6 text-yellow-500" />Build a Prototype</CardTitle>
               <CardDescription>
-                You are building a prototype for the project: <span className="font-semibold text-foreground">{project.title}</span>
+                You are building a prototype for the idea: <span className="font-semibold text-foreground">{idea.title}</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -220,12 +227,12 @@ export default function BuildPrototypePage() {
                 name="proposalId"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Based on Proposal</FormLabel>
+                    <FormLabel>Based on Your Accepted Proposal</FormLabel>
                     <Combobox 
-                        options={proposalOptions}
+                        options={acceptedProposals}
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Select a proposal..."
+                        placeholder="Select your proposal..."
                         searchPlaceholder="Search proposals..."
                     />
                     <FormMessage />
@@ -276,7 +283,7 @@ export default function BuildPrototypePage() {
                                 placeholder="Add team members..."
                             />
                         </FormControl>
-                        <FormMessage />
+                         <FormMessage />
                     </FormItem>
                 )}
               />

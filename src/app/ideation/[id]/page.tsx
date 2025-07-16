@@ -1,13 +1,13 @@
 
 'use client';
 
-import { projects } from '@/lib/mock-data';
+import { ideas } from '@/lib/mock-data';
 import { notFound, useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge, badgeVariants } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Wrench, FileText, CheckCircle } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, CheckCircle, ThumbsUp, ThumbsDown, UserCheck, Check, X, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VoteButtons from '@/components/VoteButtons';
@@ -15,6 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 import {
   Select,
   SelectContent,
@@ -22,30 +23,107 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Proposal } from '@/lib/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Textarea } from '@/components/ui/textarea';
 
 const statusConfig = {
-    'Seeking Proposals': { icon: FileText, color: 'bg-blue-500', label: 'Seeking Proposals' },
-    Prototyping: { icon: Wrench, color: 'bg-yellow-500', label: 'Prototyping' },
-    Completed: { icon: CheckCircle, color: 'bg-green-500', label: 'Completed' },
+    'Open for prototyping': { icon: FileText, color: 'bg-blue-500', label: 'Open for Prototyping' },
+    'Self-prototyping': { icon: UserCheck, color: 'bg-purple-500', label: 'Self-Prototyping' },
+    'Prototyping': { icon: Wrench, color: 'bg-yellow-500', label: 'Prototyping' },
+    'Completed': { icon: CheckCircle, color: 'bg-green-500', label: 'Completed' },
 };
 
-export default function ProjectDetailsPage() {
+const proposalStatusConfig = {
+  'Pending': { color: 'bg-yellow-500', icon: Lightbulb },
+  'Accepted': { color: 'bg-green-500', icon: Check },
+  'Rejected': { color: 'bg-red-500', icon: X },
+}
+
+const ProposalActionButtons = ({ ideaAuthorId, proposal, onAction }: { ideaAuthorId: string; proposal: Proposal; onAction: (proposalId: string, action: 'Accepted' | 'Rejected', comment?: string) => void }) => {
+  const { currentUser } = useAuth();
+  const [comment, setComment] = useState('');
+  
+  if (currentUser?.id !== ideaAuthorId || proposal.status !== 'Pending') {
+    return null;
+  }
+
+  return (
+    <div className="flex gap-2">
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button size="sm" variant="outline"><ThumbsDown className="mr-2 h-4 w-4" /> Reject</Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reject Proposal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can provide an optional comment explaining why you're rejecting this proposal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea placeholder="Optional rejection comment..." value={comment} onChange={(e) => setComment(e.target.value)} />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => onAction(proposal.id, 'Rejected', comment)} className={cn(buttonVariants({variant: "destructive"}))}>
+              Confirm Reject
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+       <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button size="sm"><ThumbsUp className="mr-2 h-4 w-4" /> Accept</Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Accept Proposal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Accepting this proposal will change the idea's status to "Prototyping" and notify the author.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => onAction(proposal.id, 'Accepted')}>Confirm Accept</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+
+export default function IdeaDetailsPage() {
   const params = useParams();
   const id = params.id as string;
-  const project = projects.find((p) => p.id === id);
+  const idea = ideas.find((p) => p.id === id);
+  const { currentUser } = useAuth();
+  
   const [selectedProposal, setSelectedProposal] = useState('all');
   const [activeTab, setActiveTab] = useState('proposals');
   const { toast } = useToast();
 
-  if (!project) {
+  if (!idea) {
     notFound();
   }
+  
+  const userProposal = currentUser ? idea.proposals.find(p => p.author.id === currentUser.id) : null;
+  const canBuildPrototype = userProposal?.status === 'Accepted';
 
   const filteredPrototypes = selectedProposal === 'all'
-    ? project.prototypes
-    : project.prototypes.filter(p => p.proposalId === selectedProposal);
+    ? idea.prototypes
+    : idea.prototypes.filter(p => p.proposalId === selectedProposal);
 
-  const StatusIcon = statusConfig[project.status].icon;
+  const StatusIcon = statusConfig[idea.status].icon;
 
   const handleViewPrototypes = (proposalId: string) => {
     setActiveTab('prototypes');
@@ -53,15 +131,14 @@ export default function ProjectDetailsPage() {
     document.getElementById('prototypes')?.scrollIntoView({ behavior: 'smooth' });
   };
   
-  const handleAcceptProposal = (proposalId: string) => {
+  const handleProposalAction = (proposalId: string, action: 'Accepted' | 'Rejected', comment?: string) => {
     // This would be an API call in a real app
-    console.log(`Accepting proposal ${proposalId} for project ${project.id}`);
+    console.log(`Setting proposal ${proposalId} to ${action} for idea ${idea.id}. Comment: ${comment}`);
     toast({
-        title: "Proposal Accepted!",
-        description: "The project is now in the prototyping phase."
+        title: `Proposal ${action}!`,
+        description: `The proposal has been successfully ${action.toLowerCase()}.`
     });
     // Here you would re-fetch project data or update state
-    // For now, we'll just show the toast
   }
 
   return (
@@ -70,40 +147,40 @@ export default function ProjectDetailsPage() {
         <Badge
           variant="secondary"
           className={cn(
-            statusConfig[project.status].color,
+            statusConfig[idea.status].color,
             'text-white mb-2',
             'inline-flex items-center gap-1'
           )}
         >
           <StatusIcon className="h-3 w-3" />
-          {statusConfig[project.status].label}
+          {statusConfig[idea.status].label}
         </Badge>
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">{project.title}</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-foreground">{idea.title}</h1>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
           <Avatar className="h-5 w-5">
-            <AvatarImage src={project.author.avatarUrl} data-ai-hint="user avatar" />
-            <AvatarFallback>{project.author.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
+            <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
           </Avatar>
-          <span>Posted by {project.author.name}</span>
+          <span>Posted by {idea.author.name}</span>
           <span>•</span>
-          <span>{project.createdAt}</span>
+          <span>{idea.createdAt}</span>
         </div>
       </header>
       
       <Card>
         <CardHeader>
-          <CardTitle>Problem Statement</CardTitle>
+          <CardTitle>The Idea</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">{project.description}</p>
+          <p className="text-muted-foreground">{idea.description}</p>
         </CardContent>
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-start border-b">
             <TabsList className="bg-transparent p-0 rounded-none">
-              <TabsTrigger value="proposals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Proposals ({project.proposals.length})</TabsTrigger>
-              <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({project.prototypes.length})</TabsTrigger>
+              <TabsTrigger value="proposals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Proposals ({idea.proposals.length})</TabsTrigger>
+              <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({idea.prototypes.length})</TabsTrigger>
             </TabsList>
         </div>
         <div className="py-6">
@@ -111,22 +188,24 @@ export default function ProjectDetailsPage() {
               <div className="space-y-6">
                 <div className="flex justify-end">
                   <Button asChild>
-                    <Link href={`/ideation/${project.id}/submit-proposal`}>
+                    <Link href={`/ideation/${idea.id}/submit-proposal`}>
                       <Lightbulb className="mr-2 h-4 w-4" /> Submit Proposal
                     </Link>
                   </Button>
                 </div>
-                {project.proposals.length > 0 ? (
-                  project.proposals.map(proposal => {
-                    const protoCount = project.prototypes.filter(p => p.proposalId === proposal.id).length;
+                {idea.proposals.length > 0 ? (
+                  idea.proposals.map(proposal => {
+                    const protoCount = idea.prototypes.filter(p => p.proposalId === proposal.id).length;
+                    const StatusIcon = proposalStatusConfig[proposal.status].icon;
                     return (
                       <Card key={proposal.id} id={`proposal-${proposal.id}`}>
                         <CardHeader>
-                           <CardTitle className="flex items-baseline justify-between">
+                           <CardTitle className="flex items-start justify-between">
                             <span>{proposal.title}</span>
-                            <Link href={`/ideation/${project.id}#proposal-${proposal.id}`} className={cn(badgeVariants({ variant: 'secondary' }), 'font-mono text-xs font-medium')}>
-                                {proposal.id}
-                            </Link>
+                             <Badge variant="secondary" className={cn('gap-1.5', proposalStatusConfig[proposal.status].color, 'text-primary-foreground')}>
+                                <StatusIcon className="h-3.5 w-3.5" />
+                                {proposal.status}
+                            </Badge>
                           </CardTitle>
                           <CardDescription>
                             <div className="flex items-center gap-2 text-xs pt-1">
@@ -142,6 +221,12 @@ export default function ProjectDetailsPage() {
                         </CardHeader>
                         <CardContent>
                           <p className="text-muted-foreground line-clamp-3">{proposal.description}</p>
+                          {proposal.status === 'Rejected' && proposal.comments && (
+                              <div className="mt-2 text-sm text-red-900 dark:text-red-300/90 bg-red-500/10 p-2 rounded-md flex gap-2">
+                                <MessageSquare className="h-4 w-4 mt-0.5 shrink-0" />
+                                <p><span className="font-semibold">{idea.author.name} commented:</span> {proposal.comments}</p>
+                              </div>
+                          )}
                         </CardContent>
                         <CardFooter className="justify-between">
                             <VoteButtons initialVotes={proposal.votes} />
@@ -151,13 +236,9 @@ export default function ProjectDetailsPage() {
                                         {protoCount} Prototype{protoCount > 1 ? 's' : ''}
                                     </Button>
                                 ) : (
-                                    <p className="text-sm text-muted-foreground">No prototypes yet</p>
+                                    proposal.status === 'Accepted' && <p className="text-sm text-muted-foreground">Prototype not submitted yet.</p>
                                 )}
-                                {project.status === 'Seeking Proposals' && (
-                                    <Button size="sm" onClick={() => handleAcceptProposal(proposal.id)}>
-                                        <CheckCircle className="mr-2 h-4 w-4" /> Accept Proposal
-                                    </Button>
-                                )}
+                                <ProposalActionButtons ideaAuthorId={idea.author.id} proposal={proposal} onAction={handleProposalAction} />
                             </div>
                         </CardFooter>
                       </Card>
@@ -178,17 +259,28 @@ export default function ProjectDetailsPage() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Proposals</SelectItem>
-                            {project.proposals.map(proposal => (
-                                <SelectItem key={proposal.id} value={proposal.id}>{proposal.id} ({proposal.title})</SelectItem>
+                            {idea.proposals.map(proposal => (
+                                <SelectItem key={proposal.id} value={proposal.id}>{proposal.title}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                     </div>
-                    <Button asChild>
-                      <Link href={`/ideation/${project.id}/build-prototype`}>
-                        <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
-                      </Link>
-                    </Button>
+                    {canBuildPrototype ? (
+                      <Button asChild>
+                        <Link href={`/ideation/${idea.id}/build-prototype`}>
+                          <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+                        </Link>
+                      </Button>
+                    ) : (
+                       <div className="text-right">
+                         <Button asChild>
+                            <Link href={`/ideation/${idea.id}/submit-proposal`}>
+                              <Lightbulb className="mr-2 h-4 w-4" /> Submit a Proposal
+                            </Link>
+                         </Button>
+                         <p className="text-xs text-muted-foreground mt-1">to start building a prototype.</p>
+                       </div>
+                    )}
                   </div>
                    <div className="grid md:grid-cols-2 gap-6">
                         {filteredPrototypes.length > 0 ? (
@@ -201,8 +293,8 @@ export default function ProjectDetailsPage() {
                                       <CardTitle className="flex items-baseline justify-between">
                                         <span>{proto.title}</span>
                                         {proto.proposalId && (
-                                          <Link href={`/ideation/${project.id}#proposal-${proto.proposalId}`} className={cn(badgeVariants({ variant: 'secondary' }), 'font-mono text-xs font-medium')}>
-                                              {proto.proposalId}
+                                          <Link href={`/ideation/${idea.id}#proposal-${proto.proposalId}`} className={cn(badgeVariants({ variant: 'secondary' }), 'font-mono text-xs font-medium')}>
+                                              {idea.proposals.find(p => p.id === proto.proposalId)?.title || 'Proposal'}
                                           </Link>
                                         )}
                                       </CardTitle>
@@ -224,7 +316,7 @@ export default function ProjectDetailsPage() {
                                       <div className="flex items-center gap-2">
                                         {proto.liveUrl && <Button asChild variant="outline"><Link href={proto.liveUrl} target="_blank">View Live</Link></Button>}
                                         <Button asChild>
-                                            <Link href={`/ideation/${project.id}/prototypes/${proto.id}`}>
+                                            <Link href={`/ideation/${idea.id}/prototypes/${proto.id}`}>
                                             View Details
                                             </Link>
                                         </Button>

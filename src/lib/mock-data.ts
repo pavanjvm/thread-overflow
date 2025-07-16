@@ -1,6 +1,5 @@
 
-
-import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Proposal, Prototype, Project, Hackathon, HackathonPerson, HackathonProject } from './types';
+import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Proposal, Prototype, Idea, Hackathon, HackathonPerson, HackathonProject } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125, role: 'admin' },
@@ -139,46 +138,59 @@ export const conversations: Conversation[] = [
 ];
 
 // --- Ideation Portal Data ---
-
-export const projects: Project[] = [
+// This is now called 'ideas' instead of 'projects'
+export const ideas: Idea[] = [
     {
-        id: 'proj-1',
+        id: 'idea-1',
         title: 'Build a Real-Time Collaborative Whiteboard',
         description: 'We need a whiteboard app where multiple users can draw and share ideas simultaneously. It should support basic shapes, text, and freeform drawing. The primary challenge is ensuring low latency and synchronized state across all clients.',
-        author: users[3],
+        author: users[3], // Diana
         createdAt: '3 days ago',
         status: 'Prototyping',
         proposals: [
-          { id: 'prop-1', title: 'Use WebSockets for Real-Time', description: 'Instead of polling, we can use WebSockets (like Socket.IO or a managed service) for instant, bidirectional communication between clients and the server. This will significantly reduce latency.', author: users[1], createdAt: '2 days ago', votes: 18, isAccepted: true },
-          { id: 'prop-2', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12, isAccepted: false },
+          { id: 'prop-1', ideaId: 'idea-1', title: 'Use WebSockets for Real-Time', description: 'Instead of polling, we can use WebSockets (like Socket.IO or a managed service) for instant, bidirectional communication between clients and the server. This will significantly reduce latency.', author: users[1], createdAt: '2 days ago', votes: 18, status: 'Accepted' },
+          { id: 'prop-2', ideaId: 'idea-1', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12, status: 'Rejected', comments: 'Great idea, but might be too complex for the initial prototype.' },
         ],
         prototypes: [
-          { id: 'proto-1', proposalId: 'prop-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[0], team: [users[0], users[2]], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10, comments: [comments[2], comments[3]] },
+          { id: 'proto-1', proposalId: 'prop-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[1], team: [users[1], users[0]], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10, comments: [comments[2], comments[3]] },
         ],
     },
     {
-        id: 'proj-2',
+        id: 'idea-2',
         title: 'AI-Powered Recipe Generator',
         description: 'Create an application that suggests recipes based on the ingredients a user has in their fridge. The AI should be able to handle substitutions and dietary restrictions. The user should be able to input ingredients via text or by uploading a photo.',
-        author: users[0],
+        author: users[0], // Alice
         createdAt: '1 week ago',
-        status: 'Seeking Proposals',
+        status: 'Open for prototyping',
         proposals: [
-          { id: 'prop-3', title: 'Use a Vision API for Ingredient Detection', description: 'We can use an existing Vision API to analyze photos of a user\'s fridge or pantry to automatically detect ingredients, making the input process much easier.', author: users[4], createdAt: '4 days ago', votes: 25, isAccepted: false },
+          { id: 'prop-3', ideaId: 'idea-2', title: 'Use a Vision API for Ingredient Detection', description: 'We can use an existing Vision API to analyze photos of a user\'s fridge or pantry to automatically detect ingredients, making the input process much easier.', author: users[4], createdAt: '4 days ago', votes: 25, status: 'Pending' },
         ],
         prototypes: [],
     },
     {
-        id: 'proj-3',
+        id: 'idea-3',
         title: 'Gamified Fitness Challenge App',
         description: 'An app that allows friends to create fitness challenges (e.g., run 50km in a month) and track their progress. It should include leaderboards, badges, and social sharing features to keep users motivated.',
-        author: users[2],
+        author: users[2], // Charlie
         createdAt: '2 weeks ago',
         status: 'Completed',
         proposals: [],
         prototypes: [],
     },
+     {
+        id: 'idea-4',
+        title: 'Personal Finance Dashboard',
+        description: 'I want to build a dashboard that connects to my bank accounts and credit cards to give me a unified view of my finances. It should automatically categorize my spending.',
+        author: users[4], // Diana
+        createdAt: '5 days ago',
+        status: 'Self-prototyping',
+        proposals: [],
+        prototypes: [],
+    },
 ];
+
+// Re-export `ideas` as `projects` for any components that haven't been updated yet.
+export const projects = ideas;
 
 // --- Hackathon Data ---
 

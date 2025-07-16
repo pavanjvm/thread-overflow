@@ -1,5 +1,5 @@
 
-import { projects } from '@/lib/mock-data';
+import { ideas } from '@/lib/mock-data';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,10 +12,10 @@ import { Separator } from '@/components/ui/separator';
 import CommentCard from '@/components/CommentCard';
 
 export default async function PrototypeDetailsPage({ params }: { params: { id: string, protoId: string } }) {
-  const project = projects.find((p) => p.id === params.id);
-  const prototype = project?.prototypes.find((p) => p.id === params.protoId);
+  const idea = ideas.find((p) => p.id === params.id);
+  const prototype = idea?.prototypes.find((p) => p.id === params.protoId);
 
-  if (!project || !prototype) {
+  if (!idea || !prototype) {
     notFound();
   }
 
@@ -26,9 +26,9 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
     <div className="max-w-4xl mx-auto space-y-6">
        <div className="mb-4">
             <Button variant="ghost" asChild>
-                <Link href={`/ideation/${project.id}#prototypes`}>
+                <Link href={`/ideation/${idea.id}#prototypes`}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Project
+                    Back to Idea
                 </Link>
             </Button>
         </div>

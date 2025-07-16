@@ -33,7 +33,7 @@ export interface PollOption {
 }
 
 export interface Post {
-  id: string;
+  id:string;
   title: string;
   content: string;
   author: User;
@@ -69,14 +69,28 @@ export interface Conversation {
     lastMessage: ChatMessage;
 }
 
-export interface Proposal {
+export interface Idea {
   id: string;
   title: string;
   description: string;
   author: User;
   createdAt: string;
+  status: 'Open for prototyping' | 'Self-prototyping' | 'Prototyping' | 'Completed';
+  proposals: Proposal[];
+  prototypes: Prototype[];
+}
+
+export interface Proposal {
+  id: string;
+  ideaId: string;
+  title: string;
+  description: string;
+  author: User;
+  createdAt: string;
   votes: number;
-  isAccepted: boolean;
+  status: 'Pending' | 'Accepted' | 'Rejected';
+  comments?: string;
+  presentationUrl?: string;
 }
 
 export interface Prototype {
@@ -93,16 +107,9 @@ export interface Prototype {
   comments?: Comment[];
 }
 
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  author: User;
-  createdAt: string;
-  status: 'Seeking Proposals' | 'Prototyping' | 'Completed';
-  proposals: Proposal[];
-  prototypes: Prototype[];
-}
+// This type is now deprecated in favor of Idea, but kept for compatibility.
+export interface Project extends Idea {}
+
 
 // --- Hackathon Types ---
 export interface HackathonPrize {

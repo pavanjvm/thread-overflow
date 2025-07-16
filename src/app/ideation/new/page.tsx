@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,13 +28,17 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lightbulb } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
-  problem: z.string().min(50, 'Problem statement must be at least 50 characters long.').max(2000, "Problem statement can't be longer than 2000 characters."),
+  description: z.string().min(50, 'Description must be at least 50 characters long.').max(2000, "Description can't be longer than 2000 characters."),
+  status: z.enum(['Open for prototyping', 'Self-prototyping'], {
+    required_error: 'You need to select a status for this idea.',
+  }),
 });
 
-export default function RequestProjectPage() {
+export default function SubmitIdeaPage() {
   const { toast } = useToast();
   const router = useRouter();
 
@@ -41,17 +46,17 @@ export default function RequestProjectPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      problem: '',
+      description: '',
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to create a new project request.
+    // TODO: Replace with your API call to create a new idea.
     console.log('Form values:', values);
 
     toast({
-      title: 'Project Requested!',
-      description: `Your project request "${values.title}" has been submitted.`,
+      title: 'Idea Submitted!',
+      description: `Your idea "${values.title}" has been submitted.`,
     });
     router.push('/ideation');
   };
@@ -70,9 +75,9 @@ export default function RequestProjectPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Lightbulb className="h-6 w-6 text-primary" /> Request a Project</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Lightbulb className="h-6 w-6 text-primary" /> Submit an Idea</CardTitle>
               <CardDescription>
-                Clearly describe a problem you're facing or an idea you have. The community can then submit proposals and build prototypes to create a solution.
+                Share a problem or an idea with the community. Others can then submit proposals to build a solution.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6">
@@ -81,7 +86,7 @@ export default function RequestProjectPage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Title</FormLabel>
+                    <FormLabel>Idea Title</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., A better way to manage project tasks" {...field} />
                     </FormControl>
@@ -91,13 +96,13 @@ export default function RequestProjectPage() {
               />
               <FormField
                 control={form.control}
-                name="problem"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Problem Statement or Idea Description</FormLabel>
+                    <FormLabel>Idea Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe the problem in detail. What are the pain points? Who is affected? What would a good solution look like? Or, if you have an idea, describe it."
+                        placeholder="Describe the problem in detail. What are the pain points? Who is affected? What would a good solution look like?"
                         className="min-h-48"
                         {...field}
                       />
@@ -106,10 +111,54 @@ export default function RequestProjectPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>What's the status of this idea?</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4 hover:bg-accent has-[[data-state=checked]]:border-primary">
+                          <FormControl>
+                            <RadioGroupItem value="Open for prototyping" />
+                          </FormControl>
+                          <div className="space-y-1">
+                            <FormLabel className="font-normal">
+                              Open for Prototyping
+                            </FormLabel>
+                             <FormDescription>
+                               Anyone in the community can submit a proposal for this idea.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4 hover:bg-accent has-[[data-state=checked]]:border-primary">
+                          <FormControl>
+                            <RadioGroupItem value="Self-prototyping" />
+                          </FormControl>
+                           <div className="space-y-1">
+                            <FormLabel className="font-normal">
+                              I'm Prototyping This
+                            </FormLabel>
+                            <FormDescription>
+                                You plan to work on this idea yourself. Only you can submit a proposal.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Submitting...' : 'Submit Project Request'}
+                {form.formState.isSubmitting ? 'Submitting...' : 'Submit Idea'}
               </Button>
             </CardFooter>
           </form>
