@@ -1,7 +1,7 @@
 
 'use client';
 
-import { ideas } from '@/lib/mock-data';
+import { ideas, comments as mockComments } from '@/lib/mock-data';
 import { notFound, useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Lightbulb, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import VoteButtons from '@/components/VoteButtons';
-import Image from 'next/image';
 import Link from 'next/link';
+import { Separator } from '@/components/ui/separator';
+import CommentCard from '@/components/CommentCard';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
@@ -30,6 +30,9 @@ export default function IdeaDetailsPage() {
   }
   
   const config = typeConfig[idea.type];
+
+  // Using mock comments for demonstration
+  const ideaComments = mockComments.slice(0, 2);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -52,23 +55,38 @@ export default function IdeaDetailsPage() {
         </div>
       </header>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>The {idea.type === 'Ideation' ? 'Idea' : 'Problem'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">{idea.description}</p>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="proposals" className="w-full">
+      <Tabs defaultValue="ideas" className="w-full">
         <div className="flex justify-start border-b">
             <TabsList className="bg-transparent p-0 rounded-none">
+              <TabsTrigger value="ideas" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Ideas</TabsTrigger>
               <TabsTrigger value="proposals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Proposals ({idea.proposals.length})</TabsTrigger>
               <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({idea.prototypes.length})</TabsTrigger>
             </TabsList>
         </div>
         <div className="py-6">
+            <TabsContent value="ideas" className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>The Core {idea.type === 'Ideation' ? 'Idea' : 'Problem'}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">{idea.description}</p>
+                    </CardContent>
+                </Card>
+
+                <div className="mt-8">
+                    <h2 className="text-2xl font-bold mb-4">{ideaComments.length} Comments</h2>
+                    <Separator />
+                    <div className="space-y-6 mt-6">
+                        {ideaComments.map((comment) => (
+                            <CommentCard 
+                                key={comment.id} 
+                                comment={comment}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </TabsContent>
             <TabsContent value="proposals">
               <div className="space-y-6">
                 <div className="flex justify-end">
