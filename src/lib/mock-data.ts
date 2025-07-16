@@ -245,6 +245,7 @@ const proposalsForProject2: Proposal[] = [
         createdAt: '1 day ago',
         votes: 12,
         status: 'Accepted',
+        presentationUrl: '#',
     },
     {
         id: 'prop-5',
@@ -255,6 +256,7 @@ const proposalsForProject2: Proposal[] = [
         createdAt: '12 hours ago',
         votes: 5,
         status: 'Pending',
+        presentationUrl: '#',
     }
 ];
 
