@@ -4,7 +4,7 @@
 
 import { ideas } from '@/lib/mock-data';
 import { notFound, useParams } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import ProposalCard from '@/components/ProposalCard';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import VoteButtons from '@/components/VoteButtons';
+import { useState } from 'react';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
@@ -30,6 +31,7 @@ export default function IdeaDetailsPage() {
   const id = params.id as string;
   const idea = ideas.find((p) => p.id === id);
   const { currentUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('ideas');
 
   if (!idea) {
     notFound();
@@ -42,6 +44,37 @@ export default function IdeaDetailsPage() {
   const prototypes = idea.prototypes || [];
   
   const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
+
+  const renderActionButton = () => {
+    switch(activeTab) {
+      case 'ideas':
+        return (
+          <Button asChild>
+            <Link href={`/ideation/${idea.id}/submit-idea`}>
+              <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
+            </Link>
+          </Button>
+        );
+      case 'proposals':
+        return (
+          <Button asChild>
+            <Link href={`/ideation/${idea.id}/submit-proposal`}>
+              <FileText className="mr-2 h-4 w-4" /> Submit Proposal
+            </Link>
+          </Button>
+        );
+      case 'prototypes':
+        return hasAcceptedProposal ? (
+          <Button asChild>
+            <Link href={`/ideation/${idea.id}/build-prototype`}>
+              <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+            </Link>
+          </Button>
+        ) : null;
+      default:
+        return null;
+    }
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -67,18 +100,14 @@ export default function IdeaDetailsPage() {
         <p className="text-lg text-muted-foreground">{idea.description}</p>
       </header>
       
-      <Tabs defaultValue="ideas" className="w-full">
-        <div className="flex justify-between items-center border-b pb-2">
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="flex justify-between items-center border-b">
             <TabsList>
               <TabsTrigger value="ideas">Ideas ({ideaSubmissions.length})</TabsTrigger>
               <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
               <TabsTrigger value="prototypes">Prototypes ({prototypes.length})</TabsTrigger>
             </TabsList>
-             <Button asChild>
-                <Link href={`/ideation/${idea.id}/submit-idea`}>
-                  <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
-                </Link>
-            </Button>
+            {renderActionButton()}
         </div>
         <div className="py-6">
             <TabsContent value="ideas" className="space-y-6">
@@ -97,15 +126,6 @@ export default function IdeaDetailsPage() {
                 </div>
             </TabsContent>
             <TabsContent value="proposals" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Proposals</h2>
-                <Button asChild>
-                  <Link href={`/ideation/${idea.id}/submit-proposal`}>
-                    <FileText className="mr-2 h-4 w-4" /> Submit Proposal
-                  </Link>
-                </Button>
-              </div>
-              <Separator />
                <div className="space-y-6 mt-6">
                   {proposals.length > 0 ? (
                     proposals.map((proposal) => (
@@ -122,14 +142,17 @@ export default function IdeaDetailsPage() {
             </TabsContent>
             <TabsContent value="prototypes">
                <div className="space-y-6">
-                  <div className="flex justify-end">
-                     {hasAcceptedProposal ? (
-                         <Button asChild>
-                          <Link href={`/ideation/${idea.id}/build-prototype`}>
-                            <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
-                          </Link>
-                        </Button>
-                     ) : (
+                  {activeTab !== 'prototypes' && hasAcceptedProposal ? (
+                         <div className="flex justify-end">
+                            <Button asChild>
+                            <Link href={`/ideation/${idea.id}/build-prototype`}>
+                                <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+                            </Link>
+                            </Button>
+                         </div>
+                     ) : null}
+
+                    {activeTab === 'prototypes' && !hasAcceptedProposal ? (
                         <Card className="bg-muted/50 w-full">
                             <CardContent className="p-4 flex items-center gap-3">
                                 <Info className="h-5 w-5 text-muted-foreground" />
@@ -138,9 +161,8 @@ export default function IdeaDetailsPage() {
                                 </p>
                             </CardContent>
                         </Card>
-                     )}
-                  </div>
-                  <Separator />
+                    ) : null }
+
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                     {prototypes.length > 0 ? (
                       prototypes.map((proto) => (
