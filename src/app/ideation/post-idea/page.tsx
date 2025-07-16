@@ -4,12 +4,12 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-// This page is obsolete and has been replaced by /ideation/ideas/new.
+// This page is obsolete and has been replaced by /ideation/new.
 // We redirect to the new page.
 export default function ObsoletePostIdeaPage() {
     const router = useRouter();
     useEffect(() => {
-        router.replace('/ideation/ideas/new');
+        router.replace('/ideation/new');
     }, [router]);
 
     return null;

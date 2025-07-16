@@ -25,7 +25,7 @@ export default function IdeationPortalPage() {
           </div>
           <div className="flex items-center gap-4">
             <Button asChild>
-                <Link href="/ideation/ideas/new">Submit an Idea</Link>
+                <Link href="/ideation/new">Submit an Idea</Link>
             </Button>
           </div>
       </header>
