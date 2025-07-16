@@ -101,7 +101,7 @@ export default function IdeaDetailsPage() {
       </header>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex justify-between items-center border-b">
+        <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="ideas">Ideas ({ideaSubmissions.length})</TabsTrigger>
               <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
