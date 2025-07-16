@@ -27,7 +27,7 @@ const SubIdeaCard = ({ subIdea }: SubIdeaCardProps) => {
           <VoteButtons initialVotes={subIdea.votes} />
         </div>
         <div className="flex-grow py-4 pr-4">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start gap-2">
             <div className="text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
                   <Avatar className="h-5 w-5">
@@ -39,9 +39,12 @@ const SubIdeaCard = ({ subIdea }: SubIdeaCardProps) => {
                   <span>{subIdea.createdAt}</span>
                 </div>
             </div>
-            <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
-                {subIdea.status}
-            </Badge>
+            <div className="flex flex-col items-end gap-2 text-right">
+              <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
+                  {subIdea.status}
+              </Badge>
+              <span className="text-xs text-muted-foreground font-mono">ID: {subIdea.id}</span>
+            </div>
           </div>
           <CardTitle className="mt-1 text-lg">
             {subIdea.title}
