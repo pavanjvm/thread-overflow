@@ -210,6 +210,80 @@ const prototypesForProject1: Prototype[] = [
   },
 ];
 
+
+const subIdeasForProject2: SubIdea[] = [
+    {
+        id: 'sub-idea-3',
+        title: 'Ingredient Image Recognition',
+        description: 'Use the device camera to take a picture of ingredients and have an AI model identify them automatically.',
+        author: users[4], // Eve
+        createdAt: '3 days ago',
+        votes: 28,
+        status: 'Open for prototyping',
+    },
+    {
+        id: 'sub-idea-4',
+        title: 'Meal Planning Integration',
+        description: 'Allow users to generate a meal plan for the week based on their available ingredients, and create a shopping list for missing items.',
+        author: users[1], // Bob
+        createdAt: '2 days ago',
+        votes: 19,
+        status: 'Open for prototyping',
+    }
+];
+
+const proposalsForProject2: Proposal[] = [
+    {
+        id: 'prop-4',
+        subIdeaId: 'sub-idea-3',
+        title: 'TensorFlow.js for On-Device Recognition',
+        description: 'We can use a pre-trained MobileNet model with TensorFlow.js to perform ingredient recognition directly on the user\'s device, ensuring privacy and offline functionality.',
+        author: users[4], // Eve
+        createdAt: '1 day ago',
+        votes: 12,
+        status: 'Accepted',
+    },
+    {
+        id: 'prop-5',
+        subIdeaId: 'sub-idea-4',
+        title: 'Weekly Meal Planner API',
+        description: 'Build a backend service that takes a list of ingredients and dietary preferences, and returns a structured 7-day meal plan.',
+        author: users[2], // Charlie
+        createdAt: '12 hours ago',
+        votes: 5,
+        status: 'Pending',
+    }
+];
+
+const prototypesForProject2: Prototype[] = [
+    {
+        id: 'proto-2',
+        proposalId: 'prop-4',
+        title: 'Ingredient Scanner PWA',
+        description: 'A progressive web app that lets you snap a photo of your food items. It correctly identifies about 80% of common vegetables and fruits.',
+        author: users[4], // Eve
+        team: [users[4], users[0]],
+        createdAt: '3 hours ago',
+        imageUrl: 'https://placehold.co/800x450.png',
+        liveUrl: '#',
+        votes: 9,
+        comments: [],
+    }
+];
+
+const subIdeasForProject3: SubIdea[] = [
+    {
+        id: 'sub-idea-5',
+        title: 'Strava & Wearables Integration',
+        description: 'Allow users to automatically sync their activities from Strava, Apple Watch, and Fitbit to track progress in challenges.',
+        author: users[3],
+        createdAt: '4 days ago',
+        votes: 42,
+        status: 'Open for prototyping',
+    }
+];
+
+
 export const ideas: Idea[] = [
     {
         id: 'proj-1',
@@ -229,9 +303,9 @@ export const ideas: Idea[] = [
         author: users[0], // Alice
         createdAt: '1 week ago',
         type: 'Solution Request',
-        subIdeas: [],
-        proposals: [],
-        prototypes: [],
+        subIdeas: subIdeasForProject2,
+        proposals: proposalsForProject2,
+        prototypes: prototypesForProject2,
     },
     {
         id: 'proj-3',
@@ -240,7 +314,7 @@ export const ideas: Idea[] = [
         author: users[2], // Charlie
         createdAt: '2 weeks ago',
         type: 'Ideation',
-        subIdeas: [],
+        subIdeas: subIdeasForProject3,
         proposals: [],
         prototypes: [],
     },
