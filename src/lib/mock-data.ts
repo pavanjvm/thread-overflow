@@ -170,6 +170,7 @@ const proposalsForProject1: Proposal[] = [
         createdAt: '1 day ago',
         votes: 10,
         status: 'Pending',
+        presentationUrl: '#',
     },
     {
         id: 'prop-2',
@@ -181,6 +182,7 @@ const proposalsForProject1: Proposal[] = [
         votes: 4,
         status: 'Rejected',
         rejectionReason: 'Good idea, but we need two-way communication for this project.',
+        presentationUrl: '#',
     },
     {
         id: 'prop-3',
@@ -191,6 +193,7 @@ const proposalsForProject1: Proposal[] = [
         createdAt: '15 hours ago',
         votes: 22,
         status: 'Accepted',
+        presentationUrl: '#',
     }
 ];
 

@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
+import Link from 'next/link';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -66,13 +67,23 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
           </div>
           <div className="flex-grow py-4 pr-4">
               <div className="flex justify-between items-start gap-2">
+                <div>
                   <CardTitle className="text-lg mb-1">{proposal.title}</CardTitle>
-                  <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
-                      <config.icon className="mr-1.5 h-3.5 w-3.5" />
-                      {currentStatus}
-                  </Badge>
+                  {proposal.presentationUrl && (
+                    <a href={proposal.presentationUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2">
+                      <Badge variant="outline" className="text-sm font-normal cursor-pointer hover:bg-accent">
+                        <FileText className="mr-1.5 h-4 w-4" />
+                        Presentation
+                      </Badge>
+                    </a>
+                  )}
+                </div>
+                <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
+                    <config.icon className="mr-1.5 h-3.5 w-3.5" />
+                    {currentStatus}
+                </Badge>
               </div>
-            <CardDescription className="text-sm text-muted-foreground">
+            <CardDescription className="text-sm text-muted-foreground mt-2">
                 <div className="flex items-center space-x-2">
                     <Avatar className="h-5 w-5">
                       <AvatarImage src={proposal.author.avatarUrl} data-ai-hint="user avatar" />
@@ -92,14 +103,7 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
               )}
             </CardContent>
             <CardFooter className="p-0 mt-4 flex justify-between items-center">
-              {proposal.presentationUrl && (
-                  <Button variant="outline" size="sm" asChild>
-                      <a href={proposal.presentationUrl} target="_blank" rel="noopener noreferrer">
-                          <FileText className="mr-2" /> View Presentation
-                      </a>
-                  </Button>
-              )}
-              
+              <div></div>
               {isProjectOwner && currentStatus === 'Pending' && (
                   <div className="flex gap-2">
                       <DialogTrigger asChild>
