@@ -45,23 +45,26 @@ export default function IdeaDetailsPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      <header>
-        <Badge
-          variant={config.variant}
-          className={cn('mb-2', config.className)}
-        >
-          {idea.type}
-        </Badge>
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">{idea.title}</h1>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-          <Avatar className="h-5 w-5">
-            <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
-            <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <span>Posted by {idea.author.name}</span>
-          <span>•</span>
-          <span>{idea.createdAt}</span>
+      <header className="space-y-4">
+        <div>
+          <Badge
+            variant={config.variant}
+            className={cn('mb-2', config.className)}
+          >
+            {idea.type}
+          </Badge>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">{idea.title}</h1>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+            <Avatar className="h-5 w-5">
+              <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
+              <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <span>Posted by {idea.author.name}</span>
+            <span>•</span>
+            <span>{idea.createdAt}</span>
+          </div>
         </div>
+        <p className="text-lg text-muted-foreground">{idea.description}</p>
       </header>
       
       <Tabs defaultValue="ideas" className="w-full">
@@ -74,16 +77,7 @@ export default function IdeaDetailsPage() {
         </div>
         <div className="py-6">
             <TabsContent value="ideas" className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>The Core {idea.type === 'Ideation' ? 'Idea' : 'Problem'}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">{idea.description}</p>
-                    </CardContent>
-                </Card>
-
-                <div className="mt-8">
+                <div>
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-2xl font-bold">{ideaSubmissions.length} Submitted Ideas</h2>
                       <Button asChild>
