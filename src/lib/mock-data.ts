@@ -147,6 +147,7 @@ const subIdeasForProject1: SubIdea[] = [
     author: users[1], // Bob
     createdAt: '2 days ago',
     votes: 15,
+    status: 'Open for prototyping',
   },
   {
     id: 'sub-idea-2',
@@ -155,6 +156,7 @@ const subIdeasForProject1: SubIdea[] = [
     author: users[2], // Charlie
     createdAt: '1 day ago',
     votes: 8,
+    status: 'Self-prototyping',
   }
 ];
 

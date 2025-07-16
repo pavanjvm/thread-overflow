@@ -76,6 +76,7 @@ export interface SubIdea {
     author: User;
     createdAt: string;
     votes: number;
+    status: 'Open for prototyping' | 'Self-prototyping';
 }
 
 // A submitted Idea or a requested Solution

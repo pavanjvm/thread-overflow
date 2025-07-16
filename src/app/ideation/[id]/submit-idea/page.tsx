@@ -31,10 +31,14 @@ import { ideas } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
 import type { Idea } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(1000),
+  status: z.enum(['Open for prototyping', 'Self-prototyping'], {
+    required_error: "You need to select a prototyping status.",
+  }),
 });
 
 
@@ -50,6 +54,7 @@ export default function SubmitSubIdeaPage() {
     defaultValues: {
       title: '',
       description: '',
+      status: 'Open for prototyping',
     },
   });
   
@@ -141,6 +146,40 @@ export default function SubmitSubIdeaPage() {
                         className="min-h-32"
                         {...field}
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Prototyping Status</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="Open for prototyping" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Open for prototyping - Anyone can submit a proposal for this idea.
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="Self-prototyping" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Self-prototyping - You plan to work on this idea yourself.
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
