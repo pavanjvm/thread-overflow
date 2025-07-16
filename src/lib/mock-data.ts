@@ -140,7 +140,7 @@ export const conversations: Conversation[] = [
 // --- Ideation Portal Data ---
 export const ideas: Idea[] = [
     {
-        id: 'idea-1',
+        id: 'proj-1',
         type: 'Solution Request',
         title: 'Build a Real-Time Collaborative Whiteboard',
         description: 'We need a whiteboard app where multiple users can draw and share ideas simultaneously. It should support basic shapes, text, and freeform drawing. The primary challenge is ensuring low latency and synchronized state across all clients.',
@@ -148,15 +148,15 @@ export const ideas: Idea[] = [
         createdAt: '3 days ago',
         status: 'Prototyping',
         proposals: [
-          { id: 'prop-1', ideaId: 'idea-1', title: 'Use WebSockets for Real-Time', description: 'Instead of polling, we can use WebSockets (like Socket.IO or a managed service) for instant, bidirectional communication between clients and the server. This will significantly reduce latency.', author: users[1], createdAt: '2 days ago', votes: 18, status: 'Accepted' },
-          { id: 'prop-2', ideaId: 'idea-1', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12, status: 'Rejected', comments: 'Great idea, but might be too complex for the initial prototype.' },
+          { id: 'prop-1', ideaId: 'proj-1', title: 'Use WebSockets for Real-Time', description: 'Instead of polling, we can use WebSockets (like Socket.IO or a managed service) for instant, bidirectional communication between clients and the server. This will significantly reduce latency.', author: users[1], createdAt: '2 days ago', votes: 18, status: 'Accepted' },
+          { id: 'prop-2', ideaId: 'proj-1', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12, status: 'Rejected', comments: 'Great idea, but might be too complex for the initial prototype.' },
         ],
         prototypes: [
           { id: 'proto-1', proposalId: 'prop-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[1], team: [users[1], users[0]], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10, comments: [comments[2], comments[3]] },
         ],
     },
     {
-        id: 'idea-2',
+        id: 'proj-2',
         type: 'Ideation',
         title: 'AI-Powered Recipe Generator',
         description: 'Create an application that suggests recipes based on the ingredients a user has in their fridge. The AI should be able to handle substitutions and dietary restrictions. The user should be able to input ingredients via text or by uploading a photo.',
@@ -164,12 +164,12 @@ export const ideas: Idea[] = [
         createdAt: '1 week ago',
         status: 'Open for prototyping',
         proposals: [
-          { id: 'prop-3', ideaId: 'idea-2', title: 'Use a Vision API for Ingredient Detection', description: 'We can use an existing Vision API to analyze photos of a user\'s fridge or pantry to automatically detect ingredients, making the input process much easier.', author: users[4], createdAt: '4 days ago', votes: 25, status: 'Pending' },
+          { id: 'prop-3', ideaId: 'proj-2', title: 'Use a Vision API for Ingredient Detection', description: 'We can use an existing Vision API to analyze photos of a user\'s fridge or pantry to automatically detect ingredients, making the input process much easier.', author: users[4], createdAt: '4 days ago', votes: 25, status: 'Pending' },
         ],
         prototypes: [],
     },
     {
-        id: 'idea-3',
+        id: 'proj-3',
         type: 'Ideation',
         title: 'Gamified Fitness Challenge App',
         description: 'An app that allows friends to create fitness challenges (e.g., run 50km in a month) and track their progress. It should include leaderboards, badges, and social sharing features to keep users motivated.',
@@ -180,7 +180,7 @@ export const ideas: Idea[] = [
         prototypes: [],
     },
      {
-        id: 'idea-4',
+        id: 'proj-4',
         type: 'Solution Request',
         title: 'Personal Finance Dashboard',
         description: 'I want to build a dashboard that connects to my bank accounts and credit cards to give me a unified view of my finances. It should automatically categorize my spending.',
