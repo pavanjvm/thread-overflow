@@ -68,38 +68,32 @@ export default function IdeaDetailsPage() {
       </header>
       
       <Tabs defaultValue="ideas" className="w-full">
-        <div className="flex justify-start">
+        <div className="flex justify-between items-center border-b pb-2">
             <TabsList>
               <TabsTrigger value="ideas">Ideas ({ideaSubmissions.length})</TabsTrigger>
               <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
               <TabsTrigger value="prototypes">Prototypes ({prototypes.length})</TabsTrigger>
             </TabsList>
+             <Button asChild>
+                <Link href={`/ideation/${idea.id}/submit-idea`}>
+                  <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
+                </Link>
+            </Button>
         </div>
         <div className="py-6">
             <TabsContent value="ideas" className="space-y-6">
-                <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-2xl font-bold">{ideaSubmissions.length} Submitted Ideas</h2>
-                      <Button asChild>
-                          <Link href={`/ideation/${idea.id}/submit-idea`}>
-                            <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
-                          </Link>
-                      </Button>
-                    </div>
-                    <Separator />
-                    <div className="space-y-6 mt-6">
-                        {ideaSubmissions.length > 0 ? (
-                          ideaSubmissions.map((subIdea) => (
-                            <Link key={subIdea.id} href={`/ideation/${idea.id}/ideas/${subIdea.id}`} className="block">
-                              <SubIdeaCard 
-                                  subIdea={subIdea}
-                              />
-                            </Link>
-                          ))
-                        ) : (
-                          <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
-                        )}
-                    </div>
+                <div className="space-y-6">
+                    {ideaSubmissions.length > 0 ? (
+                      ideaSubmissions.map((subIdea) => (
+                        <Link key={subIdea.id} href={`/ideation/${idea.id}/ideas/${subIdea.id}`} className="block">
+                          <SubIdeaCard 
+                              subIdea={subIdea}
+                          />
+                        </Link>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
+                    )}
                 </div>
             </TabsContent>
             <TabsContent value="proposals" className="space-y-6">
