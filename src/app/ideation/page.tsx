@@ -4,16 +4,16 @@ import { ideas } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Lightbulb, Wrench, FileText, CheckCircle, UserCheck } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, CheckCircle, UserCheck, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import RequestSolutionDialog from './_components/RequestSolutionDialog';
 
-const statusConfig = {
-    'Open for prototyping': { icon: FileText, variant: 'secondary' as const, label: 'Open for Prototyping' },
-    'Self-prototyping': { icon: UserCheck, variant: 'secondary' as const, label: 'Self-Prototyping', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300' },
-    'Prototyping': { icon: Wrench, variant: 'default' as const, label: 'Prototyping' },
-    'Completed': { icon: CheckCircle, variant: 'outline' as const, label: 'Completed' },
+const typeConfig = {
+    'Ideation': { icon: Lightbulb, variant: 'secondary' as const, label: 'Ideation', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
+    'Solution Request': { icon: HelpCircle, variant: 'secondary' as const, label: 'Solution Request', className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
 };
+
 
 export default function IdeationPortalPage() {
   return (
@@ -21,9 +21,10 @@ export default function IdeationPortalPage() {
       <header className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Ideation Portal</h1>
-            <p className="text-muted-foreground mt-1">Submit ideas, write proposals, and build prototypes.</p>
+            <p className="text-muted-foreground mt-1">Submit ideas, request solutions, and build prototypes.</p>
           </div>
           <div className="flex items-center gap-4">
+            <RequestSolutionDialog />
             <Button asChild>
                 <Link href="/ideation/new">Submit an Idea</Link>
             </Button>
@@ -32,8 +33,8 @@ export default function IdeationPortalPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {ideas.map((idea) => {
-          const config = statusConfig[idea.status];
-          const StatusIcon = config.icon;
+          const config = typeConfig[idea.type];
+          const TypeIcon = config.icon;
           return (
             <Link href={`/ideation/${idea.id}`} key={idea.id} className="block">
               <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 hover:bg-card/50">
@@ -44,7 +45,7 @@ export default function IdeationPortalPage() {
                           variant={config.variant}
                           className={cn('flex items-center gap-1.5 whitespace-nowrap', config.className)}
                           >
-                          <StatusIcon className="h-3.5 w-3.5" />
+                          <TypeIcon className="h-3.5 w-3.5" />
                           {config.label}
                       </Badge>
                   </div>
