@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -25,9 +26,10 @@ interface ComboboxProps {
     onChange: (value: string) => void;
     placeholder?: string;
     searchPlaceholder?: string;
+    emptyText?: string;
 }
 
-export function Combobox({ options, value, onChange, placeholder, searchPlaceholder }: ComboboxProps) {
+export function Combobox({ options, value, onChange, placeholder, searchPlaceholder, emptyText }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
   return (
@@ -49,14 +51,15 @@ export function Combobox({ options, value, onChange, placeholder, searchPlacehol
         <Command>
           <CommandInput placeholder={searchPlaceholder || "Search..."} />
           <CommandList>
-            <CommandEmpty>No option found.</CommandEmpty>
+            <CommandEmpty>{emptyText || 'No option found.'}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue)
+                    const realValue = options.find(o => o.value.toLowerCase() === currentValue)?.value
+                    onChange(realValue === value ? "" : realValue ?? "")
                     setOpen(false)
                   }}
                 >

@@ -27,13 +27,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lightbulb, Upload } from 'lucide-react';
-import { ideas } from '@/lib/mock-data';
+import { ideas, users } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
 import type { Idea, SubIdea } from '@/lib/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 
 const formSchema = z.object({
-  ideaId: z.string().min(1, { message: "Please select an idea to propose for." }),
+  ideaId: z.string({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
   title: z.string().min(10, 'Title must be at least 10 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(2000),
   presentation: z.any().optional(),
@@ -45,16 +45,21 @@ export default function SubmitProposalPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [idea, setIdea] = useState<Idea | null>(null);
-  const [availableIdeas, setAvailableIdeas] = useState<SubIdea[]>([]);
+  const [availableIdeas, setAvailableIdeas] = useState<{label: string, value: string}[]>([]);
+
+  // Assume current user is the first user for prototyping
+  const currentUser = users[0];
 
   useEffect(() => {
     const foundIdea = ideas.find(p => p.id === id);
     if (foundIdea) {
       setIdea(foundIdea);
-      const openIdeas = foundIdea.subIdeas.filter(si => si.status === 'Open for prototyping');
+      const openIdeas = foundIdea.subIdeas.filter(si => 
+        si.status === 'Open for prototyping' || (si.status === 'Self-prototyping' && si.author.id === currentUser.id)
+      ).map(si => ({ label: si.title, value: si.id }));
       setAvailableIdeas(openIdeas);
     }
-  }, [id]);
+  }, [id, currentUser.id]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -100,26 +105,15 @@ export default function SubmitProposalPage() {
                   control={form.control}
                   name="ideaId"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Idea to Build On</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select an idea that is open for prototyping" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {availableIdeas.length > 0 ? (
-                            availableIdeas.map(subIdea => (
-                              <SelectItem key={subIdea.id} value={subIdea.id}>
-                                {subIdea.title}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <div className="p-4 text-sm text-muted-foreground">No ideas are open for prototyping in this project.</div>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={availableIdeas}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select an idea..."
+                        searchPlaceholder="Search ideas..."
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
