@@ -56,10 +56,10 @@ export function Combobox({ options, value, onChange, placeholder, searchPlacehol
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.value}
+                  value={option.label} // Search against the full label (title + ID)
                   onSelect={(currentValue) => {
-                    const realValue = options.find(o => o.value.toLowerCase() === currentValue)?.value
-                    onChange(realValue === value ? "" : realValue ?? "")
+                    const selectedOption = options.find(o => o.label.toLowerCase() === currentValue.toLowerCase())
+                    onChange(selectedOption ? (selectedOption.value === value ? "" : selectedOption.value) : "");
                     setOpen(false)
                   }}
                 >

@@ -56,7 +56,7 @@ export default function SubmitProposalPage() {
       setIdea(foundIdea);
       const openIdeas = foundIdea.subIdeas.filter(si => 
         si.status === 'Open for prototyping' || (si.status === 'Self-prototyping' && si.author.id === currentUser.id)
-      ).map(si => ({ label: si.title, value: si.id }));
+      ).map(si => ({ label: `${si.title} (${si.id})`, value: si.id }));
       setAvailableIdeas(openIdeas);
     }
   }, [id, currentUser.id]);
@@ -112,7 +112,7 @@ export default function SubmitProposalPage() {
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Select an idea..."
-                        searchPlaceholder="Search ideas..."
+                        searchPlaceholder="Search ideas by title or ID..."
                       />
                       <FormMessage />
                     </FormItem>
