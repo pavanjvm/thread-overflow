@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Wrench, FileText, CheckCircle, X, MessageSquare } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
@@ -16,6 +16,8 @@ import { Separator } from '@/components/ui/separator';
 import SubIdeaCard from '@/components/SubIdeaCard';
 import ProposalCard from '@/components/ProposalCard';
 import { useAuth } from '@/context/AuthContext';
+import Image from 'next/image';
+import VoteButtons from '@/components/VoteButtons';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
@@ -37,6 +39,9 @@ export default function IdeaDetailsPage() {
 
   const ideaSubmissions = idea.subIdeas || [];
   const proposals = idea.proposals || [];
+  const prototypes = idea.prototypes || [];
+  
+  const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -62,9 +67,9 @@ export default function IdeaDetailsPage() {
       <Tabs defaultValue="ideas" className="w-full">
         <div className="flex justify-start border-b">
             <TabsList className="bg-transparent p-0 rounded-none">
-              <TabsTrigger value="ideas" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Ideas</TabsTrigger>
+              <TabsTrigger value="ideas" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Ideas ({ideaSubmissions.length})</TabsTrigger>
               <TabsTrigger value="proposals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Proposals ({proposals.length})</TabsTrigger>
-              <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({idea.prototypes.length})</TabsTrigger>
+              <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({prototypes.length})</TabsTrigger>
             </TabsList>
         </div>
         <div className="py-6">
@@ -80,7 +85,7 @@ export default function IdeaDetailsPage() {
 
                 <div className="mt-8">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-2xl font-bold">{ideaSubmissions.length} Ideas Submitted</h2>
+                      <h2 className="text-2xl font-bold">{ideaSubmissions.length} Submitted Ideas</h2>
                       <Button asChild>
                           <Link href={`/ideation/${idea.id}/submit-idea`}>
                             <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
@@ -130,13 +135,51 @@ export default function IdeaDetailsPage() {
             <TabsContent value="prototypes">
                <div className="space-y-6">
                   <div className="flex justify-end">
-                    <Button asChild>
-                      <Link href={`/ideation/${idea.id}/build-prototype`}>
-                        <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
-                      </Link>
-                    </Button>
+                     {hasAcceptedProposal ? (
+                         <Button asChild>
+                          <Link href={`/ideation/${idea.id}/build-prototype`}>
+                            <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+                          </Link>
+                        </Button>
+                     ) : (
+                        <Card className="bg-muted/50 w-full">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <Info className="h-5 w-5 text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground">
+                                    You must have an accepted proposal to build a prototype. <Link href={`/ideation/${idea.id}/submit-proposal`} className="text-primary hover:underline font-medium">Submit a proposal</Link> to get started.
+                                </p>
+                            </CardContent>
+                        </Card>
+                     )}
                   </div>
-                  <p className="text-muted-foreground text-center py-8">Prototype submission is not yet implemented.</p>
+                  <Separator />
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    {prototypes.length > 0 ? (
+                      prototypes.map((proto) => (
+                        <Link key={proto.id} href={`/ideation/${idea.id}/prototypes/${proto.id}`} className="block">
+                          <Card className="h-full hover:border-primary/50 transition-colors">
+                              <div className="relative aspect-video w-full rounded-t-lg overflow-hidden">
+                                  <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />
+                              </div>
+                              <CardHeader>
+                                  <CardTitle className="text-lg">{proto.title}</CardTitle>
+                                  <CardDescription>
+                                    by {proto.author.name}
+                                  </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
+                              </CardContent>
+                              <CardFooter>
+                                <VoteButtons initialVotes={proto.votes} />
+                              </CardFooter>
+                          </Card>
+                        </Link>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-center py-8 col-span-full">No prototypes submitted yet.</p>
+                    )}
+                  </div>
                </div>
             </TabsContent>
         </div>

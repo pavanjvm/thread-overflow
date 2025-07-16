@@ -194,6 +194,22 @@ const proposalsForProject1: Proposal[] = [
     }
 ];
 
+const prototypesForProject1: Prototype[] = [
+  {
+    id: 'proto-1',
+    proposalId: 'prop-3',
+    title: 'LiveKit Whiteboard Demo',
+    description: 'A working prototype demonstrating real-time collaboration using LiveKit. It supports multiple cursors, basic shapes, and text.',
+    author: users[0], // Alice
+    team: [users[0]],
+    createdAt: '2 hours ago',
+    imageUrl: 'https://placehold.co/800x450.png',
+    liveUrl: '#',
+    votes: 18,
+    comments: [comments[0]],
+  },
+];
+
 export const ideas: Idea[] = [
     {
         id: 'proj-1',
@@ -204,7 +220,7 @@ export const ideas: Idea[] = [
         type: 'Ideation',
         subIdeas: subIdeasForProject1,
         proposals: proposalsForProject1,
-        prototypes: [/* placeholder */],
+        prototypes: prototypesForProject1,
     },
     {
         id: 'proj-2',
@@ -215,7 +231,7 @@ export const ideas: Idea[] = [
         type: 'Solution Request',
         subIdeas: [],
         proposals: [],
-        prototypes: [/* placeholder */],
+        prototypes: [],
     },
     {
         id: 'proj-3',
@@ -226,7 +242,7 @@ export const ideas: Idea[] = [
         type: 'Ideation',
         subIdeas: [],
         proposals: [],
-        prototypes: [/* placeholder */],
+        prototypes: [],
     },
      {
         id: 'proj-4',
@@ -237,7 +253,7 @@ export const ideas: Idea[] = [
         type: 'Solution Request',
         subIdeas: [],
         proposals: [],
-        prototypes: [/* placeholder */],
+        prototypes: [],
     },
 ];
 

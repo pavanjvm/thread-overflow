@@ -100,10 +100,9 @@ export interface Idea {
   author: User;
   createdAt: string;
   type: 'Ideation' | 'Solution Request';
-  // The following fields are placeholders for future development
   subIdeas: SubIdea[];
   proposals: Proposal[];
-  prototypes: any[];
+  prototypes: Prototype[];
 }
 
 export interface Prototype {
