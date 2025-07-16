@@ -16,7 +16,7 @@ import SubIdeaCard from '@/components/SubIdeaCard';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
-    'Solution Request': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
+    'Solution Request': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:green-300' },
 };
 
 
@@ -76,16 +76,21 @@ export default function IdeaDetailsPage() {
                 <div className="mt-8">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-2xl font-bold">{ideaSubmissions.length} Ideas Submitted</h2>
-                      <Button>Submit Your Idea</Button>
+                      <Button asChild>
+                          <Link href={`/ideation/${idea.id}/submit-idea`}>
+                            <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
+                          </Link>
+                      </Button>
                     </div>
                     <Separator />
                     <div className="space-y-6 mt-6">
                         {ideaSubmissions.length > 0 ? (
                           ideaSubmissions.map((subIdea) => (
+                            <Link key={subIdea.id} href={`/ideation/${idea.id}/ideas/${subIdea.id}`} className="block">
                               <SubIdeaCard 
-                                  key={subIdea.id} 
                                   subIdea={subIdea}
                               />
+                            </Link>
                           ))
                         ) : (
                           <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
