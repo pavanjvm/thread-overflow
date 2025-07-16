@@ -1,15 +1,17 @@
+
 import Link from 'next/link';
 import { projects } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Lightbulb, Wrench, HelpCircle } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-const typeConfig = {
-  'Solution Request': { icon: HelpCircle, variant: 'secondary' as const, label: 'Solution Request' },
-  'Idea': { icon: Lightbulb, variant: 'default' as const, label: 'Idea' },
+const statusConfig = {
+    'Seeking Proposals': { icon: FileText, variant: 'secondary' as const, label: 'Seeking Proposals' },
+    Prototyping: { icon: Wrench, variant: 'default' as const, label: 'Prototyping' },
+    Completed: { icon: CheckCircle, variant: 'outline' as const, label: 'Completed' },
 };
 
 
@@ -22,31 +24,27 @@ export default function IdeationPortalPage() {
             <p className="text-muted-foreground mt-1">Solve challenges, build prototypes, and earn rewards.</p>
           </div>
           <div className="flex items-center gap-4">
-            <Button asChild variant="secondary">
-                <Link href="/ideation/post-idea">Contribute an Idea</Link>
-            </Button>
             <Button asChild>
-                <Link href="/ideation/request-solution">Request a Solution</Link>
+                <Link href="/ideation/new">Request a Project</Link>
             </Button>
           </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => {
-          const projectType = project.type || 'Solution Request';
-          const TypeIcon = typeConfig[projectType].icon;
+          const StatusIcon = statusConfig[project.status].icon;
           return (
             <Link href={`/ideation/${project.id}`} key={project.id} className="block">
-              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 hover:bg-muted">
+              <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 hover:bg-card/50">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{project.title}</CardTitle>
                        <Badge
-                          variant={typeConfig[projectType].variant}
-                          className={cn('flex items-center gap-1')}
+                          variant={statusConfig[project.status].variant}
+                          className={cn('flex items-center gap-1.5 whitespace-nowrap')}
                           >
-                          <TypeIcon className="h-3 w-3" />
-                          {typeConfig[projectType].label}
+                          <StatusIcon className="h-3.5 w-3.5" />
+                          {statusConfig[project.status].label}
                       </Badge>
                   </div>
                   <CardDescription className="flex items-center gap-2 text-xs pt-2">
@@ -65,12 +63,12 @@ export default function IdeationPortalPage() {
                 <CardFooter>
                    <div className="w-full flex justify-start items-center text-sm text-muted-foreground">
                       <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5">
                               <Lightbulb className="h-4 w-4 text-primary" />
-                              <span>{project.ideas.length} Ideas</span>
+                              <span>{project.proposals.length} Proposals</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                              <Wrench className="h-4 w-4 text-secondary" />
+                          <div className="flex items-center gap-1.5">
+                              <Wrench className="h-4 w-4 text-yellow-500" />
                               <span>{project.prototypes.length} Prototypes</span>
                           </div>
                       </div>

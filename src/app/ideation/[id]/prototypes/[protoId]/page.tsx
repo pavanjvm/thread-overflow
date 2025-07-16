@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import VoteButtons from '@/components/VoteButtons';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
   }
 
   const prototypeComments = prototype.comments || [];
+  const teamMembers = prototype.team || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -58,6 +59,26 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
           {prototype.liveUrl && <Button asChild><Link href={prototype.liveUrl} target="_blank">View Live</Link></Button>}
         </CardFooter>
       </Card>
+
+       {teamMembers.length > 0 && (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl"><Users className="h-5 w-5" /> Team Members</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-4">
+                {teamMembers.map(member => (
+                    <div key={member.id} className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={member.avatarUrl} data-ai-hint="user avatar" />
+                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{member.name}</span>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+      )}
+
 
       <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">{prototypeComments.length} Comments</h2>

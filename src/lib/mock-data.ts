@@ -1,6 +1,6 @@
 
 
-import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Idea, Prototype, Project, Hackathon, HackathonPerson, HackathonProject } from './types';
+import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Proposal, Prototype, Project, Hackathon, HackathonPerson, HackathonProject } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125, role: 'admin' },
@@ -148,13 +148,12 @@ export const projects: Project[] = [
         author: users[3],
         createdAt: '3 days ago',
         status: 'Prototyping',
-        type: 'Solution Request',
-        ideas: [
-          { id: 'idea-1', title: 'Use WebSockets for Real-Time', description: 'Instead of polling, we can use WebSockets (like Socket.IO or a managed service) for instant, bidirectional communication between clients and the server. This will significantly reduce latency.', author: users[1], createdAt: '2 days ago', votes: 18 },
-          { id: 'idea-2', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12 },
+        proposals: [
+          { id: 'prop-1', title: 'Use WebSockets for Real-Time', description: 'Instead of polling, we can use WebSockets (like Socket.IO or a managed service) for instant, bidirectional communication between clients and the server. This will significantly reduce latency.', author: users[1], createdAt: '2 days ago', votes: 18, isAccepted: true },
+          { id: 'prop-2', title: 'Leverage CRDTs for Conflict-Free Syncing', description: 'Conflict-Free Replicated Data Types (CRDTs) are a data structure that can be updated independently and concurrently without coordination, and then merged automatically. This would be perfect for managing the state of the whiteboard.', author: users[2], createdAt: '2 days ago', votes: 12, isAccepted: false },
         ],
         prototypes: [
-          { id: 'proto-1', ideaId: 'idea-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[0], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10, comments: [comments[2], comments[3]] },
+          { id: 'proto-1', proposalId: 'prop-1', title: 'WebSocket Proof-of-Concept', description: 'A working prototype using Socket.io to demonstrate real-time communication. Multiple browser windows can connect and see drawings update live.', author: users[0], team: [users[0], users[2]], createdAt: '1 day ago', imageUrl: 'https://placehold.co/600x400.png', liveUrl: '#', votes: 10, comments: [comments[2], comments[3]] },
         ],
     },
     {
@@ -163,10 +162,9 @@ export const projects: Project[] = [
         description: 'Create an application that suggests recipes based on the ingredients a user has in their fridge. The AI should be able to handle substitutions and dietary restrictions. The user should be able to input ingredients via text or by uploading a photo.',
         author: users[0],
         createdAt: '1 week ago',
-        status: 'Ideation',
-        type: 'Solution Request',
-        ideas: [
-          { id: 'idea-3', title: 'Use a Vision API for Ingredient Detection', description: 'We can use an existing Vision API to analyze photos of a user\'s fridge or pantry to automatically detect ingredients, making the input process much easier.', author: users[4], createdAt: '4 days ago', votes: 25 },
+        status: 'Seeking Proposals',
+        proposals: [
+          { id: 'prop-3', title: 'Use a Vision API for Ingredient Detection', description: 'We can use an existing Vision API to analyze photos of a user\'s fridge or pantry to automatically detect ingredients, making the input process much easier.', author: users[4], createdAt: '4 days ago', votes: 25, isAccepted: false },
         ],
         prototypes: [],
     },
@@ -177,19 +175,7 @@ export const projects: Project[] = [
         author: users[2],
         createdAt: '2 weeks ago',
         status: 'Completed',
-        type: 'Solution Request',
-        ideas: [],
-        prototypes: [],
-    },
-    {
-        id: 'proj-4',
-        title: 'Use WebAssembly for Client-Side Video Processing',
-        description: 'Instead of sending videos to the server for processing, we could leverage the power of WebAssembly to perform tasks like transcoding, applying filters, or object detection directly in the browser. This would reduce server costs and improve privacy.',
-        author: users[4],
-        createdAt: '2 days ago',
-        status: 'Ideation',
-        type: 'Idea',
-        ideas: [],
+        proposals: [],
         prototypes: [],
     },
 ];

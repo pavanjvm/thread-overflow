@@ -69,21 +69,23 @@ export interface Conversation {
     lastMessage: ChatMessage;
 }
 
-export interface Idea {
+export interface Proposal {
   id: string;
   title: string;
   description: string;
   author: User;
   createdAt: string;
   votes: number;
+  isAccepted: boolean;
 }
 
 export interface Prototype {
   id: string;
-  ideaId: string;
+  proposalId: string;
   title: string;
   description: string;
   author: User;
+  team: User[];
   createdAt: string;
   imageUrl: string;
   liveUrl?: string;
@@ -97,9 +99,8 @@ export interface Project {
   description: string;
   author: User;
   createdAt: string;
-  status: 'Ideation' | 'Prototyping' | 'Completed';
-  type?: 'Solution Request' | 'Idea';
-  ideas: Idea[];
+  status: 'Seeking Proposals' | 'Prototyping' | 'Completed';
+  proposals: Proposal[];
   prototypes: Prototype[];
 }
 
