@@ -69,6 +69,15 @@ export interface Conversation {
     lastMessage: ChatMessage;
 }
 
+export interface SubIdea {
+    id: string;
+    title: string;
+    description: string;
+    author: User;
+    createdAt: string;
+    votes: number;
+}
+
 // A submitted Idea or a requested Solution
 export interface Idea {
   id: string;
@@ -78,6 +87,7 @@ export interface Idea {
   createdAt: string;
   type: 'Ideation' | 'Solution Request';
   // The following fields are placeholders for future development
+  subIdeas: SubIdea[];
   proposals: any[];
   prototypes: any[];
 }

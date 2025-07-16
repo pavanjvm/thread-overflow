@@ -1,5 +1,5 @@
 
-import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Proposal, Prototype, Idea, Hackathon, HackathonPerson, HackathonProject } from './types';
+import { User, Post, Comment, Community, Notification, ChatMessage, Conversation, Proposal, Prototype, Idea, SubIdea, Hackathon, HackathonPerson, HackathonProject } from './types';
 
 export const users: User[] = [
   { id: 'user-1', name: 'Alice', avatarUrl: 'https://placehold.co/40x40.png?text=A', stars: 125, role: 'admin' },
@@ -138,6 +138,26 @@ export const conversations: Conversation[] = [
 ];
 
 // --- Ideation Portal Data ---
+
+const subIdeasForProject1: SubIdea[] = [
+  {
+    id: 'sub-idea-1',
+    title: 'Use WebSockets for real-time updates',
+    description: 'Instead of polling, we should use WebSockets for instant communication between clients. This will reduce latency and server load.',
+    author: users[1], // Bob
+    createdAt: '2 days ago',
+    votes: 15,
+  },
+  {
+    id: 'sub-idea-2',
+    title: 'Add a "presenter mode"',
+    description: 'A mode where one user controls the main view for everyone else, which would be great for guided presentations or teaching.',
+    author: users[2], // Charlie
+    createdAt: '1 day ago',
+    votes: 8,
+  }
+];
+
 export const ideas: Idea[] = [
     {
         id: 'proj-1',
@@ -146,6 +166,7 @@ export const ideas: Idea[] = [
         author: users[3], // Diana
         createdAt: '3 days ago',
         type: 'Ideation',
+        subIdeas: subIdeasForProject1,
         proposals: [/* placeholder */],
         prototypes: [/* placeholder */],
     },
@@ -156,6 +177,7 @@ export const ideas: Idea[] = [
         author: users[0], // Alice
         createdAt: '1 week ago',
         type: 'Solution Request',
+        subIdeas: [],
         proposals: [/* placeholder */],
         prototypes: [/* placeholder */],
     },
@@ -166,6 +188,7 @@ export const ideas: Idea[] = [
         author: users[2], // Charlie
         createdAt: '2 weeks ago',
         type: 'Ideation',
+        subIdeas: [],
         proposals: [/* placeholder */],
         prototypes: [/* placeholder */],
     },
@@ -176,6 +199,7 @@ export const ideas: Idea[] = [
         author: users[4], // Eve
         createdAt: '5 days ago',
         type: 'Solution Request',
+        subIdeas: [],
         proposals: [/* placeholder */],
         prototypes: [/* placeholder */],
     },

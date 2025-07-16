@@ -1,9 +1,9 @@
 
 'use client';
 
-import { ideas, comments as mockComments } from '@/lib/mock-data';
+import { ideas } from '@/lib/mock-data';
 import { notFound, useParams } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
-import CommentCard from '@/components/CommentCard';
+import SubIdeaCard from '@/components/SubIdeaCard';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
@@ -31,8 +31,7 @@ export default function IdeaDetailsPage() {
   
   const config = typeConfig[idea.type];
 
-  // Using mock comments for demonstration
-  const ideaComments = mockComments.slice(0, 2);
+  const ideaSubmissions = idea.subIdeas || [];
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -75,15 +74,22 @@ export default function IdeaDetailsPage() {
                 </Card>
 
                 <div className="mt-8">
-                    <h2 className="text-2xl font-bold mb-4">{ideaComments.length} Comments</h2>
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-2xl font-bold">{ideaSubmissions.length} Ideas Submitted</h2>
+                      <Button>Submit Your Idea</Button>
+                    </div>
                     <Separator />
                     <div className="space-y-6 mt-6">
-                        {ideaComments.map((comment) => (
-                            <CommentCard 
-                                key={comment.id} 
-                                comment={comment}
-                            />
-                        ))}
+                        {ideaSubmissions.length > 0 ? (
+                          ideaSubmissions.map((subIdea) => (
+                              <SubIdeaCard 
+                                  key={subIdea.id} 
+                                  subIdea={subIdea}
+                              />
+                          ))
+                        ) : (
+                          <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
+                        )}
                     </div>
                 </div>
             </TabsContent>
