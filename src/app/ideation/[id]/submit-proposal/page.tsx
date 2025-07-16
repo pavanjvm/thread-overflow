@@ -26,14 +26,17 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Upload } from 'lucide-react';
 import { ideas } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
-import type { Idea } from '@/lib/types';
+import type { Idea, SubIdea } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
+  ideaId: z.string().min(1, { message: "Please select an idea to propose for." }),
   title: z.string().min(10, 'Title must be at least 10 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(2000),
+  presentation: z.any().optional(),
 });
 
 export default function SubmitProposalPage() {
@@ -42,17 +45,21 @@ export default function SubmitProposalPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [idea, setIdea] = useState<Idea | null>(null);
+  const [availableIdeas, setAvailableIdeas] = useState<SubIdea[]>([]);
 
   useEffect(() => {
     const foundIdea = ideas.find(p => p.id === id);
     if (foundIdea) {
       setIdea(foundIdea);
+      const openIdeas = foundIdea.subIdeas.filter(si => si.status === 'Open for prototyping');
+      setAvailableIdeas(openIdeas);
     }
   }, [id]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      ideaId: '',
       title: '',
       description: '',
     },
@@ -60,7 +67,7 @@ export default function SubmitProposalPage() {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     // TODO: Replace with your API call to submit a proposal
-    console.log('Submitting proposal for idea:', id, values);
+    console.log('Submitting proposal for project:', id, values);
 
     toast({
       title: 'Proposal Submitted!',
@@ -75,7 +82,7 @@ export default function SubmitProposalPage() {
             <Button variant="ghost" asChild>
                 <Link href={id ? `/ideation/${id}` : '/ideation'}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to {idea ? 'Idea' : 'Ideation Portal'}
+                    Back to {idea ? 'Project' : 'Ideation Portal'}
                 </Link>
             </Button>
         </div>
@@ -85,10 +92,38 @@ export default function SubmitProposalPage() {
             <CardHeader>
               <CardTitle className="flex items-center"><Lightbulb className="mr-2 h-6 w-6 text-blue-500" />Submit a Proposal</CardTitle>
               <CardDescription>
-                You are submitting a proposal for the {idea?.type.toLowerCase()}: <span className="font-semibold text-foreground">{idea?.title}</span>
+                You are submitting a proposal for the project: <span className="font-semibold text-foreground">{idea?.title}</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+               <FormField
+                  control={form.control}
+                  name="ideaId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Idea to Build On</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an idea that is open for prototyping" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableIdeas.length > 0 ? (
+                            availableIdeas.map(subIdea => (
+                              <SelectItem key={subIdea.id} value={subIdea.id}>
+                                {subIdea.title}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-4 text-sm text-muted-foreground">No ideas are open for prototyping in this project.</div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                <FormField
                 control={form.control}
                 name="title"
@@ -114,6 +149,28 @@ export default function SubmitProposalPage() {
                         className="min-h-48"
                         {...field}
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="presentation"
+                render={({ field: { onChange, value, ...rest }}) => (
+                  <FormItem>
+                    <FormLabel>Upload Presentation (PPTX)</FormLabel>
+                     <FormControl>
+                        <div className="relative">
+                            <Input 
+                                type="file" 
+                                accept=".pptx"
+                                onChange={(e) => onChange(e.target.files)}
+                                className="pl-12"
+                                {...rest}
+                            />
+                            <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
