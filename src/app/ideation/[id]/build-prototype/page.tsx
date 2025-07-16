@@ -26,17 +26,21 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Wrench } from 'lucide-react';
-import { ideas } from '@/lib/mock-data';
-import { useEffect, useState } from 'react';
-import type { Idea } from '@/lib/types';
+import { ArrowLeft, Wrench, X, UserPlus } from 'lucide-react';
+import { ideas, users } from '@/lib/mock-data';
+import { useEffect, useState, useMemo } from 'react';
+import type { Idea, User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Combobox } from '@/components/ui/combobox';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(1000),
   imageUrl: z.string().url('Please enter a valid image URL.').optional().or(z.literal('')),
   liveUrl: z.string().url('Please enter a valid live URL.').optional().or(z.literal('')),
+  team: z.array(z.string()).optional(),
 });
 
 
@@ -46,6 +50,7 @@ export default function BuildPrototypePage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [idea, setIdea] = useState<Idea | null>(null);
+  const [teamMembers, setTeamMembers] = useState<User[]>([]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,8 +59,31 @@ export default function BuildPrototypePage() {
       description: '',
       imageUrl: '',
       liveUrl: '',
+      team: [],
     },
   });
+
+  const availableUsersForTeam = useMemo(() => {
+    return users
+      .filter(u => !teamMembers.some(tm => tm.id === u.id))
+      .map(u => ({ label: u.name, value: u.id }));
+  }, [teamMembers]);
+
+  const handleAddTeamMember = (userId: string) => {
+    if (!userId) return;
+    const userToAdd = users.find(u => u.id === userId);
+    if (userToAdd && !teamMembers.some(tm => tm.id === userToAdd.id)) {
+      const newTeamMembers = [...teamMembers, userToAdd];
+      setTeamMembers(newTeamMembers);
+      form.setValue('team', newTeamMembers.map(u => u.id));
+    }
+  }
+
+  const handleRemoveTeamMember = (userId: string) => {
+    const newTeamMembers = teamMembers.filter(u => u.id !== userId);
+    setTeamMembers(newTeamMembers);
+    form.setValue('team', newTeamMembers.map(u => u.id));
+  }
   
   useEffect(() => {
     const foundIdea = ideas.find(p => p.id === id);
@@ -121,7 +149,7 @@ export default function BuildPrototypePage() {
                 You are building a prototype for the idea: <span className="font-semibold text-foreground">{idea.title}</span>
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="title"
@@ -178,6 +206,38 @@ export default function BuildPrototypePage() {
                   </FormItem>
                 )}
               />
+              <FormItem>
+                <FormLabel>Team Members</FormLabel>
+                <FormControl>
+                    <>
+                        <Combobox 
+                            options={availableUsersForTeam}
+                            onChange={(value) => handleAddTeamMember(value)}
+                            value="" // Always reset combobox
+                            placeholder="Add a team member..."
+                            searchPlaceholder="Search for a user..."
+                            emptyText="No users found or all added."
+                        />
+                        <div className="mt-3 space-y-2">
+                            {teamMembers.map(user => (
+                                <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
+                                    <div className="flex items-center gap-2">
+                                        <Avatar className="h-5 w-5">
+                                            <AvatarImage src={user.avatarUrl} />
+                                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        {user.name}
+                                    </div>
+                                    <button type="button" onClick={() => handleRemoveTeamMember(user.id)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </div>
+                    </>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
