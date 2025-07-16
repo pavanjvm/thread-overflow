@@ -71,7 +71,6 @@ export interface Conversation {
 
 export interface Idea {
   id: string;
-  type: 'Ideation' | 'Solution Request';
   title: string;
   description: string;
   author: User;

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge, badgeVariants } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Lightbulb, Wrench, FileText, CheckCircle, ThumbsUp, ThumbsDown, UserCheck, Check, X, MessageSquare } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, CheckCircle, UserCheck, ThumbsUp, ThumbsDown, UserCheck, Check, X, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VoteButtons from '@/components/VoteButtons';

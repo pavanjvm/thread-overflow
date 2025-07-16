@@ -141,7 +141,6 @@ export const conversations: Conversation[] = [
 export const ideas: Idea[] = [
     {
         id: 'proj-1',
-        type: 'Solution Request',
         title: 'Build a Real-Time Collaborative Whiteboard',
         description: 'We need a whiteboard app where multiple users can draw and share ideas simultaneously. It should support basic shapes, text, and freeform drawing. The primary challenge is ensuring low latency and synchronized state across all clients.',
         author: users[3], // Diana
@@ -157,7 +156,6 @@ export const ideas: Idea[] = [
     },
     {
         id: 'proj-2',
-        type: 'Ideation',
         title: 'AI-Powered Recipe Generator',
         description: 'Create an application that suggests recipes based on the ingredients a user has in their fridge. The AI should be able to handle substitutions and dietary restrictions. The user should be able to input ingredients via text or by uploading a photo.',
         author: users[0], // Alice
@@ -170,7 +168,6 @@ export const ideas: Idea[] = [
     },
     {
         id: 'proj-3',
-        type: 'Ideation',
         title: 'Gamified Fitness Challenge App',
         description: 'An app that allows friends to create fitness challenges (e.g., run 50km in a month) and track their progress. It should include leaderboards, badges, and social sharing features to keep users motivated.',
         author: users[2], // Charlie
@@ -181,7 +178,6 @@ export const ideas: Idea[] = [
     },
      {
         id: 'proj-4',
-        type: 'Solution Request',
         title: 'Personal Finance Dashboard',
         description: 'I want to build a dashboard that connects to my bank accounts and credit cards to give me a unified view of my finances. It should automatically categorize my spending.',
         author: users[4], // Diana
