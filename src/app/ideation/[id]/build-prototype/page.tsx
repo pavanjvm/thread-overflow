@@ -209,11 +209,11 @@ export default function BuildPrototypePage() {
               <FormItem>
                 <FormLabel>Team Members</FormLabel>
                 <FormControl>
-                    <>
+                    <div>
                         <Combobox 
                             options={availableUsersForTeam}
                             onChange={(value) => handleAddTeamMember(value)}
-                            value="" // Always reset combobox
+                            value=""
                             placeholder="Add a team member..."
                             searchPlaceholder="Search for a user..."
                             emptyText="No users found or all added."
@@ -234,7 +234,7 @@ export default function BuildPrototypePage() {
                                 </Badge>
                             ))}
                         </div>
-                    </>
+                    </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
