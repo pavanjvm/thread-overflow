@@ -79,6 +79,19 @@ export interface SubIdea {
     status: 'Open for prototyping' | 'Self-prototyping';
 }
 
+export interface Proposal {
+  id: string;
+  subIdeaId: string;
+  title: string;
+  description: string;
+  author: User;
+  createdAt: string;
+  votes: number;
+  status: 'Pending' | 'Accepted' | 'Rejected';
+  rejectionReason?: string;
+  presentationUrl?: string;
+}
+
 // A submitted Idea or a requested Solution
 export interface Idea {
   id: string;
@@ -89,21 +102,8 @@ export interface Idea {
   type: 'Ideation' | 'Solution Request';
   // The following fields are placeholders for future development
   subIdeas: SubIdea[];
-  proposals: any[];
+  proposals: Proposal[];
   prototypes: any[];
-}
-
-export interface Proposal {
-  id: string;
-  ideaId: string;
-  title: string;
-  description: string;
-  author: User;
-  createdAt: string;
-  votes: number;
-  status: 'Pending' | 'Accepted' | 'Rejected';
-  comments?: string;
-  presentationUrl?: string;
 }
 
 export interface Prototype {

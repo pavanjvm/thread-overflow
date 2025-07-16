@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { ideas } from '@/lib/mock-data';
@@ -7,16 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Wrench } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, CheckCircle, X, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import SubIdeaCard from '@/components/SubIdeaCard';
+import ProposalCard from '@/components/ProposalCard';
+import { useAuth } from '@/context/AuthContext';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
-    'Solution Request': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:green-300' },
+    'Solution Request': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
 };
 
 
@@ -24,6 +27,7 @@ export default function IdeaDetailsPage() {
   const params = useParams();
   const id = params.id as string;
   const idea = ideas.find((p) => p.id === id);
+  const { currentUser } = useAuth();
 
   if (!idea) {
     notFound();
@@ -32,6 +36,7 @@ export default function IdeaDetailsPage() {
   const config = typeConfig[idea.type];
 
   const ideaSubmissions = idea.subIdeas || [];
+  const proposals = idea.proposals || [];
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -58,7 +63,7 @@ export default function IdeaDetailsPage() {
         <div className="flex justify-start border-b">
             <TabsList className="bg-transparent p-0 rounded-none">
               <TabsTrigger value="ideas" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Ideas</TabsTrigger>
-              <TabsTrigger value="proposals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Proposals ({idea.proposals.length})</TabsTrigger>
+              <TabsTrigger value="proposals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Proposals ({proposals.length})</TabsTrigger>
               <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({idea.prototypes.length})</TabsTrigger>
             </TabsList>
         </div>
@@ -98,16 +103,28 @@ export default function IdeaDetailsPage() {
                     </div>
                 </div>
             </TabsContent>
-            <TabsContent value="proposals">
-              <div className="space-y-6">
-                <div className="flex justify-end">
-                  <Button asChild>
-                    <Link href={`/ideation/${idea.id}/submit-proposal`}>
-                      <Lightbulb className="mr-2 h-4 w-4" /> Submit Proposal
-                    </Link>
-                  </Button>
-                </div>
-                <p className="text-muted-foreground text-center py-8">Proposal submission is not yet implemented.</p>
+            <TabsContent value="proposals" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Proposals</h2>
+                <Button asChild>
+                  <Link href={`/ideation/${idea.id}/submit-proposal`}>
+                    <FileText className="mr-2 h-4 w-4" /> Submit Proposal
+                  </Link>
+                </Button>
+              </div>
+              <Separator />
+               <div className="space-y-6 mt-6">
+                  {proposals.length > 0 ? (
+                    proposals.map((proposal) => (
+                      <ProposalCard 
+                        key={proposal.id}
+                        proposal={proposal}
+                        isProjectOwner={currentUser?.id === idea.author.id}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">No proposals submitted yet.</p>
+                  )}
               </div>
             </TabsContent>
             <TabsContent value="prototypes">

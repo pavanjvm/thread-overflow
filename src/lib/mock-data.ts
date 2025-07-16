@@ -160,16 +160,50 @@ const subIdeasForProject1: SubIdea[] = [
   }
 ];
 
+const proposalsForProject1: Proposal[] = [
+    {
+        id: 'prop-1',
+        subIdeaId: 'sub-idea-1',
+        title: 'Proposal for WebSocket Implementation',
+        description: 'Detailed plan to integrate a WebSocket server and client-side logic using Socket.io for the collaborative whiteboard.',
+        author: users[1], // Bob
+        createdAt: '1 day ago',
+        votes: 10,
+        status: 'Pending',
+    },
+    {
+        id: 'prop-2',
+        subIdeaId: 'sub-idea-1',
+        title: 'Alternative: Using Server-Sent Events',
+        description: 'A simpler approach using SSE for one-way communication from server to client, which might be sufficient for our needs.',
+        author: users[2], // Charlie
+        createdAt: '20 hours ago',
+        votes: 4,
+        status: 'Rejected',
+        rejectionReason: 'Good idea, but we need two-way communication for this project.',
+    },
+    {
+        id: 'prop-3',
+        subIdeaId: 'sub-idea-1',
+        title: 'Full-Featured Real-Time Solution',
+        description: 'A comprehensive proposal leveraging LiveKit for a robust, scalable real-time backend.',
+        author: users[0], // Alice
+        createdAt: '15 hours ago',
+        votes: 22,
+        status: 'Accepted',
+    }
+];
+
 export const ideas: Idea[] = [
     {
         id: 'proj-1',
         title: 'Real-Time Collaborative Whiteboard',
         description: 'A whiteboard app where multiple users can draw and share ideas simultaneously. It should support basic shapes, text, and freeform drawing.',
-        author: users[3], // Diana
+        author: users[3], // Diana is the project owner
         createdAt: '3 days ago',
         type: 'Ideation',
         subIdeas: subIdeasForProject1,
-        proposals: [/* placeholder */],
+        proposals: proposalsForProject1,
         prototypes: [/* placeholder */],
     },
     {
@@ -180,7 +214,7 @@ export const ideas: Idea[] = [
         createdAt: '1 week ago',
         type: 'Solution Request',
         subIdeas: [],
-        proposals: [/* placeholder */],
+        proposals: [],
         prototypes: [/* placeholder */],
     },
     {
@@ -191,7 +225,7 @@ export const ideas: Idea[] = [
         createdAt: '2 weeks ago',
         type: 'Ideation',
         subIdeas: [],
-        proposals: [/* placeholder */],
+        proposals: [],
         prototypes: [/* placeholder */],
     },
      {
@@ -202,7 +236,7 @@ export const ideas: Idea[] = [
         createdAt: '5 days ago',
         type: 'Solution Request',
         subIdeas: [],
-        proposals: [/* placeholder */],
+        proposals: [],
         prototypes: [/* placeholder */],
     },
 ];
