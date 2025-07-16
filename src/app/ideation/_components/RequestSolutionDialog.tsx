@@ -44,8 +44,9 @@ export default function RequestSolutionDialog() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to create a new project/request.
-    console.log('Form values:', values);
+    // TODO: Replace with your API call to create a new request.
+    // The `type` would be 'Solution Request' here.
+    console.log('Form values:', { ...values, type: 'Solution Request' });
 
     toast({
       title: 'Solution Requested!',
@@ -58,7 +59,7 @@ export default function RequestSolutionDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Request a Solution</Button>
+        <Button variant="outline">Request a Solution</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <Form {...form}>

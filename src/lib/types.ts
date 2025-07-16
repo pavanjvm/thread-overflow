@@ -69,15 +69,17 @@ export interface Conversation {
     lastMessage: ChatMessage;
 }
 
+// A submitted Idea or a requested Solution
 export interface Idea {
   id: string;
   title: string;
   description: string;
   author: User;
   createdAt: string;
-  status: 'Open for prototyping' | 'Self-prototyping' | 'Prototyping' | 'Completed';
-  proposals: Proposal[];
-  prototypes: Prototype[];
+  type: 'Ideation' | 'Solution Request';
+  // The following fields are placeholders for future development
+  proposals: any[];
+  prototypes: any[];
 }
 
 export interface Proposal {

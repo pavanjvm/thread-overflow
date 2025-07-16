@@ -27,103 +27,17 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Wrench } from 'lucide-react';
-import { ideas, users } from '@/lib/mock-data';
+import { ideas } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
-import type { Idea, User } from '@/lib/types';
+import type { Idea } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Combobox } from '@/components/ui/combobox';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
-  proposalId: z.string({
-    required_error: 'Please select your accepted proposal.',
-  }),
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(1000),
-  team: z.array(z.string()).min(1, 'You must be on the team.').optional(),
   imageUrl: z.string().url('Please enter a valid image URL.').optional().or(z.literal('')),
   liveUrl: z.string().url('Please enter a valid live URL.').optional().or(z.literal('')),
 });
-
-const MultiSelect = ({
-    options,
-    selected,
-    onChange,
-    placeholder = "Select members...",
-}: {
-    options: { label: string; value: string }[];
-    selected: string[];
-    onChange: (selected: string[]) => void;
-    placeholder?: string;
-}) => {
-    const [open, setOpen] = useState(false);
-
-    const handleSelect = (value: string) => {
-        const newSelected = selected.includes(value)
-            ? selected.filter((item) => item !== value)
-            : [...selected, value];
-        onChange(newSelected);
-    };
-    
-    const handleUnselect = (value: string) => {
-        onChange(selected.filter((s) => s !== value));
-    };
-
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <div className="relative w-full">
-                    <Button variant="outline" className="w-full justify-start h-auto min-h-10 flex-wrap">
-                        <div className="flex gap-1 flex-wrap">
-                            {selected.length === 0 && <span className="text-muted-foreground">{placeholder}</span>}
-                            {selected.map((value) => {
-                                const label = options.find((opt) => opt.value === value)?.label;
-                                return (
-                                <Badge
-                                    key={value}
-                                    variant="secondary"
-                                    className="gap-1.5"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleUnselect(value);
-                                    }}
-                                >
-                                    {label}
-                                    <X className="h-3 w-3" />
-                                </Badge>
-                                );
-                            })}
-                        </div>
-                    </Button>
-                </div>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                <Command>
-                    <CommandInput placeholder="Search members..." />
-                    <CommandList>
-                        <CommandEmpty>No members found.</CommandEmpty>
-                        <CommandGroup>
-                        {options.map((option) => (
-                            <CommandItem
-                                key={option.value}
-                                onSelect={() => handleSelect(option.value)}
-                            >
-                                <Check className={cn("mr-2 h-4 w-4", selected.includes(option.value) ? "opacity-100" : "opacity-0")} />
-                                {option.label}
-                            </CommandItem>
-                        ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
-    );
-};
 
 
 export default function BuildPrototypePage() {
@@ -132,14 +46,12 @@ export default function BuildPrototypePage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [idea, setIdea] = useState<Idea | null>(null);
-  const { currentUser } = useAuth();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       description: '',
-      team: currentUser ? [currentUser.id] : [],
       imageUrl: '',
       liveUrl: '',
     },
@@ -149,15 +61,10 @@ export default function BuildPrototypePage() {
     const foundIdea = ideas.find(p => p.id === id);
     if (foundIdea) {
       setIdea(foundIdea);
-      // Pre-select the user's accepted proposal
-      const userProposal = foundIdea.proposals.find(p => p.author.id === currentUser?.id && p.status === 'Accepted');
-      if (userProposal) {
-        form.setValue('proposalId', userProposal.id);
-      }
     } else {
         console.error("Idea not found");
     }
-  }, [id, currentUser, form]);
+  }, [id]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     // TODO: Replace with your API call to submit a prototype for the project.
@@ -183,7 +90,6 @@ export default function BuildPrototypePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-24 w-full" />
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
@@ -195,12 +101,6 @@ export default function BuildPrototypePage() {
         </div>
       );
   }
-
-  const acceptedProposals = idea.proposals
-    .filter(p => p.status === 'Accepted' && p.author.id === currentUser?.id)
-    .map(p => ({ label: p.title, value: p.id }));
-
-  const userOptions = users.map(user => ({ label: user.name, value: user.id }));
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -222,23 +122,6 @@ export default function BuildPrototypePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="proposalId"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Based on Your Accepted Proposal</FormLabel>
-                    <Combobox 
-                        options={acceptedProposals}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Select your proposal..."
-                        searchPlaceholder="Search proposals..."
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="title"
@@ -267,24 +150,6 @@ export default function BuildPrototypePage() {
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="team"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Team Members</FormLabel>
-                        <FormControl>
-                            <MultiSelect
-                                options={userOptions}
-                                selected={field.value || []}
-                                onChange={field.onChange}
-                                placeholder="Add team members..."
-                            />
-                        </FormControl>
-                         <FormMessage />
-                    </FormItem>
                 )}
               />
                <FormField
