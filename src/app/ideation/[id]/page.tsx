@@ -68,11 +68,11 @@ export default function IdeaDetailsPage() {
       </header>
       
       <Tabs defaultValue="ideas" className="w-full">
-        <div className="flex justify-start border-b">
-            <TabsList className="bg-transparent p-0 rounded-none">
-              <TabsTrigger value="ideas" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Ideas ({ideaSubmissions.length})</TabsTrigger>
-              <TabsTrigger value="proposals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Proposals ({proposals.length})</TabsTrigger>
-              <TabsTrigger value="prototypes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prototypes ({prototypes.length})</TabsTrigger>
+        <div className="flex justify-start">
+            <TabsList>
+              <TabsTrigger value="ideas">Ideas ({ideaSubmissions.length})</TabsTrigger>
+              <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
+              <TabsTrigger value="prototypes">Prototypes ({prototypes.length})</TabsTrigger>
             </TabsList>
         </div>
         <div className="py-6">
