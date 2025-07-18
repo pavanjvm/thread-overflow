@@ -100,6 +100,7 @@ export interface Idea {
   author: User;
   createdAt: string;
   type: 'Ideation' | 'Solution Request';
+  potentialDollarValue?: number;
   subIdeas: SubIdea[];
   proposals: Proposal[];
   prototypes: Prototype[];

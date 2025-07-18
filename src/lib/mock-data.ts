@@ -297,6 +297,7 @@ export const ideas: Idea[] = [
         author: users[3], // Diana is the project owner
         createdAt: '3 days ago',
         type: 'Ideation',
+        potentialDollarValue: 75000,
         subIdeas: subIdeasForProject1,
         proposals: proposalsForProject1,
         prototypes: prototypesForProject1,
@@ -319,6 +320,7 @@ export const ideas: Idea[] = [
         author: users[2], // Charlie
         createdAt: '2 weeks ago',
         type: 'Ideation',
+        potentialDollarValue: 50000,
         subIdeas: subIdeasForProject3,
         proposals: [],
         prototypes: [],

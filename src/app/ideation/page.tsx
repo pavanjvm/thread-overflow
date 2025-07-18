@@ -1,10 +1,11 @@
 
+
 import Link from 'next/link';
 import { ideas } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Lightbulb, Wrench } from 'lucide-react';
+import { Lightbulb, Wrench, CircleDollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import RequestSolutionDialog from './_components/RequestSolutionDialog';
@@ -62,7 +63,7 @@ export default function IdeationPortalPage() {
                 </CardContent>
                 <CardFooter>
                    <div className="w-full flex justify-start items-center text-sm text-muted-foreground">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 flex-wrap">
                           <div className="flex items-center gap-1.5">
                               <Lightbulb className="h-4 w-4 text-primary" />
                               <span>{idea.proposals.length} Proposals</span>
@@ -71,6 +72,12 @@ export default function IdeationPortalPage() {
                               <Wrench className="h-4 w-4 text-yellow-500" />
                               <span>{idea.prototypes.length} Prototypes</span>
                           </div>
+                           {idea.potentialDollarValue && (
+                                <div className="flex items-center gap-1.5">
+                                    <CircleDollarSign className="h-4 w-4 text-green-500" />
+                                    <span>${idea.potentialDollarValue.toLocaleString()}</span>
+                                </div>
+                            )}
                       </div>
                    </div>
                 </CardFooter>
