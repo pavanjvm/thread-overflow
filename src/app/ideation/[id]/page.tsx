@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Wrench, FileText, Info } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, Info, CircleDollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
@@ -99,6 +99,15 @@ export default function IdeaDetailsPage() {
           </div>
         </div>
         <p className="text-lg text-muted-foreground">{idea.description}</p>
+        {idea.potentialDollarValue && (
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <CircleDollarSign className="h-5 w-5" />
+              <span className="font-semibold text-lg">
+                  ${idea.potentialDollarValue.toLocaleString()}
+              </span>
+              <span className="text-sm text-muted-foreground">Potential Value</span>
+          </div>
+        )}
       </header>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
