@@ -17,6 +17,7 @@ import ForumSidebar from './ForumSidebar';
 import IdeationSidebar from './IdeationSidebar';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import Breadcrumb from './Breadcrumb';
 
 const Header = dynamic(() => import('@/components/Header'), { 
     ssr: false,
@@ -112,6 +113,7 @@ export default function AppClientLayout({
         <SidebarInset>
             <Header showSidebar={showSidebar} setIsChatOpen={setIsChatOpen} />
             <main className={cn("flex-grow", "container mx-auto px-4 py-8")}>
+                <Breadcrumb />
                 {children}
             </main>
         </SidebarInset>
