@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
+  FormDescription as FormDesc,
   FormField,
   FormItem,
   FormLabel,
@@ -26,11 +27,14 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Lightbulb, DollarSign } from 'lucide-react';
 
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
   description: z.string().min(50, 'Description must be at least 50 characters long.').max(2000, "Description can't be longer than 2000 characters."),
+  potentialDollarValue: z.string().optional().refine(
+    (val) => !val || !isNaN(parseFloat(val)), { message: "Must be a valid number."}
+  ).transform((val) => val ? parseFloat(val) : undefined),
 });
 
 export default function SubmitIdeaPage() {
@@ -42,6 +46,7 @@ export default function SubmitIdeaPage() {
     defaultValues: {
       title: '',
       description: '',
+      potentialDollarValue: undefined,
     },
   });
 
@@ -103,6 +108,30 @@ export default function SubmitIdeaPage() {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="potentialDollarValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Potential Dollar Value ($)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                         <Input
+                          type="number"
+                          placeholder="e.g., 50000"
+                          className="pl-8"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value ?? ''}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDesc>Estimate the potential value or cost savings of this idea.</FormDesc>
                     <FormMessage />
                   </FormItem>
                 )}
