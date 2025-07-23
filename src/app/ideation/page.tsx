@@ -9,6 +9,12 @@ import { Lightbulb, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import RequestSolutionDialog from './_components/RequestSolutionDialog';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
@@ -20,17 +26,37 @@ export default function IdeationPortalPage() {
   return (
     <div className="space-y-8">
       <header className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Ideation Portal</h1>
-            <p className="text-muted-foreground mt-1">Submit ideas or request solutions from the community.</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <RequestSolutionDialog />
-            <Button asChild>
-                <Link href="/ideation/new">Submit an Idea</Link>
-            </Button>
-          </div>
-      </header>
+  <div>
+    <h1 className="text-3xl font-bold tracking-tight text-foreground">Ideation Portal</h1>
+    <p className="text-muted-foreground mt-1">Submit ideas or request solutions from the community.</p>
+  </div>
+
+  <div className="flex items-center gap-4">
+    <RequestSolutionDialog />
+
+    {/* Filter Dropdown */}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Filter</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href="/ideation">View All</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/ideation?status=open">View Open Files</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/ideation?status=closed">View Closed Files</Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+
+    <Button asChild>
+      <Link href="/ideation/new">Submit an Idea</Link>
+    </Button>
+  </div>
+</header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {ideas.map((idea) => {

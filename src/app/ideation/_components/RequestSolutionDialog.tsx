@@ -29,6 +29,7 @@ import { useState } from 'react';
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
   problem: z.string().min(50, 'Problem statement must be at least 50 characters long.').max(2000, "Problem statement can't be longer than 2000 characters."),
+   potentialDollarValue: z.number({ invalid_type_error: 'Must be a number' }).min(0, 'Value must be zero or more').optional(),
 });
 
 export default function RequestSolutionDialog() {
@@ -94,6 +95,23 @@ export default function RequestSolutionDialog() {
                       <Textarea
                         placeholder="Describe the problem in detail. What are the pain points? Who is affected? What would a good solution look like?"
                         className="min-h-48"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="potentialDollarValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Potential Dollar Value</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter estimated value (e.g., 50000)"
                         {...field}
                       />
                     </FormControl>

@@ -6,6 +6,9 @@ import PostView from '@/components/PostView';
 import { useEffect, useState } from 'react';
 import type { Post } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
 
 export default function PostPage() {
   const params = useParams();
