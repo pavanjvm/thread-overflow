@@ -24,11 +24,36 @@ const replyToComment2: Comment = {
 };
 
 export const comments: Comment[] = [
-  { id: 'comment-1', content: 'This is a great point, I hadn\'t considered that!', author: users[1], createdAt: '2 hours ago', votes: 12 },
-  { id: 'comment-2', content: 'Could you elaborate on the second part? I am not sure I follow.', author: users[2], createdAt: '1 hour ago', votes: 8, replies: [replyToComment2] },
-  { id: 'comment-3', content: 'I tried this and it worked perfectly. Thanks for sharing!', author: users[0], createdAt: '30 minutes ago', votes: 25 },
-  { id: 'comment-4', content: 'I have a different perspective on this...', author: users[3], createdAt: '4 hours ago', votes: -2 },
-];
+    {
+      id: 'comment-1',
+      content: "This is a great point, I hadn't considered that!",
+      author: users[1],
+      createdAt: '2 hours ago',
+      votes: 12
+    },
+    {
+      id: 'comment-2',
+      content: 'Could you elaborate on the second part? I am not sure I follow.',
+      author: users[2],
+      createdAt: '1 hour ago',
+      votes: 8,
+      replies: [replyToComment2]
+    },
+    {
+      id: 'comment-3',
+      content: 'I tried this and it worked perfectly. Thanks for sharing!',
+      author: users[0],
+      createdAt: '30 minutes ago',
+      votes: 25
+    },
+    {
+      id: 'comment-4',
+      content: 'I have a different perspective on this...',
+      author: users[3],
+      createdAt: '4 hours ago',
+      votes: -2
+    }
+  ];
 
 export const posts: Post[] = [
   {
@@ -245,8 +270,8 @@ const proposalsForProject2: Proposal[] = [
         createdAt: '1 day ago',
         votes: 12,
         status: 'Accepted',
-        presentationUrl: '#',
-    },
+        presentationUrl: '#'
+      },
     {
         id: 'prop-5',
         subIdeaId: 'sub-idea-4',
@@ -301,6 +326,7 @@ export const ideas: Idea[] = [
         subIdeas: subIdeasForProject1,
         proposals: proposalsForProject1,
         prototypes: prototypesForProject1,
+        closed: false, // Added closed property
     },
     {
         id: 'proj-2',
@@ -312,6 +338,7 @@ export const ideas: Idea[] = [
         subIdeas: subIdeasForProject2,
         proposals: proposalsForProject2,
         prototypes: prototypesForProject2,
+        closed: false, // Added closed property
     },
     {
         id: 'proj-3',
@@ -324,6 +351,7 @@ export const ideas: Idea[] = [
         subIdeas: subIdeasForProject3,
         proposals: [],
         prototypes: [],
+        closed: true, // Added closed property and set to true for a closed idea example
     },
      {
         id: 'proj-4',
@@ -335,6 +363,7 @@ export const ideas: Idea[] = [
         subIdeas: [],
         proposals: [],
         prototypes: [],
+        closed: false, // Added closed property
     },
 ];
 
@@ -371,7 +400,7 @@ export const hackathons: Hackathon[] = [
         prizes: [
             { rank: '1st Place', reward: '10,000 Points', description: 'Awarded to the most innovative and impactful project.' },
             { rank: '2nd Place', reward: '5,000 Points', description: 'Awarded to the project with the best technical implementation.' },
-            { rank: '3rd Place', reward: '2,500 Points', description: 'Awarded to the project with the best user experience.' },
+            { rank: '3d Place', reward: '2,500 Points', description: 'Awarded to the project with the best user experience.' },
         ],
         speakers,
         judges,

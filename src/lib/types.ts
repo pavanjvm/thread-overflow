@@ -104,6 +104,7 @@ export interface Idea {
   subIdeas: SubIdea[];
   proposals: Proposal[];
   prototypes: Prototype[];
+  closed: boolean; // Added this line
 }
 
 export interface Prototype {
