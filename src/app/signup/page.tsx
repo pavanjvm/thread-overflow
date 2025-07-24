@@ -10,10 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Ghost } from 'lucide-react';
 import { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState(''); // Changed from username to name
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -21,8 +22,8 @@ export default function SignupPage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/signup', {
-        username,
+      const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, {
+        name, // Changed from username to name
         email,
         password,
       });
@@ -51,8 +52,8 @@ export default function SignupPage() {
           <form onSubmit={handleSignup}>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="first-name">Username</Label>
-                <Input id="first-name" placeholder="John Doe" required value={username} onChange={(e) => setUsername(e.target.value)} />
+                <Label htmlFor="name">Name</Label> {/* Changed from first-name to name */}
+                <Input id="name" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} /> {/* Changed from username to name and setUsername to setName */}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
