@@ -28,6 +28,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lightbulb, DollarSign } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
@@ -52,18 +54,11 @@ export default function SubmitIdeaPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await fetch('http://localhost:3000/api/ideas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...values, type: 'IDEATION' }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit idea.');
-      }
+      await axios.post(
+        `${API_BASE_URL}/api/ideas`,
+        { ...values, type: 'IDEATION' },
+        { withCredentials: true }
+      );
 
       toast({
         title: 'Idea Submitted!',
@@ -74,7 +69,7 @@ export default function SubmitIdeaPage() {
       console.error('Error submitting idea:', error);
       toast({
         title: 'Submission Failed',
-        description: error.message || 'An error occurred while submitting your idea.',
+        description: error.response?.data?.error || 'An error occurred while submitting your idea.',
         variant: 'destructive',
       });
     }

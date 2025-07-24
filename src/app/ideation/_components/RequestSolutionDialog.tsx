@@ -27,6 +27,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { DollarSign } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 
 const formSchema = z.object({
@@ -52,21 +54,11 @@ export default function RequestSolutionDialog() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await fetch('http://localhost:3000/api/ideas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...values, type: 'SOLUTION_REQUEST' }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit solution request.');
-      }
-
-      const result = await response.json();
-      console.log('Solution request submitted:', result);
+      await axios.post(
+        `${API_BASE_URL}/api/ideas`,
+        { ...values, type: 'SOLUTION_REQUEST' },
+        { withCredentials: true }
+      );
 
       toast({
         title: 'Solution Requested!',
@@ -78,7 +70,7 @@ export default function RequestSolutionDialog() {
       console.error('Error submitting solution request:', error);
       toast({
         title: 'Submission Failed',
-        description: error.message || 'An error occurred while submitting your request.',
+        description: error.response?.data?.error || 'An error occurred while submitting your request.',
         variant: 'destructive',
       });
     }

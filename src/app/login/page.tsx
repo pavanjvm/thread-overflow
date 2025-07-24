@@ -24,6 +24,8 @@ export default function LoginPage() {
       const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password,
+      }, {
+        withCredentials: true, // <-- This is the crucial part
       });
 
       if (response.status === 200) {
@@ -39,11 +41,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center py-12">
-      <Card className="mx-auto max-w-sm w-full">
-        <CardHeader className="text-center">
-          <Ghost className="mx-auto h-12 w-12 text-primary" />
-          <CardTitle className="text-2xl">Login</CardTitle>
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <Card className="mx-auto max-w-sm">
+        <CardHeader>
+          <div className="flex justify-center mb-4">
+            <Ghost className="h-12 w-12 text-primary" />
+          </div>
+          <CardTitle className="text-2xl text-center">Login</CardTitle>
           <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -51,11 +55,29 @@ export default function LoginPage() {
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="/forgot-password" passHref legacyBehavior>
+                    <a className="ml-auto inline-block text-sm underline">Forgot your password?</a>
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
               <Button type="submit" className="w-full">
                 Login
@@ -64,13 +86,8 @@ export default function LoginPage() {
           </form>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline">
-              Sign up
-            </Link>
-          </div>
-           <div className="mt-4 text-center text-sm">
-            <Link href="/forgot-password" className="ml-auto inline-block text-sm underline">
-              Forgot your password?
+            <Link href="/signup" passHref legacyBehavior>
+              <a className="underline">Sign up</a>
             </Link>
           </div>
         </CardContent>
