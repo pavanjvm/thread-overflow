@@ -28,7 +28,7 @@ export default function SignupPage() {
         password,
       });
 
-      if (response.status === 200) {
+      if (response.status === 201) { // Changed status code to 201 for successful creation
         // Handle successful signup, e.g., redirect to login page or show success message
         router.push('/login');
       } else {
