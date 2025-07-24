@@ -50,16 +50,34 @@ export default function SubmitIdeaPage() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to create a new idea.
-    // The `type` would be 'Ideation' here.
-    console.log('Form values:', { ...values, type: 'Ideation' });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/ideas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...values, type: 'IDEATION' }),
+      });
 
-    toast({
-      title: 'Idea Submitted!',
-      description: `Your idea "${values.title}" has been submitted.`,
-    });
-    router.push('/ideation');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit idea.');
+      }
+
+      toast({
+        title: 'Idea Submitted!',
+        description: `Your idea "${values.title}" has been submitted.`,
+      });
+      router.push('/ideation');
+    } catch (error: any) {
+      console.error('Error submitting idea:', error);
+      toast({
+        title: 'Submission Failed',
+        description: error.message || 'An error occurred while submitting your idea.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
