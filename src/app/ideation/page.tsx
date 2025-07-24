@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Lightbulb, Wrench } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, timeAgo } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import RequestSolutionDialog from './_components/RequestSolutionDialog';
 import { useState, useEffect } from 'react'; // Import useEffect
@@ -96,7 +96,7 @@ export default function IdeationPortalPage() {
                       </Avatar>
                       <span>{idea.author?.name}</span> {/* Added optional chaining */}
                       <span>•</span>
-                      <span>{new Date(idea.createdAt).toLocaleDateString()}</span> {/* Format date */}
+                      <span>{timeAgo(idea.createdAt)}</span> {/* Use timeAgo function */}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
