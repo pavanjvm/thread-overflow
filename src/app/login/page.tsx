@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Ghost } from 'lucide-react';
 import { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/auth/api/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password,
       });
