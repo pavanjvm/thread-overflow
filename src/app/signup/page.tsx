@@ -8,13 +8,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Ghost } from 'lucide-react';
+import { useState } from 'react';
+import axios from 'axios';
 
 export default function SignupPage() {
   const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/auth/signup', {
+        username,
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        // Handle successful signup, e.g., redirect to login page or show success message
+        router.push('/login');
+      } else {
+        // Handle signup error, e.g., show error message
+        console.error('Signup failed', response.status);
+      }
+    } catch (error) {
+      console.error('Signup failed', error);
+    }
   };
 
   return (
@@ -30,15 +52,15 @@ export default function SignupPage() {
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="first-name">Username</Label>
-                <Input id="first-name" placeholder="John Doe" required />
+                <Input id="first-name" placeholder="John Doe" required value={username} onChange={(e) => setUsername(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
               <Button type="submit" className="w-full">
                 Create an account

@@ -29,6 +29,7 @@ import { useState } from 'react';
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
   problem: z.string().min(50, 'Problem statement must be at least 50 characters long.').max(2000, "Problem statement can't be longer than 2000 characters."),
+  marketValue: z.string().optional(),
 });
 
 export default function RequestSolutionDialog() {
@@ -40,6 +41,7 @@ export default function RequestSolutionDialog() {
     defaultValues: {
       title: '',
       problem: '',
+      marketValue: '',
     },
   });
 
@@ -96,6 +98,19 @@ export default function RequestSolutionDialog() {
                         className="min-h-48"
                         {...field}
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="marketValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Potential Market Value</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., $1 million" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
