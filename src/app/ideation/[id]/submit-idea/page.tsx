@@ -31,7 +31,7 @@ import { Idea } from '@/lib/types';
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long.'),
   description: z.string().min(20, 'Description must be at least 20 characters long.'),
-  status: z.enum(['OPEN', 'SELF_PROTOTYPING']),
+  status: z.enum(['OPEN_FOR_PROTOTYPING', 'SELF_PROTOTYPING']),
 });
 
 export default function SubmitSubIdeaPage() {
@@ -47,7 +47,7 @@ export default function SubmitSubIdeaPage() {
     defaultValues: {
       title: '',
       description: '',
-      status: 'OPEN',
+      status: 'OPEN_FOR_PROTOTYPING',
     },
   });
   
@@ -159,7 +159,7 @@ export default function SubmitSubIdeaPage() {
                   >
                     <FormItem className="flex items-center space-x-3 space-y-0">
                       <FormControl>
-                        <RadioGroupItem value="OPEN" />
+                        <RadioGroupItem value="OPEN_FOR_PROTOTYPING" />
                       </FormControl>
                       <FormLabel className="font-normal">
                        No, I'm just sharing the idea. It's open for anyone to prototype.
