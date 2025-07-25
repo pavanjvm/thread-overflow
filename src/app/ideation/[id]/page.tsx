@@ -2,7 +2,6 @@
 
 'use client';
 
-import { ideas } from '@/lib/mock-data';
 import { notFound, useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,31 +17,83 @@ import ProposalCard from '@/components/ProposalCard';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import VoteButtons from '@/components/VoteButtons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
     'Solution Request': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
+    'IDEATION': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
 };
 
 
 export default function IdeaDetailsPage() {
   const params = useParams();
   const id = params.id as string;
-  const idea = ideas.find((p) => p.id === id);
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('ideas');
+  const [idea, setIdea] = useState(null);
+  const [ideaSubmissions, setIdeaSubmissions] = useState([]);
+  const [proposals, setProposals] = useState([]);
+  const [prototypes, setPrototypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchIdeaData = async () => {
+      try {
+        const [ideaRes, subIdeasRes, proposalsRes, prototypesRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/api/ideas/${id}`),
+          axios.get(`${API_BASE_URL}/api/subideas/${id}/subideas`),
+          axios.get(`${API_BASE_URL}/api/proposals/${id}/proposals`),
+          axios.get(`${API_BASE_URL}/api/prototypes/${id}/prototypes`),
+        ]);
+        setIdea(ideaRes.data);
+        setIdeaSubmissions(subIdeasRes.data);
+        setProposals(proposalsRes.data);
+        setPrototypes(prototypesRes.data);
+      } catch (error) {
+        console.error('Error fetching idea data:', error);
+        notFound();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIdeaData();
+  }, [id]);
+
+  if (loading) {
+    return (
+        <div className="max-w-6xl mx-auto space-y-8">
+            <header className="space-y-4">
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-12 w-3/4" />
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded-full" />
+                    <Skeleton className="h-4 w-48" />
+                </div>
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-2/3" />
+            </header>
+            <Tabs defaultValue="ideas" className="w-full">
+                <TabsList>
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                </TabsList>
+            </Tabs>
+        </div>
+    );
+  }
 
   if (!idea) {
     notFound();
   }
   
   const config = typeConfig[idea.type];
-
-  const ideaSubmissions = idea.subIdeas || [];
-  const proposals = idea.proposals || [];
-  const prototypes = idea.prototypes || [];
   
   const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
 
@@ -101,7 +152,7 @@ export default function IdeaDetailsPage() {
             </Avatar>
             <span>Posted by {idea.author.name}</span>
             <span>•</span>
-            <span>{idea.createdAt}</span>
+            <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
         <p className="text-lg text-muted-foreground">{idea.description}</p>
