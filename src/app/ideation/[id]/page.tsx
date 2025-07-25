@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Wrench, FileText, Info, CircleDollarSign, Loader2 } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, Info, CircleDollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
@@ -68,50 +68,6 @@ export default function IdeaDetailsPage() {
     }
   }, [id]);
 
-  const renderActionButton = () => {
-    if (loading) {
-        return <Button disabled><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait</Button>;
-    }
-
-    if (!idea || !idea.id) return null;
-
-    switch(activeTab) {
-      case 'ideas':
-        return (
-          <Button asChild>
-            <Link href={`/ideation/${idea.id}/submit-idea`}>
-              <>
-                <Lightbulb className="mr-2 h-4 w-4" /> Share Your Thoughts
-              </>
-            </Link>
-          </Button>
-        );
-      case 'proposals':
-        return (
-          <Button asChild>
-            <Link href={`/ideation/${idea.id}/submit-proposal`}>
-              <>
-                <FileText className="mr-2 h-4 w-4" /> Submit Proposal
-              </>
-            </Link>
-          </Button>
-        );
-      case 'prototypes':
-        const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
-        return hasAcceptedProposal ? (
-          <Button asChild>
-            <Link href={`/ideation/${idea.id}/build-prototype`}>
-              <>
-                <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
-              </>
-            </Link>
-          </Button>
-        ) : null;
-      default:
-        return null;
-    }
-  }
-
   if (loading) {
     return (
         <div className="max-w-6xl mx-auto space-y-8">
@@ -141,6 +97,45 @@ export default function IdeaDetailsPage() {
   }
   
   const config = typeConfig[idea.type] || typeConfig.default;
+  
+  const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
+
+  const renderActionButton = () => {
+    switch(activeTab) {
+      case 'ideas':
+        return (
+          <Button asChild>
+            <Link href={`/ideation/${id}/submit-idea`}>
+              <>
+                <Lightbulb className="mr-2 h-4 w-4" /> Share Your Thoughts
+              </>
+            </Link>
+          </Button>
+        );
+      case 'proposals':
+        return (
+          <Button asChild>
+            <Link href={`/ideation/${id}/submit-proposal`}>
+              <>
+                <FileText className="mr-2 h-4 w-4" /> Submit Proposal
+              </>
+            </Link>
+          </Button>
+        );
+      case 'prototypes':
+        return hasAcceptedProposal ? (
+          <Button asChild>
+            <Link href={`/ideation/${id}/build-prototype`}>
+              <>
+                <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+              </>
+            </Link>
+          </Button>
+        ) : null;
+      default:
+        return null;
+    }
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -190,7 +185,7 @@ export default function IdeaDetailsPage() {
                       ideaSubmissions.map((subIdea) => (
                         <Link
                           key={subIdea.id}
-                          href={`/ideation/${idea.id}/ideas/${subIdea.id}`}
+                          href={`/ideation/${id}/ideas/${subIdea.id}`}
                           className="block">
                           <SubIdeaCard 
                               subIdea={subIdea}
@@ -219,12 +214,24 @@ export default function IdeaDetailsPage() {
             </TabsContent>
             <TabsContent value="prototypes">
                <div className="space-y-6">
-                    {activeTab === 'prototypes' && !proposals.some(p => p.author.id === currentUser?.id && p.status === 'Accepted') ? (
+                  {activeTab !== 'prototypes' && hasAcceptedProposal ? (
+                         <div className="flex justify-end">
+                            <Button asChild>
+                            <Link href={`/ideation/${id}/build-prototype`}>
+                              <>
+                                <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+                              </>
+                            </Link>
+                            </Button>
+                         </div>
+                     ) : null}
+
+                    {activeTab === 'prototypes' && !hasAcceptedProposal ? (
                         <Card className="bg-muted/50 w-full">
                             <CardContent className="p-4 flex items-center gap-3">
                                 <Info className="h-5 w-5 text-muted-foreground" />
                                 <p className="text-sm text-muted-foreground">
-                                    You must have an accepted proposal to build a prototype. <Link href={`/ideation/${idea.id}/submit-proposal`} className="text-primary hover:underline font-medium">Submit a proposal</Link> to get started.
+                                    You must have an accepted proposal to build a prototype. <Link href={`/ideation/${id}/submit-proposal`} className="text-primary hover:underline font-medium">Submit a proposal</Link> to get started.
                                 </p>
                             </CardContent>
                         </Card>
@@ -235,7 +242,7 @@ export default function IdeaDetailsPage() {
                       prototypes.map((proto) => (
                         <Link
                           key={proto.id}
-                          href={`/ideation/${idea.id}/prototypes/${proto.id}`}
+                          href={`/ideation/${id}/prototypes/${proto.id}`}
                           className="block">
                           <Card className="h-full hover:border-primary/50 transition-colors">
                               <div className="relative aspect-video w-full rounded-t-lg overflow-hidden">
@@ -246,7 +253,7 @@ export default function IdeaDetailsPage() {
                                   <CardDescription>
                                     by {proto.author.name}
                                   </CardDescription>
-                              </CardHeader>
+                              </Header>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
                               </CardContent>
