@@ -101,6 +101,8 @@ export default function IdeaDetailsPage() {
   const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
 
   const renderActionButton = () => {
+    if (!idea || !idea.id) return null;
+
     switch(activeTab) {
       case 'ideas':
         return (
