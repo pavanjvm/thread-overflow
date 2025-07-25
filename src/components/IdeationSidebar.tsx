@@ -47,21 +47,27 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/ideation')}>
               <Link href="/ideation">
-                <Rocket /> All Projects
+                <>
+                  <Rocket /> All Projects
+                </>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/hackathons')}>
               <Link href="/hackathons">
-                <Swords /> Hackathon Portal
+                <>
+                  <Swords /> Hackathon Portal
+                </>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/feed'}>
               <Link href="/feed">
-                <MessageSquare /> Community Forum
+                <>
+                  <MessageSquare /> Community Forum
+                </>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -77,8 +83,10 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
                 isActive={pathname === '/search' && searchParams.get('q') === topic.slug}
               >
                 <Link href={`/search?q=${topic.slug}`}>
-                  <topic.icon />
-                  <span>{topic.name}</span>
+                  <>
+                    <topic.icon />
+                    <span>{topic.name}</span>
+                  </>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -91,7 +99,9 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
               <Link href="/drafts">
-                <FileText /> Drafts
+                <>
+                  <FileText /> Drafts
+                </>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -103,7 +113,9 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/leaderboard'}>
               <Link href="/leaderboard">
-                <Trophy /> View All
+                <>
+                  <Trophy /> View All
+                </>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -111,15 +123,17 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
             <SidebarMenuItem key={user.id}>
               <SidebarMenuButton asChild isActive={pathname === `/profile`}>
                 <Link href={`/profile`}>
-                  <Avatar className="size-5">
-                    <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span className="flex-grow">{user.name}</span>
-                  <div className="flex items-center gap-1 text-xs text-yellow-500">
-                    <span>{user.stars}</span>
-                    <Star className="size-3 fill-current" />
-                  </div>
+                  <>
+                    <Avatar className="size-5">
+                      <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
+                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="flex-grow">{user.name}</span>
+                    <div className="flex items-center gap-1 text-xs text-yellow-500">
+                      <span>{user.stars}</span>
+                      <Star className="size-3 fill-current" />
+                    </div>
+                  </>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

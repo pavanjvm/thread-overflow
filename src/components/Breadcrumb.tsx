@@ -45,10 +45,11 @@ const Breadcrumb = () => {
         <li>
           <Link
             href="/dashboard"
-            className="flex items-center gap-1 hover:text-foreground"
-            legacyBehavior>
-            <Home className="h-4 w-4" />
-            <span className="sr-only">Home</span>
+            className="flex items-center gap-1 hover:text-foreground">
+            <>
+              <Home className="h-4 w-4" />
+              <span className="sr-only">Home</span>
+            </>
           </Link>
         </li>
         {breadcrumbs.map(({ href, text, isLast }) => (
@@ -58,8 +59,7 @@ const Breadcrumb = () => {
               <Link
                 href={href}
                 className={`ml-1 ${isLast ? 'text-foreground' : 'hover:text-foreground'}`}
-                aria-current={isLast ? 'page' : undefined}
-                legacyBehavior>
+                aria-current={isLast ? 'page' : undefined}>
                 {text}
               </Link>
             </li>
