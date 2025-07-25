@@ -32,7 +32,7 @@ export default function IdeationPortalPage() {
         if (filter !== 'all') {
           url = `${API_BASE_URL}/api/ideas?status=${filter.toUpperCase()}`;
         }
-        const response = await axios.get(url);
+        const response = await axios.get(url, { withCredentials: true });
         setIdeas(response.data); // Assuming the response data is the array of ideas
       } catch (error) {
         console.error('Error fetching ideas:', error);
