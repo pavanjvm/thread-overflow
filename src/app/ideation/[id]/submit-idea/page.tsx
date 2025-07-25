@@ -27,11 +27,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lightbulb } from 'lucide-react';
-import { ideas } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
 import type { Idea } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100),
@@ -59,11 +60,17 @@ export default function SubmitSubIdeaPage() {
   });
   
   useEffect(() => {
-    const foundIdea = ideas.find(p => p.id === id);
-    if (foundIdea) {
-      setIdea(foundIdea);
-    } else {
-        console.error("Idea not found");
+    const fetchIdea = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/ideas/${id}`);
+        setIdea(response.data);
+      } catch (error) {
+        console.error("Error fetching idea:", error);
+      }
+    };
+
+    if (id) {
+      fetchIdea();
     }
   }, [id]);
 
