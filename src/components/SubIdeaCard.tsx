@@ -14,12 +14,23 @@ interface SubIdeaCardProps {
 }
 
 const statusConfig = {
-    'Open for prototyping': { className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
-    'Self-prototyping': { className: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300' },
+    'OPEN_FOR_PROTOTYPING': { 
+        label: 'Open for prototyping', 
+        className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' 
+    },
+    'SELF_PROTOTYPING': { 
+        label: 'Self-prototyping', 
+        className: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300' 
+    },
+    // Add a default or handle other statuses if they exist
+    default: {
+        label: 'Unknown Status',
+        className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300'
+    }
 };
 
 const SubIdeaCard = ({ subIdea }: SubIdeaCardProps) => {
-  const config = statusConfig[subIdea.status];
+  const config = statusConfig[subIdea.status] || statusConfig.default;
   return (
     <Card className="hover:border-primary/50 transition-colors duration-300">
       <div className="flex">
@@ -41,7 +52,7 @@ const SubIdeaCard = ({ subIdea }: SubIdeaCardProps) => {
             </div>
             <div className="flex flex-col items-end gap-2 text-right">
               <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
-                  {subIdea.status}
+                  {config.label}
               </Badge>
               <span className="text-xs text-muted-foreground font-mono">ID: {subIdea.id}</span>
             </div>
