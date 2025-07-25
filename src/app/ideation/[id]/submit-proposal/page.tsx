@@ -96,14 +96,13 @@ export default function SubmitProposalPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
         const formData = new FormData();
-        formData.append('subIdeaId', values.subIdeaId.toString());
         formData.append('title', values.title);
         formData.append('description', values.description);
         if (values.presentation && values.presentation.length > 0) {
             formData.append('file', values.presentation[0]);
         }
 
-        await axios.post(`${API_BASE_URL}/api/proposals/${id}/proposals`, formData, {
+        await axios.post(`${API_BASE_URL}/api/proposal/submit/${values.subIdeaId}`, formData, {
             withCredentials: true,
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -210,7 +209,7 @@ export default function SubmitProposalPage() {
                                 className="pl-12"
                                 {...rest}
                             />
-                            <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Upload className="absolute left-4 top-1/2 -translate-y-1_2 h-5 w-5 text-muted-foreground" />
                         </div>
                     </FormControl>
                     <FormMessage />
@@ -220,7 +219,7 @@ export default function SubmitProposalPage() {
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.form_state.isSubmitting ? 'Submitting...' : 'Submit Proposal'}
+                {form.formState.isSubmitting ? 'Submitting...' : 'Submit Proposal'}
               </Button>
             </CardFooter>
           </form>
