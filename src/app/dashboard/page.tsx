@@ -10,7 +10,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground mt-2 text-lg">Where would you like to go today?</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
-        <Link href="/feed" className="block" legacyBehavior>
+        <Link href="/feed" className="block">
           <Card className="h-full hover:border-primary/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <CardHeader className="items-center text-center p-8">
               <CardTitle className="text-2xl">Community Forum</CardTitle>
@@ -20,7 +20,7 @@ export default function DashboardPage() {
             </CardHeader>
           </Card>
         </Link>
-        <Link href="/ideation" className="block" legacyBehavior>
+        <Link href="/ideation" className="block">
           <Card className="h-full hover:border-accent/80 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <CardHeader className="items-center text-center p-8">
               <CardTitle className="text-2xl">Ideation Portal</CardTitle>
@@ -30,7 +30,7 @@ export default function DashboardPage() {
             </CardHeader>
           </Card>
         </Link>
-        <Link href="/hackathons" className="block" legacyBehavior>
+        <Link href="/hackathons" className="block">
           <Card className="h-full hover:border-blue-500/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <CardHeader className="items-center text-center p-8">
               <CardTitle className="text-2xl">Hackathon Portal</CardTitle>
