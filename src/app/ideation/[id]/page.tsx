@@ -107,7 +107,7 @@ export default function IdeaDetailsPage() {
           <Button asChild>
             <Link href={`/ideation/${idea.id}/submit-idea`}>
               <>
-                <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
+                <Lightbulb className="mr-2 h-4 w-4" /> Share Your Thoughts
               </>
             </Link>
           </Button>
@@ -172,7 +172,7 @@ export default function IdeaDetailsPage() {
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-between items-center">
             <TabsList>
-              <TabsTrigger value="ideas">Ideas ({ideaSubmissions.length})</TabsTrigger>
+              <TabsTrigger value="ideas">Ideas and Suggestions ({ideaSubmissions.length})</TabsTrigger>
               <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
               <TabsTrigger value="prototypes">Prototypes ({prototypes.length})</TabsTrigger>
             </TabsList>
