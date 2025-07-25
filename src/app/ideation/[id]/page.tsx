@@ -46,7 +46,7 @@ export default function IdeaDetailsPage() {
       try {
         const [ideaRes, subIdeasRes, proposalsRes, prototypesRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/ideas/${id}`),
-          axios.get(`${API_BASE_URL}/api/subideas/${id}/subideas`),
+          axios.get(`${API_BASE_URL}/api/subidea/${id}/subideas`),
           axios.get(`${API_BASE_URL}/api/proposals/${id}/proposals`),
           axios.get(`${API_BASE_URL}/api/prototypes/${id}/prototypes`),
         ]);
@@ -62,7 +62,9 @@ export default function IdeaDetailsPage() {
       }
     };
 
-    fetchIdeaData();
+    if (id) {
+      fetchIdeaData();
+    }
   }, [id]);
 
   if (loading) {
