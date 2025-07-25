@@ -46,10 +46,10 @@ export default function IdeaDetailsPage() {
     const fetchIdeaData = async () => {
       try {
         const [ideaRes, subIdeasRes, proposalsRes, prototypesRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/ideas/${id}`),
-          axios.get(`${API_BASE_URL}/api/subidea/${id}/subideas`),
-          axios.get(`${API_BASE_URL}/api/proposals/${id}/proposals`),
-          axios.get(`${API_BASE_URL}/api/prototypes/${id}/prototypes`),
+          axios.get(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true }),
+          axios.get(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true }),
+          axios.get(`${API_BASE_URL}/api/proposals/${id}/proposals`, { withCredentials: true }),
+          axios.get(`${API_BASE_URL}/api/prototypes/${id}/prototypes`, { withCredentials: true }),
         ]);
         setIdea(ideaRes.data);
         setIdeaSubmissions(subIdeasRes.data);
