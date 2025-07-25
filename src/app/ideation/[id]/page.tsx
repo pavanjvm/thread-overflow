@@ -106,9 +106,9 @@ export default function IdeaDetailsPage() {
         return (
           <Button asChild>
             <Link href={`/ideation/${id}/submit-idea`}>
-              <>
+              <span>
                 <Lightbulb className="mr-2 h-4 w-4" /> Share Your Thoughts
-              </>
+              </span>
             </Link>
           </Button>
         );
@@ -116,9 +116,9 @@ export default function IdeaDetailsPage() {
         return (
           <Button asChild>
             <Link href={`/ideation/${id}/submit-proposal`}>
-              <>
+              <span>
                 <FileText className="mr-2 h-4 w-4" /> Submit Proposal
-              </>
+              </span>
             </Link>
           </Button>
         );
@@ -126,9 +126,9 @@ export default function IdeaDetailsPage() {
         return hasAcceptedProposal ? (
           <Button asChild>
             <Link href={`/ideation/${id}/build-prototype`}>
-              <>
+              <span>
                 <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
-              </>
+              </span>
             </Link>
           </Button>
         ) : null;
@@ -218,9 +218,9 @@ export default function IdeaDetailsPage() {
                          <div className="flex justify-end">
                             <Button asChild>
                             <Link href={`/ideation/${id}/build-prototype`}>
-                              <>
+                              <span>
                                 <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
-                              </>
+                              </span>
                             </Link>
                             </Button>
                          </div>
