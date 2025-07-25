@@ -26,7 +26,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lightbulb, Upload } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Upload, Link2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Idea, SubIdea } from '@/lib/types';
 import { Combobox } from '@/components/ui/combobox';
@@ -37,7 +37,8 @@ const formSchema = z.object({
   subIdeaId: z.coerce.number({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
   title: z.string().min(10, 'Title must be at least 10 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(2000),
-  presentation: z.any().optional(),
+  presentationFile: z.any().optional(),
+  presentationUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 export default function SubmitProposalPage() {
@@ -90,24 +91,44 @@ export default function SubmitProposalPage() {
       subIdeaId: 0,
       title: '',
       description: '',
+      presentationFile: undefined,
+      presentationUrl: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-        const formData = new FormData();
-        formData.append('title', values.title);
-        formData.append('description', values.description);
-        if (values.presentation && values.presentation.length > 0) {
-            formData.append('file', values.presentation[0]);
-        }
+        const { subIdeaId, title, description, presentationFile, presentationUrl } = values;
 
-        await axios.post(`${API_BASE_URL}/api/proposal/submit/${values.subIdeaId}`, formData, {
-            withCredentials: true,
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        // Case 1: File is uploaded
+        if (presentationFile && presentationFile.length > 0) {
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('file', presentationFile[0]);
+
+            await axios.post(`${API_BASE_URL}/api/proposal/submit/${subIdeaId}`, formData, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        } 
+        // Case 2: URL is provided or neither
+        else {
+            const payload = {
+                title,
+                description,
+                presentationUrl: presentationUrl || undefined, // Send undefined if empty string
+            };
+
+            await axios.post(`${API_BASE_URL}/api/proposal/submit/${subIdeaId}`, payload, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
 
         toast({
             title: 'Proposal Submitted!',
@@ -194,28 +215,60 @@ export default function SubmitProposalPage() {
                   </FormItem>
                 )}
               />
-               <FormField
-                control={form.control}
-                name="presentation"
-                render={({ field: { onChange, value, ...rest }}) => (
-                  <FormItem>
-                    <FormLabel>Upload Presentation (PPTX)</FormLabel>
-                     <FormControl>
-                        <div className="relative">
-                            <Input 
-                                type="file" 
-                                accept=".pptx"
-                                onChange={(e) => onChange(e.target.files)}
-                                className="pl-12"
-                                {...rest}
-                            />
-                            <Upload className="absolute left-4 top-1/2 -translate-y-1_2 h-5 w-5 text-muted-foreground" />
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <FormLabel>Presentation (Optional)</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="presentationFile"
+                  render={({ field: { onChange, value, ...rest }}) => (
+                    <FormItem className="mt-2">
+                       <FormControl>
+                          <div className="relative">
+                              <Input 
+                                  type="file" 
+                                  accept=".pptx,.pdf,.doc,.docx"
+                                  onChange={(e) => onChange(e.target.files)}
+                                  className="pl-12"
+                                  {...rest}
+                              />
+                              <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">
+                            Or
+                        </span>
+                    </div>
+                </div>
+                <FormField
+                    control={form.control}
+                    name="presentationUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                         <FormControl>
+                            <div className="relative">
+                                <Input 
+                                    type="url"
+                                    placeholder="e.g., https://slides.com/your-deck"
+                                    className="pl-12"
+                                    {...field}
+                                />
+                                <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                />
+              </div>
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
