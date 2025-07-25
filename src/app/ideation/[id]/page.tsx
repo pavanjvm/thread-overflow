@@ -226,7 +226,7 @@ export default function IdeaDetailsPage() {
                          </div>
                      ) : null}
 
-                    {activeTab === 'prototypes' && !hasAcceptedProposal ? (
+                    {active_tab === 'prototypes' && !has_accepted_proposal ? (
                         <Card className="bg-muted/50 w-full">
                             <CardContent className="p-4 flex items-center gap-3">
                                 <Info className="h-5 w-5 text-muted-foreground" />
