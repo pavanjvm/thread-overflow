@@ -27,13 +27,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lightbulb, Upload } from 'lucide-react';
-import { ideas, users } from '@/lib/mock-data';
 import { useEffect, useState } from 'react';
 import type { Idea, SubIdea } from '@/lib/types';
 import { Combobox } from '@/components/ui/combobox';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 const formSchema = z.object({
-  ideaId: z.string({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
+  subIdeaId: z.string({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
   title: z.string().min(10, 'Title must be at least 10 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(2000),
   presentation: z.any().optional(),
@@ -45,40 +46,84 @@ export default function SubmitProposalPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [idea, setIdea] = useState<Idea | null>(null);
-  const [availableIdeas, setAvailableIdeas] = useState<{label: string, value: string}[]>([]);
-
-  // Assume current user is the first user for prototyping
-  const currentUser = users[0];
+  const [availableSubIdeas, setAvailableSubIdeas] = useState<{label: string, value: string}[]>([]);
 
   useEffect(() => {
-    const foundIdea = ideas.find(p => p.id === id);
-    if (foundIdea) {
-      setIdea(foundIdea);
-      const openIdeas = foundIdea.subIdeas.filter(si => 
-        si.status === 'Open for prototyping' || (si.status === 'Self-prototyping' && si.author.id === currentUser.id)
-      ).map(si => ({ label: `${si.title} (${si.id})`, value: si.id }));
-      setAvailableIdeas(openIdeas);
+    const fetchOpenSubIdeas = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/subidea/open`, { withCredentials: true });
+            const openSubIdeas = response.data
+                .filter((subIdea: SubIdea) => subIdea.idea.id === id)
+                .map((subIdea: SubIdea) => ({
+                    label: subIdea.title,
+                    value: subIdea.id,
+                }));
+            setAvailableSubIdeas(openSubIdeas);
+        } catch (error) {
+            console.error("Error fetching open sub-ideas:", error);
+            toast({
+                title: 'Error',
+                description: 'Could not fetch open sub-ideas for this project.',
+                variant: 'destructive',
+            });
+        }
+    };
+    
+    const fetchParentIdea = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
+            setIdea(response.data);
+        } catch (error) {
+            console.error("Error fetching parent idea:", error);
+        }
     }
-  }, [id, currentUser.id]);
+
+    if (id) {
+        fetchOpenSubIdeas();
+        fetchParentIdea();
+    }
+  }, [id, toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ideaId: '',
+      subIdeaId: '',
       title: '',
       description: '',
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to submit a proposal
-    console.log('Submitting proposal for project:', id, values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+        const formData = new FormData();
+        formData.append('subIdeaId', values.subIdeaId);
+        formData.append('title', values.title);
+        formData.append('description', values.description);
+        if (values.presentation && values.presentation.length > 0) {
+            formData.append('file', values.presentation[0]);
+        }
 
-    toast({
-      title: 'Proposal Submitted!',
-      description: `Your proposal has been successfully submitted.`,
-    });
-    router.push(`/ideation/${id}`);
+        await axios.post(`${API_BASE_URL}/api/proposals/${id}/proposals`, formData, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        toast({
+            title: 'Proposal Submitted!',
+            description: `Your proposal has been successfully submitted.`,
+        });
+        router.push(`/ideation/${id}`);
+
+    } catch (error: any) {
+        console.error('Error submitting proposal:', error);
+        toast({
+            title: 'Submission Failed',
+            description: error.response?.data?.error || 'An error occurred while submitting your proposal.',
+            variant: 'destructive',
+        });
+    }
   };
 
   return (
@@ -86,10 +131,10 @@ export default function SubmitProposalPage() {
       <div className="mb-4">
           <Button variant="ghost" asChild>
               <Link href={id ? `/ideation/${id}` : '/ideation'}>
-                  <>
+                  <span>
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Back to {idea ? 'Project' : 'Ideation Portal'}
-                  </>
+                  </span>
               </Link>
           </Button>
       </div>
@@ -105,16 +150,16 @@ export default function SubmitProposalPage() {
             <CardContent className="space-y-4">
                <FormField
                   control={form.control}
-                  name="ideaId"
+                  name="subIdeaId"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Idea to Build On</FormLabel>
                       <Combobox
-                        options={availableIdeas}
+                        options={availableSubIdeas}
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Select an idea..."
-                        searchPlaceholder="Search ideas by title or ID..."
+                        searchPlaceholder="Search ideas by title..."
                       />
                       <FormMessage />
                     </FormItem>

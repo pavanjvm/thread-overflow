@@ -108,13 +108,13 @@ export default function IdeationPortalPage() {
                    <div className="w-full flex justify-start items-center text-sm text-muted-foreground">
                       <div className="flex items-center gap-4 flex-wrap">
                           <div className="flex items-center gap-1.5">
-                              <Lightbulb className="h-4 w-4 text-primary" />
                               {/* Assuming your API returns totalProposals and totalPrototypes */}
                               <span>{idea.totalProposals} Proposals</span>
+                              <Lightbulb className="h-4 w-4 text-primary" />
                           </div>
                           <div className="flex items-center gap-1.5">
-                              <Wrench className="h-4 w-4 text-yellow-500" />
                                <span>{idea.totalPrototypes} Prototypes</span>
+                              <Wrench className="h-4 w-4 text-yellow-500" />
                           </div>
                       </div>
                    </div>
