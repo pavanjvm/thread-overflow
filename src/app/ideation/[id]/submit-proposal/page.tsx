@@ -51,9 +51,9 @@ export default function SubmitProposalPage() {
   useEffect(() => {
     const fetchOpenSubIdeas = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/subidea/open`, { withCredentials: true });
+            const response = await axios.get(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true });
             const openSubIdeas = response.data
-                .filter((subIdea: SubIdea) => subIdea.idea.id === id)
+                .filter((subIdea: SubIdea) => subIdea.status === 'OPEN_FOR_PROTOTYPING')
                 .map((subIdea: SubIdea) => ({
                     label: subIdea.title,
                     value: subIdea.id,
