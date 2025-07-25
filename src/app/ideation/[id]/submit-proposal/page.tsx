@@ -34,7 +34,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/lib/constants';
 
 const formSchema = z.object({
-  subIdeaId: z.string({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
+  subIdeaId: z.coerce.number({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
   title: z.string().min(10, 'Title must be at least 10 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(2000),
   presentation: z.any().optional(),
@@ -87,7 +87,7 @@ export default function SubmitProposalPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      subIdeaId: '',
+      subIdeaId: 0,
       title: '',
       description: '',
     },
@@ -96,7 +96,7 @@ export default function SubmitProposalPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
         const formData = new FormData();
-        formData.append('subIdeaId', values.subIdeaId);
+        formData.append('subIdeaId', values.subIdeaId.toString());
         formData.append('title', values.title);
         formData.append('description', values.description);
         if (values.presentation && values.presentation.length > 0) {
@@ -220,7 +220,7 @@ export default function SubmitProposalPage() {
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Submitting...' : 'Submit Proposal'}
+                {form.form_state.isSubmitting ? 'Submitting...' : 'Submit Proposal'}
               </Button>
             </CardFooter>
           </form>
