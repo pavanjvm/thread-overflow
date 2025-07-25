@@ -46,21 +46,21 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/ideation')}>
-              <Link href="/ideation" legacyBehavior>
+              <Link href="/ideation">
                 <Rocket /> All Projects
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/hackathons')}>
-              <Link href="/hackathons" legacyBehavior>
+              <Link href="/hackathons">
                 <Swords /> Hackathon Portal
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/feed'}>
-              <Link href="/feed" legacyBehavior>
+              <Link href="/feed">
                 <MessageSquare /> Community Forum
               </Link>
             </SidebarMenuButton>
@@ -76,7 +76,7 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
                 asChild
                 isActive={pathname === '/search' && searchParams.get('q') === topic.slug}
               >
-                <Link href={`/search?q=${topic.slug}`} legacyBehavior>
+                <Link href={`/search?q=${topic.slug}`}>
                   <topic.icon />
                   <span>{topic.name}</span>
                 </Link>
@@ -90,7 +90,7 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
-              <Link href="/drafts" legacyBehavior>
+              <Link href="/drafts">
                 <FileText /> Drafts
               </Link>
             </SidebarMenuButton>
@@ -102,7 +102,7 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/leaderboard'}>
-              <Link href="/leaderboard" legacyBehavior>
+              <Link href="/leaderboard">
                 <Trophy /> View All
               </Link>
             </SidebarMenuButton>
@@ -110,7 +110,7 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
           {topUsers.map((user) => (
             <SidebarMenuItem key={user.id}>
               <SidebarMenuButton asChild isActive={pathname === `/profile`}>
-                <Link href={`/profile`} legacyBehavior>
+                <Link href={`/profile`}>
                   <Avatar className="size-5">
                     <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
                     <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
