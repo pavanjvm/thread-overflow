@@ -85,9 +85,11 @@ export default function SubmitProposalPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-4">
           <Button variant="ghost" asChild>
-              <Link href={id ? `/ideation/${id}` : '/ideation'} legacyBehavior>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to {idea ? 'Project' : 'Ideation Portal'}
+              <Link href={id ? `/ideation/${id}` : '/ideation'}>
+                  <>
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Back to {idea ? 'Project' : 'Ideation Portal'}
+                  </>
               </Link>
           </Button>
       </div>

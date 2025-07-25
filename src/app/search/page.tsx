@@ -98,8 +98,7 @@ export default function SearchPage() {
                       <Link
                         key={community.id}
                         href={`/c/${community.slug}`}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
-                        legacyBehavior>
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
                           <AvatarFallback>{community.name.charAt(0)}</AvatarFallback>
@@ -136,8 +135,7 @@ export default function SearchPage() {
                       <Link
                         key={user.id}
                         href={`/profile`}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
-                        legacyBehavior>
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
                           <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>

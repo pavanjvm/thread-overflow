@@ -29,9 +29,11 @@ export default async function SubIdeaDetailsPage({ params }: { params: { id: str
       <div>
         <div className="mb-4">
             <Button variant="ghost" asChild>
-                <Link href={`/ideation/${idea.id}`} legacyBehavior>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Project
+                <Link href={`/ideation/${idea.id}`}>
+                    <>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Project
+                    </>
                 </Link>
             </Button>
         </div>
@@ -72,4 +74,3 @@ export default async function SubIdeaDetailsPage({ params }: { params: { id: str
     </div>
   );
 }
-

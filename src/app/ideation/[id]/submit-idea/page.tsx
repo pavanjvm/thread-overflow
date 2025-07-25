@@ -105,9 +105,11 @@ export default function SubmitSubIdeaPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-4">
           <Button variant="ghost" asChild>
-              <Link href={`/ideation/${id}`} legacyBehavior>
+              <Link href={`/ideation/${id}`}>
+                <>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Project
+                </>
               </Link>
           </Button>
       </div>

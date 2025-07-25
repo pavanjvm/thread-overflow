@@ -26,9 +26,11 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="mb-4">
            <Button variant="ghost" asChild>
-               <Link href={`/ideation/${idea.id}#prototypes`} legacyBehavior>
-                   <ArrowLeft className="mr-2 h-4 w-4" />
-                   Back to Idea
+               <Link href={`/ideation/${idea.id}#prototypes`}>
+                   <>
+                       <ArrowLeft className="mr-2 h-4 w-4" />
+                       Back to Idea
+                   </>
                </Link>
            </Button>
        </div>

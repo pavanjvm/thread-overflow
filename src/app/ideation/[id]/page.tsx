@@ -51,24 +51,30 @@ export default function IdeaDetailsPage() {
       case 'ideas':
         return (
           <Button asChild>
-            <Link href={`/ideation/${idea.id}/submit-idea`} legacyBehavior>
-              <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
+            <Link href={`/ideation/${idea.id}/submit-idea`}>
+              <>
+                <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
+              </>
             </Link>
           </Button>
         );
       case 'proposals':
         return (
           <Button asChild>
-            <Link href={`/ideation/${idea.id}/submit-proposal`} legacyBehavior>
-              <FileText className="mr-2 h-4 w-4" /> Submit Proposal
+            <Link href={`/ideation/${idea.id}/submit-proposal`}>
+              <>
+                <FileText className="mr-2 h-4 w-4" /> Submit Proposal
+              </>
             </Link>
           </Button>
         );
       case 'prototypes':
         return hasAcceptedProposal ? (
           <Button asChild>
-            <Link href={`/ideation/${idea.id}/build-prototype`} legacyBehavior>
-              <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+            <Link href={`/ideation/${idea.id}/build-prototype`}>
+              <>
+                <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+              </>
             </Link>
           </Button>
         ) : null;
@@ -126,8 +132,7 @@ export default function IdeaDetailsPage() {
                         <Link
                           key={subIdea.id}
                           href={`/ideation/${idea.id}/ideas/${subIdea.id}`}
-                          className="block"
-                          legacyBehavior>
+                          className="block">
                           <SubIdeaCard 
                               subIdea={subIdea}
                           />
@@ -158,8 +163,10 @@ export default function IdeaDetailsPage() {
                   {activeTab !== 'prototypes' && hasAcceptedProposal ? (
                          <div className="flex justify-end">
                             <Button asChild>
-                            <Link href={`/ideation/${idea.id}/build-prototype`} legacyBehavior>
+                            <Link href={`/ideation/${idea.id}/build-prototype`}>
+                              <>
                                 <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
+                              </>
                             </Link>
                             </Button>
                          </div>
@@ -182,8 +189,7 @@ export default function IdeaDetailsPage() {
                         <Link
                           key={proto.id}
                           href={`/ideation/${idea.id}/prototypes/${proto.id}`}
-                          className="block"
-                          legacyBehavior>
+                          className="block">
                           <Card className="h-full hover:border-primary/50 transition-colors">
                               <div className="relative aspect-video w-full rounded-t-lg overflow-hidden">
                                   <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />

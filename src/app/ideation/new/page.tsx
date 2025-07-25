@@ -79,9 +79,11 @@ export default function SubmitIdeaPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-4">
           <Button variant="ghost" asChild>
-              <Link href="/ideation" legacyBehavior>
+              <Link href="/ideation">
+                <>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Ideation Portal
+                </>
               </Link>
           </Button>
       </div>

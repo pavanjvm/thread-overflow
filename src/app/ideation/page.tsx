@@ -73,8 +73,7 @@ export default function IdeationPortalPage() {
             <Link
               href={`/ideation/${idea.id}`}
               key={idea.id}
-              className="block"
-              legacyBehavior>
+              className="block">
               <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 hover:bg-card/50">
                 <CardHeader>
                   <div className="flex justify-between items-start">
