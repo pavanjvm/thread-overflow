@@ -253,7 +253,7 @@ export default function IdeaDetailsPage() {
                                   <CardDescription>
                                     by {proto.author.name}
                                   </CardDescription>
-                              </Header>
+                              </CardHeader>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
                               </CardContent>
