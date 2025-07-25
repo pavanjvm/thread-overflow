@@ -51,7 +51,7 @@ export default function IdeaDetailsPage() {
       case 'ideas':
         return (
           <Button asChild>
-            <Link href={`/ideation/${idea.id}/submit-idea`}>
+            <Link href={`/ideation/${idea.id}/submit-idea`} legacyBehavior>
               <Lightbulb className="mr-2 h-4 w-4" /> Submit Your Idea
             </Link>
           </Button>
@@ -59,7 +59,7 @@ export default function IdeaDetailsPage() {
       case 'proposals':
         return (
           <Button asChild>
-            <Link href={`/ideation/${idea.id}/submit-proposal`}>
+            <Link href={`/ideation/${idea.id}/submit-proposal`} legacyBehavior>
               <FileText className="mr-2 h-4 w-4" /> Submit Proposal
             </Link>
           </Button>
@@ -67,7 +67,7 @@ export default function IdeaDetailsPage() {
       case 'prototypes':
         return hasAcceptedProposal ? (
           <Button asChild>
-            <Link href={`/ideation/${idea.id}/build-prototype`}>
+            <Link href={`/ideation/${idea.id}/build-prototype`} legacyBehavior>
               <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
             </Link>
           </Button>
@@ -109,7 +109,6 @@ export default function IdeaDetailsPage() {
           </div>
         )}
       </header>
-      
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-between items-center">
             <TabsList>
@@ -124,7 +123,11 @@ export default function IdeaDetailsPage() {
                 <div className="space-y-6">
                     {ideaSubmissions.length > 0 ? (
                       ideaSubmissions.map((subIdea) => (
-                        <Link key={subIdea.id} href={`/ideation/${idea.id}/ideas/${subIdea.id}`} className="block">
+                        <Link
+                          key={subIdea.id}
+                          href={`/ideation/${idea.id}/ideas/${subIdea.id}`}
+                          className="block"
+                          legacyBehavior>
                           <SubIdeaCard 
                               subIdea={subIdea}
                           />
@@ -155,7 +158,7 @@ export default function IdeaDetailsPage() {
                   {activeTab !== 'prototypes' && hasAcceptedProposal ? (
                          <div className="flex justify-end">
                             <Button asChild>
-                            <Link href={`/ideation/${idea.id}/build-prototype`}>
+                            <Link href={`/ideation/${idea.id}/build-prototype`} legacyBehavior>
                                 <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
                             </Link>
                             </Button>
@@ -176,7 +179,11 @@ export default function IdeaDetailsPage() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                     {prototypes.length > 0 ? (
                       prototypes.map((proto) => (
-                        <Link key={proto.id} href={`/ideation/${idea.id}/prototypes/${proto.id}`} className="block">
+                        <Link
+                          key={proto.id}
+                          href={`/ideation/${idea.id}/prototypes/${proto.id}`}
+                          className="block"
+                          legacyBehavior>
                           <Card className="h-full hover:border-primary/50 transition-colors">
                               <div className="relative aspect-video w-full rounded-t-lg overflow-hidden">
                                   <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />

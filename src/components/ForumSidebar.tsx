@@ -44,28 +44,27 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/ideation')}>
-              <Link href="/ideation">
+              <Link href="/ideation" legacyBehavior>
                 <Rocket /> Ideation Portal
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/hackathons')}>
-              <Link href="/hackathons">
+              <Link href="/hackathons" legacyBehavior>
                 <Swords /> Hackathon Portal
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/feed'}>
-              <Link href="/feed">
+              <Link href="/feed" legacyBehavior>
                 <Newspaper /> All Posts
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
-
       <SidebarGroup>
         <SidebarGroupLabel>Topics</SidebarGroupLabel>
         <SidebarMenu>
@@ -75,7 +74,7 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
                 asChild
                 isActive={pathname === '/search' && searchParams.get('q') === topic.slug}
               >
-                <Link href={`/search?q=${topic.slug}`}>
+                <Link href={`/search?q=${topic.slug}`} legacyBehavior>
                   <topic.icon />
                   <span>{topic.name}</span>
                 </Link>
@@ -84,26 +83,24 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
           ))}
         </SidebarMenu>
       </SidebarGroup>
-
       <SidebarGroup>
         <SidebarGroupLabel>My Content</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
-              <Link href="/drafts">
+              <Link href="/drafts" legacyBehavior>
                 <FileText /> Drafts
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
-
       <SidebarGroup>
         <SidebarGroupLabel>Communities</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
-              <Link href="/c/new">
+              <Link href="/c/new" legacyBehavior>
                 <Plus /> Create Community
               </Link>
             </SidebarMenuButton>
@@ -111,7 +108,7 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
           {communities.map((community) => (
             <SidebarMenuItem key={community.id}>
               <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
-                <Link href={`/c/${community.slug}`}>
+                <Link href={`/c/${community.slug}`} legacyBehavior>
                   <Avatar className="size-5">
                     <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
                     <AvatarFallback>{community.name.charAt(0)}</AvatarFallback>

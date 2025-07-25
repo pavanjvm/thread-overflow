@@ -24,15 +24,14 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-       <div className="mb-4">
-            <Button variant="ghost" asChild>
-                <Link href={`/ideation/${idea.id}#prototypes`}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Idea
-                </Link>
-            </Button>
-        </div>
-
+      <div className="mb-4">
+           <Button variant="ghost" asChild>
+               <Link href={`/ideation/${idea.id}#prototypes`} legacyBehavior>
+                   <ArrowLeft className="mr-2 h-4 w-4" />
+                   Back to Idea
+               </Link>
+           </Button>
+       </div>
       <Card>
         <CardHeader>
           <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
@@ -59,27 +58,24 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
           {prototype.liveUrl && <Button asChild><Link href={prototype.liveUrl} target="_blank">View Live</Link></Button>}
         </CardFooter>
       </Card>
-
-       {teamMembers.length > 0 && (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl"><Users className="h-5 w-5" /> Team Members</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-4">
-                {teamMembers.map(member => (
-                    <div key={member.id} className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                            <AvatarImage src={member.avatarUrl} data-ai-hint="user avatar" />
-                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{member.name}</span>
-                    </div>
-                ))}
-            </CardContent>
-        </Card>
-      )}
-
-
+      {teamMembers.length > 0 && (
+       <Card>
+           <CardHeader>
+               <CardTitle className="flex items-center gap-2 text-xl"><Users className="h-5 w-5" /> Team Members</CardTitle>
+           </CardHeader>
+           <CardContent className="flex flex-wrap gap-4">
+               {teamMembers.map(member => (
+                   <div key={member.id} className="flex items-center gap-2">
+                       <Avatar className="h-8 w-8">
+                           <AvatarImage src={member.avatarUrl} data-ai-hint="user avatar" />
+                           <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                       </Avatar>
+                       <span className="font-medium">{member.name}</span>
+                   </div>
+               ))}
+           </CardContent>
+       </Card>
+     )}
       <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">{prototypeComments.length} Comments</h2>
           <Separator />

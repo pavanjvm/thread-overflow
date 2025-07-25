@@ -66,12 +66,15 @@ export default function IdeationPortalPage() {
             </Button>
           </div>
       </header>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {ideas.map((idea) => {
           const config = typeConfig[idea.type];
           return (
-            <Link href={`/ideation/${idea.id}`} key={idea.id} className="block">
+            <Link
+              href={`/ideation/${idea.id}`}
+              key={idea.id}
+              className="block"
+              legacyBehavior>
               <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 hover:bg-card/50">
                 <CardHeader>
                   <div className="flex justify-between items-start">

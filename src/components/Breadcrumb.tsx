@@ -43,7 +43,10 @@ const Breadcrumb = () => {
     <nav aria-label="Breadcrumb" className="mb-6">
       <ol className="flex items-center space-x-1 text-sm text-muted-foreground">
         <li>
-          <Link href="/dashboard" className="flex items-center gap-1 hover:text-foreground">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1 hover:text-foreground"
+            legacyBehavior>
             <Home className="h-4 w-4" />
             <span className="sr-only">Home</span>
           </Link>
@@ -56,7 +59,7 @@ const Breadcrumb = () => {
                 href={href}
                 className={`ml-1 ${isLast ? 'text-foreground' : 'hover:text-foreground'}`}
                 aria-current={isLast ? 'page' : undefined}
-              >
+                legacyBehavior>
                 {text}
               </Link>
             </li>

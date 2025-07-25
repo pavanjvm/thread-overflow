@@ -103,14 +103,14 @@ export default function SubmitSubIdeaPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-        <div className="mb-4">
-            <Button variant="ghost" asChild>
-                <Link href={`/ideation/${id}`}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Project
-                </Link>
-            </Button>
-        </div>
+      <div className="mb-4">
+          <Button variant="ghost" asChild>
+              <Link href={`/ideation/${id}`} legacyBehavior>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Project
+              </Link>
+          </Button>
+      </div>
       <Card>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

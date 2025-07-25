@@ -51,7 +51,10 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
         <div className="flex items-center justify-between h-16 gap-4 px-4">
           <div className="flex items-center gap-2">
             {showSidebar && <SidebarTrigger />}
-            <Link href="/dashboard" className="flex items-center space-x-2 text-primary font-bold text-lg">
+            <Link
+              href="/dashboard"
+              className="flex items-center space-x-2 text-primary font-bold text-lg"
+              legacyBehavior>
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
             </Link>
@@ -77,7 +80,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
             <>
               {!isHackathonSection && !isIdeationSection && !isDashboardPage && (
                 <Button asChild className="hidden md:inline-flex">
-                  <Link href="/posts/new">
+                  <Link href="/posts/new" legacyBehavior>
                     <Plus className="mr-2" />
                     New Post
                   </Link>
@@ -87,7 +90,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
               {isIdeationSection && (
                   <div className="hidden md:flex gap-2">
                       <Button asChild variant="outline">
-                          <Link href="/leaderboard">
+                          <Link href="/leaderboard" legacyBehavior>
                               <Trophy className="mr-2" />
                               Leaderboard
                           </Link>
@@ -124,7 +127,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
                   {notifications.length > 0 ? (
                       notifications.map(notification => (
                           <DropdownMenuItem key={notification.id} asChild className={cn(!notification.read && 'font-bold')}>
-                            <Link href={notification.href} className="flex gap-3">
+                            <Link href={notification.href} className="flex gap-3" legacyBehavior>
                                 <div className="w-full">
                                     <p className="text-sm leading-snug whitespace-normal">{notification.text}</p>
                                     <p className="text-xs text-muted-foreground mt-1">{notification.createdAt}</p>
@@ -160,22 +163,22 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
                 <DropdownMenuSeparator />
                 {!isHackathonSection && !isIdeationSection && !isDashboardPage &&(
                   <DropdownMenuItem asChild className="md:hidden">
-                    <Link href="/posts/new"><Plus className="mr-2" />New Post</Link>
+                    <Link href="/posts/new" legacyBehavior><Plus className="mr-2" />New Post</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href="/c/new"><Users className="mr-2" />Create Community</Link>
+                  <Link href="/c/new" legacyBehavior><Users className="mr-2" />Create Community</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/leaderboard"><Trophy className="mr-2" />Leaderboard</Link>
+                  <Link href="/leaderboard" legacyBehavior><Trophy className="mr-2" />Leaderboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/profile"><User className="mr-2" />Profile</Link>
+                  <Link href="/profile" legacyBehavior><User className="mr-2" />Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem><Settings className="mr-2" />Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/login"><LogOut className="mr-2" />Log out</Link>
+                  <Link href="/login" legacyBehavior><LogOut className="mr-2" />Log out</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

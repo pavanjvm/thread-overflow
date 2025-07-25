@@ -26,7 +26,10 @@ const PostCard = ({ post }: PostCardProps) => {
                 <AvatarImage src={post.community.iconUrl} data-ai-hint="community icon" />
                 <AvatarFallback>{post.community.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <Link href={`/c/${post.community.slug}`} className="font-semibold hover:underline hover:text-primary transition-colors">
+              <Link
+                href={`/c/${post.community.slug}`}
+                className="font-semibold hover:underline hover:text-primary transition-colors"
+                legacyBehavior>
                 c/{post.community.slug}
               </Link>
               <span className="text-xs">•</span>
@@ -35,7 +38,10 @@ const PostCard = ({ post }: PostCardProps) => {
               <span>{post.createdAt}</span>
             </div>
             <CardTitle className="flex items-center">
-              <Link href={`/posts/${post.id}`} className="hover:text-primary transition-colors">
+              <Link
+                href={`/posts/${post.id}`}
+                className="hover:text-primary transition-colors"
+                legacyBehavior>
                 {post.title}
               </Link>
               {post.status === 'draft' && <Badge variant="secondary" className="ml-2">Draft</Badge>}
