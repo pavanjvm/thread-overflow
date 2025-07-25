@@ -37,7 +37,7 @@ import { API_BASE_URL } from '@/lib/constants';
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(1000),
-  status: z.enum(['Open for prototyping', 'Self-prototyping'], {
+  status: z.enum(['OPEN', 'SELF_PROTOTYPING'], {
     required_error: "You need to select a prototyping status.",
   }),
 });
@@ -49,13 +49,14 @@ export default function SubmitSubIdeaPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [idea, setIdea] = useState<Idea | null>(null);
+  const [loading, setLoading] = useState(true);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       description: '',
-      status: 'Open for prototyping',
+      status: 'OPEN',
     },
   });
   
@@ -66,6 +67,8 @@ export default function SubmitSubIdeaPage() {
         setIdea(response.data);
       } catch (error) {
         console.error("Error fetching idea:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -74,18 +77,30 @@ export default function SubmitSubIdeaPage() {
     }
   }, [id]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to submit a sub-idea.
-    console.log('Submitting sub-idea for project', id, values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/subidea/${id}/subideas`,
+        values,
+        { withCredentials: true }
+      );
 
-    toast({
-      title: 'Idea Submitted!',
-      description: `Your idea "${values.title}" has been successfully submitted.`,
-    });
-    router.push(`/ideation/${id}`);
+      toast({
+        title: 'Idea Submitted!',
+        description: `Your idea "${values.title}" has been successfully submitted.`,
+      });
+      router.push(`/ideation/${id}`);
+    } catch (error: any) {
+      console.error('Error submitting idea:', error);
+      toast({
+        title: 'Submission Failed',
+        description: error.response?.data?.error || 'An error occurred while submitting your idea.',
+        variant: 'destructive',
+      });
+    }
   };
   
-  if (!idea) {
+  if (loading) {
       return (
         <div className="max-w-2xl mx-auto">
             <div className="mb-4">
@@ -106,6 +121,10 @@ export default function SubmitSubIdeaPage() {
             </Card>
         </div>
       );
+  }
+
+  if (!idea) {
+    return <div>Idea not found.</div>
   }
 
   return (
@@ -174,7 +193,7 @@ export default function SubmitSubIdeaPage() {
                       >
                         <FormItem className="flex items-center space-x-3 space-y-0">
                           <FormControl>
-                            <RadioGroupItem value="Open for prototyping" />
+                            <RadioGroupItem value="OPEN" />
                           </FormControl>
                           <FormLabel className="font-normal">
                             Open for prototyping - Anyone can submit a proposal for this idea.
@@ -182,7 +201,7 @@ export default function SubmitSubIdeaPage() {
                         </FormItem>
                         <FormItem className="flex items-center space-x-3 space-y-0">
                           <FormControl>
-                            <RadioGroupItem value="Self-prototyping" />
+                            <RadioGroupItem value="SELF_PROTOTYPING" />
                           </FormControl>
                           <FormLabel className="font-normal">
                             Self-prototyping - You plan to work on this idea yourself.
