@@ -98,7 +98,8 @@ export default function IdeaDetailsPage() {
   
   const config = typeConfig[idea.type] || typeConfig.default;
   
-  const isProjectOwner = String(currentUser?.id) === String(idea.authorId);
+  // Use strict equality for a clean, type-safe check
+  const isProjectOwner = currentUser?.id === idea.authorId;
 
   const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
 
