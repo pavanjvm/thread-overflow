@@ -55,6 +55,10 @@ export default function IdeaDetailsPage() {
         setIdeaSubmissions(subIdeasRes.data || []);
         setProposals(proposalsRes.data || []);
         setPrototypes(prototypesRes.data || []);
+
+        // --- Log the proposals array ---
+        console.log("Proposals data from API:", proposalsRes.data);
+
       } catch (error) {
         console.error('Error fetching idea data:', error);
         notFound();
@@ -79,7 +83,7 @@ export default function IdeaDetailsPage() {
                     <Skeleton className="h-4 w-48" />
                 </div>
                 <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-6 w-2/h-full" />
             </header>
             <Tabs defaultValue="ideas" className="w-full">
                 <TabsList>
@@ -96,11 +100,6 @@ export default function IdeaDetailsPage() {
     notFound();
   }
   
-  // --- Start Debugging Logs ---
-  console.log("Current User ID:", currentUser?.id, "| Type:", typeof currentUser?.id);
-  console.log("Idea Author ID:", idea.authorId, "| Type:", typeof idea.authorId);
-  // --- End Debugging Logs ---
-
   const config = typeConfig[idea.type] || typeConfig.default;
   
   const isProjectOwner = currentUser?.id === idea.authorId;
