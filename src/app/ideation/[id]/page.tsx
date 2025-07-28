@@ -24,9 +24,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Idea, SubIdea, Proposal, Prototype } from '@/lib/types';
 
 const typeConfig = {
-    'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
-    'Solution Request': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
     'IDEATION': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
+    'SOLUTION_REQUEST': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
     default: { variant: 'secondary' as const, className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300' },
 };
 
@@ -46,15 +45,16 @@ export default function IdeaDetailsPage() {
     const fetchIdeaData = async () => {
       try {
         const [ideaRes, subIdeasRes, proposalsRes, prototypesRes] = await Promise.all([
-          axios.get<{ data: Idea }>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true }),
-          axios.get<{ data: SubIdea[] }>(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true }),
-          axios.get<{ data: Proposal[] }>(`${API_BASE_URL}/api/proposals/${id}/proposals`, { withCredentials: true }),
-          axios.get<{ data: Prototype[] }>(`${API_BASE_URL}/api/prototypes/${id}/prototypes`, { withCredentials: true }),
+          axios.get<Idea>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true }),
+          axios.get<SubIdea[]>(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true }),
+          axios.get<Proposal[]>(`${API_BASE_URL}/api/proposals/${id}/proposals`, { withCredentials: true }),
+          axios.get<Prototype[]>(`${API_BASE_URL}/api/prototypes/${id}/prototypes`, { withCredentials: true }),
         ]);
-        setIdea(ideaRes.data.data);
-        setIdeaSubmissions(subIdeasRes.data.data || []);
-        setProposals(proposalsRes.data.data || []);
-        setPrototypes(prototypesRes.data.data || []);
+        // Corrected data access: use response.data directly
+        setIdea(ideaRes.data);
+        setIdeaSubmissions(subIdeasRes.data || []);
+        setProposals(proposalsRes.data || []);
+        setPrototypes(prototypesRes.data || []);
       } catch (error) {
         console.error('Error fetching idea data:', error);
         notFound();
@@ -258,7 +258,7 @@ export default function IdeaDetailsPage() {
                               </CardHeader>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
-                              </CardContent>
+                              </Content>
                               <CardFooter className="flex justify-between items-center">
                                 <VoteButtons initialVotes={proto.votes} />
                                 <div className="flex -space-x-2">
@@ -267,7 +267,7 @@ export default function IdeaDetailsPage() {
                                       <Tooltip key={member.id}>
                                         <TooltipTrigger>
                                           <Avatar className="h-8 w-8 border-2 border-card">
-                                              <AvatarImage src={member.avatarUrl} data-ai-hint="user avatar" />
+                                              <AvatarImage src={member.avatarUrl || ''} data-ai-hint="user avatar" />
                                               <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                           </Avatar>
                                         </TooltipTrigger>
