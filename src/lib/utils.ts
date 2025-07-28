@@ -33,3 +33,8 @@ export function timeAgo(dateString: string): string {
   }
   return Math.floor(seconds) + " seconds ago";
 }
+
+export function titleCase(str: string): string {
+    if (!str) return '';
+    return str.toLowerCase().replace(/_/g, ' ').replace(/\w/g, char => char.toUpperCase());
+}
