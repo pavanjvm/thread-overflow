@@ -1,10 +1,10 @@
 
 export interface User {
-  id: string;
+  id: number; // Corrected to number to match API response
   name: string;
   avatarUrl: string | null;
   stars?: number;
-  role?: 'admin' | 'user';
+  role?: 'ADMIN' | 'USER'; // Corrected to match API response
 }
 
 export interface Community {
@@ -96,7 +96,7 @@ export interface Idea {
   title: string;
   description: string;
   author: User;
-  authorId: number; // Added to match backend structure
+  authorId: number;
   createdAt: string;
   type: 'IDEATION' | 'SOLUTION_REQUEST';
   status: 'OPEN' | 'CLOSED';
