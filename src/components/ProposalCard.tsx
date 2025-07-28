@@ -13,6 +13,9 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -41,29 +44,58 @@ const defaultConfig = {
   
 
 const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
+  const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState(proposal.status);
   const [rejectionReason, setRejectionReason] = useState(proposal.rejectionReason);
   const [comment, setComment] = useState('');
   const [actionType, setActionType] = useState<'accept' | 'reject' | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fallback to default config if status is unknown
   const config = statusConfig[currentStatus] || defaultConfig;
   const authorName = proposal.author?.name || 'Unknown Author';
   const authorAvatarUrl = proposal.author?.avatarUrl;
 
-  const handleAction = () => {
-    // In a real app, this would be an API call
-    if (actionType === 'accept') {
-        console.log(`Accepting proposal ${proposal.id} with comment: ${comment}`);
-        setCurrentStatus('Accepted');
-    } else if (actionType === 'reject') {
-        console.log(`Rejecting proposal ${proposal.id} with reason: ${comment}`);
-        setCurrentStatus('Rejected');
+  const handleAction = async () => {
+    if (!actionType) return;
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        status: actionType === 'accept' ? 'ACCEPTED' : 'REJECTED',
+        rejectionReason: actionType === 'reject' ? comment : undefined,
+      };
+
+      await axios.patch(
+        `${API_BASE_URL}/api/proposals/${proposal.id}/status`,
+        payload,
+        { withCredentials: true }
+      );
+
+      const newStatus = actionType === 'accept' ? 'Accepted' : 'Rejected';
+      setCurrentStatus(newStatus);
+      if (actionType === 'reject') {
         setRejectionReason(comment);
+      }
+
+      toast({
+        title: `Proposal ${newStatus}`,
+        description: `The proposal has been successfully ${newStatus.toLowerCase()}.`,
+      });
+
+    } catch (error: any) {
+      console.error('Failed to update proposal status:', error);
+      toast({
+        title: 'Update Failed',
+        description: error.response?.data?.error || 'An error occurred while updating the status.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+      setIsDialogOpen(false);
+      setComment('');
     }
-    setIsDialogOpen(false);
-    setComment('');
   };
 
   return (
@@ -168,10 +200,10 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
+            <Button variant="ghost" disabled={isSubmitting}>Cancel</Button>
           </DialogClose>
-          <Button onClick={handleAction} disabled={actionType === 'reject' && !comment.trim()}>
-            {actionType === 'accept' ? 'Accept and Send' : 'Reject and Send'}
+          <Button onClick={handleAction} disabled={isSubmitting || (actionType === 'reject' && !comment.trim())}>
+            {isSubmitting ? 'Submitting...' : (actionType === 'accept' ? 'Accept and Send' : 'Reject and Send')}
           </Button>
         </DialogFooter>
       </DialogContent>
