@@ -69,18 +69,18 @@ export interface Conversation {
 }
 
 export interface SubIdea {
-    id: number; // Corrected to number
+    id: number; 
     title: string;
     description: string;
     author: User;
     createdAt: string;
     votes: number;
-    status: 'OPEN_FOR_PROTOTYPING' | 'SELF_PROTOTYPING'; // Corrected to match API
+    status: 'OPEN_FOR_PROTOTYPING' | 'SELF_PROTOTYPING';
 }
 
 export interface Proposal {
-  id: string;
-  subIdeaId: number; // Corrected to number
+  id: number; // Changed to number to align with usage
+  subIdeaId: number;
   title: string;
   description: string;
   author: User;
@@ -101,6 +101,7 @@ export interface Idea {
   status: 'OPEN' | 'CLOSED';
   totalProposals: number;
   totalPrototypes: number;
+  potentialDollarValue?: number; // Added this property
   subIdeas?: SubIdea[];
   proposals?: Proposal[];
   prototypes?: Prototype[];
