@@ -79,7 +79,7 @@ export interface SubIdea {
 }
 
 export interface Proposal {
-  id: number; // Changed to number to align with usage
+  id: number;
   subIdeaId: number;
   title: string;
   description: string;
@@ -96,12 +96,13 @@ export interface Idea {
   title: string;
   description: string;
   author: User;
+  authorId: number; // Added to match backend structure
   createdAt: string;
   type: 'IDEATION' | 'SOLUTION_REQUEST';
   status: 'OPEN' | 'CLOSED';
   totalProposals: number;
   totalPrototypes: number;
-  potentialDollarValue?: number; // Added this property
+  potentialDollarValue?: number;
   subIdeas?: SubIdea[];
   proposals?: Proposal[];
   prototypes?: Prototype[];
