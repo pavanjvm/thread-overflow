@@ -96,9 +96,14 @@ export default function IdeaDetailsPage() {
     notFound();
   }
   
+  // --- Start Debugging Logs ---
+  console.log("Current User ID:", currentUser?.id, "| Type:", typeof currentUser?.id);
+  console.log("Idea Author ID:", idea.author.id, "| Type:", typeof idea.author.id);
+  // --- End Debugging Logs ---
+
   const config = typeConfig[idea.type] || typeConfig.default;
   
-  const isProjectOwner = currentUser?.id === idea.author.id;
+  const isProjectOwner = currentUser?.id == idea.author.id; // Use '==' for type coercion
 
   const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
 
