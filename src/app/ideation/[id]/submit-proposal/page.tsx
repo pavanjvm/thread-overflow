@@ -52,12 +52,12 @@ export default function SubmitProposalPage() {
   useEffect(() => {
     const fetchOpenSubIdeas = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true });
-            const openSubIdeas = response.data
-                .filter((subIdea: SubIdea) => subIdea.status === 'OPEN_FOR_PROTOTYPING')
-                .map((subIdea: SubIdea) => ({
+            const response = await axios.get<{ data: SubIdea[] }>(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true });
+            const openSubIdeas = response.data.data
+                .filter((subIdea) => subIdea.status === 'OPEN_FOR_PROTOTYPING')
+                .map((subIdea) => ({
                     label: subIdea.title,
-                    value: subIdea.id,
+                    value: String(subIdea.id), // Convert number to string for Combobox
                 }));
             setAvailableSubIdeas(openSubIdeas);
         } catch (error) {
@@ -72,8 +72,8 @@ export default function SubmitProposalPage() {
     
     const fetchParentIdea = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
-            setIdea(response.data);
+            const response = await axios.get<{ data: Idea }>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
+            setIdea(response.data.data);
         } catch (error) {
             console.error("Error fetching parent idea:", error);
         }
@@ -100,6 +100,9 @@ export default function SubmitProposalPage() {
     try {
         const { subIdeaId, title, description, presentationFile, presentationUrl } = values;
 
+        // Corrected API endpoint
+        const url = `${API_BASE_URL}/api/proposals/submit/${subIdeaId}`;
+
         // Case 1: File is uploaded
         if (presentationFile && presentationFile.length > 0) {
             const formData = new FormData();
@@ -107,7 +110,7 @@ export default function SubmitProposalPage() {
             formData.append('description', description);
             formData.append('file', presentationFile[0]);
 
-            await axios.post(`${API_BASE_URL}/api/proposal/submit/${subIdeaId}`, formData, {
+            await axios.post(url, formData, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -119,10 +122,10 @@ export default function SubmitProposalPage() {
             const payload = {
                 title,
                 description,
-                presentationUrl: presentationUrl || undefined, // Send undefined if empty string
+                presentationUrl: presentationUrl || undefined,
             };
 
-            await axios.post(`${API_BASE_URL}/api/proposal/submit/${subIdeaId}`, payload, {
+            await axios.post(url, payload, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json',
@@ -176,8 +179,8 @@ export default function SubmitProposalPage() {
                       <FormLabel>Idea to Build On</FormLabel>
                       <Combobox
                         options={availableSubIdeas}
-                        value={field.value}
-                        onChange={field.onChange}
+                        value={String(field.value)} // Ensure value is a string
+                        onChange={(value) => field.onChange(Number(value))} // Convert back to number on change
                         placeholder="Select an idea..."
                         searchPlaceholder="Search ideas by title..."
                       />

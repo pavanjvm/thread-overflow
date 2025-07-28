@@ -13,39 +13,48 @@ import { useState, useEffect } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import axios from 'axios';
 import { API_BASE_URL } from '@/lib/constants';
+import type { Idea } from '@/lib/types'; // Import the corrected Idea type
 
-const typeConfig = {
-    'IDEATION': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
-    'SOLUTION_REQUEST': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
+// Define a specific type for the configuration object keys
+type IdeaType = 'IDEATION' | 'SOLUTION_REQUEST';
+
+const typeConfig: Record<IdeaType, { variant: 'secondary'; className: string }> = {
+    'IDEATION': { variant: 'secondary', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
+    'SOLUTION_REQUEST': { variant: 'secondary', className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
 };
 
 const defaultConfig = { variant: 'secondary' as const, className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300' };
 
 export default function IdeationPortalPage() {
-  const [filter, setFilter] = useState('open'); // 'open' or 'closed' or 'all'
-  const [ideas, setIdeas] = useState([]);
+  const [filter, setFilter] = useState('open');
+  const [ideas, setIdeas] = useState<Idea[]>([]);
 
   useEffect(() => {
     const fetchIdeas = async () => {
       try {
         let url = `${API_BASE_URL}/api/ideas`;
+        // Append status filter if not 'all'
         if (filter !== 'all') {
           url = `${API_BASE_URL}/api/ideas?status=${filter.toUpperCase()}`;
         }
-        const response = await axios.get(url, { withCredentials: true });
+        
+        // Use the corrected Idea type for the axios response
+        const response = await axios.get<Idea[]>(url, { withCredentials: true });
+        
+        // Filter out any malformed idea objects from the API response
         if (Array.isArray(response.data)) {
-            setIdeas(response.data.filter(idea => idea && idea.type)); // Ensure idea and its type are not null
+            setIdeas(response.data.filter(idea => idea && idea.type && idea.id)); 
         } else {
             setIdeas([]);
         }
       } catch (error) {
         console.error('Error fetching ideas:', error);
-        setIdeas([]);
+        setIdeas([]); // Reset ideas on error to prevent crashes
       }
     };
 
     fetchIdeas();
-  }, [filter]);
+  }, [filter]); // Re-run effect when filter changes
 
   return (
     <div className="space-y-8">
@@ -84,9 +93,9 @@ export default function IdeationPortalPage() {
               className="block">
               <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-300 hover:bg-card/50">
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg line-clamp-1">{idea.title}</CardTitle>
-                       <div className="flex items-center gap-2">
+                  <div className="flex justify-between items-start gap-2">
+                      <CardTitle className="text-lg line-clamp-2">{idea.title}</CardTitle>
+                       <div className="flex items-center gap-2 flex-shrink-0">
                         <Badge
                             variant={config.variant}
                             className={cn('whitespace-nowrap', config.className)}
@@ -100,7 +109,7 @@ export default function IdeationPortalPage() {
                   </div>
                   <CardDescription className="flex items-center gap-2 text-xs pt-2">
                       <Avatar className="h-5 w-5">
-                          <AvatarImage src={authorAvatar} data-ai-hint="user avatar" />
+                          <AvatarImage src={authorAvatar || ''} alt={`${authorName}'s avatar`} />
                           <AvatarFallback>{authorName.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <span>{authorName}</span>
