@@ -1,34 +1,48 @@
 
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import type { User } from '@/lib/types';
-import { users } from '@/lib/mock-data';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 interface AuthContextType {
   currentUser: User | null;
-  login: (userId: string) => void;
-  logout: () => void;
+  setCurrentUser: (user: User | null) => void;
+  // login and logout are now handled by your backend's auth flow (e.g., cookies)
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // For this prototype, we'll set the initial user to Alice (admin)
-  const [currentUser, setCurrentUser] = useState<User | null>(users[0]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    setCurrentUser(user || null);
-  };
+  useEffect(() => {
+    // This effect runs once when the app loads
+    const fetchCurrentUser = async () => {
+      try {
+        // The cookie is sent automatically by the browser
+        const response = await axios.get(`${API_BASE_URL}/api/users/me`);
+        if (response.data) {
+          setCurrentUser(response.data);
+        }
+      } catch (error) {
+        // This is expected if the user is not logged in
+        console.log('Not logged in');
+        setCurrentUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const logout = () => {
-    setCurrentUser(null);
-  };
+    fetchCurrentUser();
+  }, []);
+
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
