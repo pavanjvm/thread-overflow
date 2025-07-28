@@ -8,7 +8,7 @@ import VoteButtons from './VoteButtons';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
-import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Hourglass, FileText } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Hourglass, FileText, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
 import { Textarea } from './ui/textarea';
@@ -33,6 +33,11 @@ const statusConfig = {
         icon: XCircle,
     },
 };
+
+const defaultConfig = {
+    className: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    icon: HelpCircle,
+}
   
 
 const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
@@ -42,7 +47,10 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
   const [actionType, setActionType] = useState<'accept' | 'reject' | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const config = statusConfig[currentStatus];
+  // Fallback to default config if status is unknown
+  const config = statusConfig[currentStatus] || defaultConfig;
+  const authorName = proposal.author?.name || 'Unknown Author';
+  const authorAvatarUrl = proposal.author?.avatarUrl;
 
   const handleAction = () => {
     // In a real app, this would be an API call
@@ -86,10 +94,10 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
             <CardDescription className="text-sm text-muted-foreground mt-2">
                 <div className="flex items-center space-x-2">
                     <Avatar className="h-5 w-5">
-                      <AvatarImage src={proposal.author.avatarUrl} data-ai-hint="user avatar" />
-                      <AvatarFallback>{proposal.author.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={authorAvatarUrl || ''} data-ai-hint="user avatar" />
+                      <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span>Proposed by {proposal.author.name}</span>
+                    <span>Proposed by {authorName}</span>
                     <span>•</span>
                     <span>{proposal.createdAt}</span>
                   </div>
