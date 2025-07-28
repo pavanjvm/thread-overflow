@@ -52,14 +52,19 @@ export default function SubmitProposalPage() {
   useEffect(() => {
     const fetchOpenSubIdeas = async () => {
         try {
-            const response = await axios.get<{ data: SubIdea[] }>(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true });
-            const openSubIdeas = response.data.data
-                .filter((subIdea) => subIdea.status === 'OPEN_FOR_PROTOTYPING')
-                .map((subIdea) => ({
-                    label: subIdea.title,
-                    value: String(subIdea.id), // Convert number to string for Combobox
-                }));
-            setAvailableSubIdeas(openSubIdeas);
+            const response = await axios.get<SubIdea[]>(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true });
+            // Directly use response.data as it's the array
+            if (response.data && Array.isArray(response.data)) {
+                const openSubIdeas = response.data
+                    .filter((subIdea) => subIdea.status === 'OPEN_FOR_PROTOTYPING')
+                    .map((subIdea) => ({
+                        label: subIdea.title,
+                        value: String(subIdea.id),
+                    }));
+                setAvailableSubIdeas(openSubIdeas);
+            } else {
+                setAvailableSubIdeas([]);
+            }
         } catch (error) {
             console.error("Error fetching open sub-ideas:", error);
             toast({
@@ -72,8 +77,9 @@ export default function SubmitProposalPage() {
     
     const fetchParentIdea = async () => {
         try {
-            const response = await axios.get<{ data: Idea }>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
-            setIdea(response.data.data);
+            // Corrected to expect the Idea object directly
+            const response = await axios.get<Idea>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
+            setIdea(response.data); // Set the idea directly from response.data
         } catch (error) {
             console.error("Error fetching parent idea:", error);
         }
@@ -100,10 +106,8 @@ export default function SubmitProposalPage() {
     try {
         const { subIdeaId, title, description, presentationFile, presentationUrl } = values;
 
-        // Corrected API endpoint
         const url = `${API_BASE_URL}/api/proposals/submit/${subIdeaId}`;
 
-        // Case 1: File is uploaded
         if (presentationFile && presentationFile.length > 0) {
             const formData = new FormData();
             formData.append('title', title);
@@ -117,7 +121,6 @@ export default function SubmitProposalPage() {
                 },
             });
         } 
-        // Case 2: URL is provided or neither
         else {
             const payload = {
                 title,
@@ -179,8 +182,8 @@ export default function SubmitProposalPage() {
                       <FormLabel>Idea to Build On</FormLabel>
                       <Combobox
                         options={availableSubIdeas}
-                        value={String(field.value)} // Ensure value is a string
-                        onChange={(value) => field.onChange(Number(value))} // Convert back to number on change
+                        value={String(field.value)}
+                        onChange={(value) => field.onChange(Number(value))}
                         placeholder="Select an idea..."
                         searchPlaceholder="Search ideas by title..."
                       />
