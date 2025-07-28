@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { notFound, useParams } from 'next/navigation';
@@ -22,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import axios from 'axios';
 import { API_BASE_URL } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Idea, SubIdea, Proposal, Prototype } from '@/lib/types';
 
 const typeConfig = {
     'Ideation': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
@@ -36,25 +36,25 @@ export default function IdeaDetailsPage() {
   const id = params.id as string;
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('ideas');
-  const [idea, setIdea] = useState(null);
-  const [ideaSubmissions, setIdeaSubmissions] = useState([]);
-  const [proposals, setProposals] = useState([]);
-  const [prototypes, setPrototypes] = useState([]);
+  const [idea, setIdea] = useState<Idea | null>(null);
+  const [ideaSubmissions, setIdeaSubmissions] = useState<SubIdea[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [prototypes, setPrototypes] = useState<Prototype[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchIdeaData = async () => {
       try {
         const [ideaRes, subIdeasRes, proposalsRes, prototypesRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true }),
-          axios.get(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true }),
-          axios.get(`${API_BASE_URL}/api/proposals/${id}/proposals`, { withCredentials: true }),
-          axios.get(`${API_BASE_URL}/api/prototypes/${id}/prototypes`, { withCredentials: true }),
+          axios.get<{ data: Idea }>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true }),
+          axios.get<{ data: SubIdea[] }>(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true }),
+          axios.get<{ data: Proposal[] }>(`${API_BASE_URL}/api/proposals/${id}/proposals`, { withCredentials: true }),
+          axios.get<{ data: Prototype[] }>(`${API_BASE_URL}/api/prototypes/${id}/prototypes`, { withCredentials: true }),
         ]);
-        setIdea(ideaRes.data);
-        setIdeaSubmissions(subIdeasRes.data);
-        setProposals(proposalsRes.data);
-        setPrototypes(prototypesRes.data);
+        setIdea(ideaRes.data.data);
+        setIdeaSubmissions(subIdeasRes.data.data || []);
+        setProposals(proposalsRes.data.data || []);
+        setPrototypes(prototypesRes.data.data || []);
       } catch (error) {
         console.error('Error fetching idea data:', error);
         notFound();
@@ -98,6 +98,8 @@ export default function IdeaDetailsPage() {
   
   const config = typeConfig[idea.type] || typeConfig.default;
   
+  const isProjectOwner = currentUser?.id === idea.author.id;
+
   const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
 
   const renderActionButton = () => {
@@ -150,7 +152,7 @@ export default function IdeaDetailsPage() {
           <h1 className="text-4xl font-bold tracking-tight text-foreground">{idea.title}</h1>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
             <Avatar className="h-5 w-5">
-              <AvatarImage src={idea.author.avatarUrl} data-ai-hint="user avatar" />
+              <AvatarImage src={idea.author.avatarUrl || ''} data-ai-hint="user avatar" />
               <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <span>Posted by {idea.author.name}</span>
@@ -204,7 +206,7 @@ export default function IdeaDetailsPage() {
                       <ProposalCard 
                         key={proposal.id}
                         proposal={proposal}
-                        isProjectOwner={currentUser?.id === idea.author.id}
+                        isProjectOwner={isProjectOwner}
                       />
                     ))
                   ) : (
