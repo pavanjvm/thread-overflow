@@ -55,10 +55,6 @@ export default function IdeaDetailsPage() {
         setIdeaSubmissions(subIdeasRes.data || []);
         setProposals(proposalsRes.data || []);
         setPrototypes(prototypesRes.data || []);
-
-        // --- Log the proposals array ---
-        console.log("Proposals data from API:", proposalsRes.data);
-
       } catch (error) {
         console.error('Error fetching idea data:', error);
         notFound();
@@ -104,7 +100,7 @@ export default function IdeaDetailsPage() {
   
   const isProjectOwner = currentUser?.id === idea.authorId;
 
-  const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'Accepted') : false;
+  const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'ACCEPTED') : false;
 
   const renderActionButton = () => {
     switch(activeTab) {
