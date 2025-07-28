@@ -1,10 +1,10 @@
 
 export interface User {
-  id: number; // Corrected to number to match API response
+  id: number;
   name: string;
   avatarUrl: string | null;
   stars?: number;
-  role?: 'ADMIN' | 'USER'; // Corrected to match API response
+  role?: 'ADMIN' | 'USER';
 }
 
 export interface Community {
@@ -86,7 +86,7 @@ export interface Proposal {
   author: User;
   createdAt: string;
   votes: number;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED'; // Corrected to uppercase
   rejectionReason?: string;
   presentationUrl?: string;
 }

@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import VoteButtons from './VoteButtons';
 import { Badge } from './ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, titleCase } from '@/lib/utils';
 import { Button } from './ui/button';
 import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Hourglass, FileText, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
@@ -23,15 +23,15 @@ interface ProposalCardProps {
 }
 
 const statusConfig = {
-    'Pending': { 
+    'PENDING': { 
         className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
         icon: Hourglass
     },
-    'Accepted': { 
+    'ACCEPTED': { 
         className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
         icon: CheckCircle,
     },
-    'Rejected': { 
+    'REJECTED': { 
         className: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
         icon: XCircle,
     },
@@ -52,7 +52,6 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fallback to default config if status is unknown
   const config = statusConfig[currentStatus] || defaultConfig;
   const authorName = proposal.author?.name || 'Unknown Author';
   const authorAvatarUrl = proposal.author?.avatarUrl;
@@ -73,14 +72,14 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
         { withCredentials: true }
       );
 
-      const newStatus = actionType === 'accept' ? 'Accepted' : 'Rejected';
+      const newStatus = actionType === 'accept' ? 'ACCEPTED' : 'REJECTED';
       setCurrentStatus(newStatus);
       if (actionType === 'reject') {
         setRejectionReason(comment);
       }
 
       toast({
-        title: `Proposal ${newStatus}`,
+        title: `Proposal ${titleCase(newStatus)}`,
         description: `The proposal has been successfully ${newStatus.toLowerCase()}.`,
       });
 
@@ -120,7 +119,7 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
                 </div>
                 <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
                     <config.icon className="mr-1.5 h-3.5 w-3.5" />
-                    {currentStatus}
+                    {titleCase(currentStatus)}
                 </Badge>
               </div>
             <CardDescription className="text-sm text-muted-foreground mt-2">
@@ -136,7 +135,7 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
               </CardDescription>
             <CardContent className="p-0 mt-3">
               <p className="text-muted-foreground line-clamp-3">{proposal.description}</p>
-               {currentStatus === 'Rejected' && rejectionReason && (
+               {currentStatus === 'REJECTED' && rejectionReason && (
                   <div className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-md border border-red-200 dark:border-red-500/30">
                       <span className="font-semibold">Reason:</span> {rejectionReason}
                   </div>
@@ -144,7 +143,7 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
             </CardContent>
             <CardFooter className="p-0 mt-4 flex justify-between items-center">
               <div></div>
-              {isProjectOwner && currentStatus === 'Pending' && (
+              {isProjectOwner && currentStatus === 'PENDING' && (
                   <div className="flex gap-2">
                       <DialogTrigger asChild>
                           <Button 
