@@ -50,7 +50,7 @@ export default function IdeaDetailsPage() {
           axios.get<Proposal[]>(`${API_BASE_URL}/api/proposals/${id}/proposals`, { withCredentials: true }),
           axios.get<Prototype[]>(`${API_BASE_URL}/api/prototypes/${id}/prototypes`, { withCredentials: true }),
         ]);
-        // Corrected data access: use response.data directly
+        
         setIdea(ideaRes.data);
         setIdeaSubmissions(subIdeasRes.data || []);
         setProposals(proposalsRes.data || []);
@@ -258,7 +258,7 @@ export default function IdeaDetailsPage() {
                               </CardHeader>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
-                              </Content>
+                              </CardContent>
                               <CardFooter className="flex justify-between items-center">
                                 <VoteButtons initialVotes={proto.votes} />
                                 <div className="flex -space-x-2">
