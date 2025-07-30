@@ -82,7 +82,7 @@ export default function BuildPrototypePage() {
         const ideaRes = await axios.get<Idea>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
         setIdea(ideaRes.data);
 
-        const usersRes = await axios.get<User[]>(`${API_BASE_URL}/api/users`, { withCredentials: true });
+        const usersRes = await axios.get<User[]>(`${API_BASE_URL}/api/profile/users`, { withCredentials: true });
         setAllUsers(usersRes.data);
         
         if(currentUser) {
@@ -91,13 +91,13 @@ export default function BuildPrototypePage() {
         }
       } catch (error) {
           console.error("Failed to fetch initial data:", error);
-          toast({ title: 'Error', description: 'Failed to load idea details.', variant: 'destructive' });
+          toast({ title: 'Error', description: 'Failed to load page details.', variant: 'destructive' });
           router.push(`/ideation/${id}`);
       } finally {
           setLoading(false);
       }
     };
-    if (id) {
+    if (id && currentUser) {
         fetchInitialData();
     }
   }, [id, proposalId, currentUser, toast, router, form]);
