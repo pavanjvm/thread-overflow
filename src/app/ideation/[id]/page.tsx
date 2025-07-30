@@ -248,12 +248,12 @@ export default function IdeaDetailsPage() {
                               </CardContent>
                               <CardFooter className="flex justify-between items-center">
                                 <VoteButtons initialVotes={proto.votes} />
-                                <div className="flex -space-x-2">
+                                <div className="flex -space-x-2 overflow-hidden">
                                   <TooltipProvider>
                                     {proto.team?.map(member => (
                                       <Tooltip key={member.id}>
                                         <TooltipTrigger>
-                                          <Avatar className="h-8 w-8 border-2 border-card">
+                                          <Avatar className="h-8 w-8 border-2 border-background">
                                               <AvatarImage src={member.avatarUrl || ''} data-ai-hint="user avatar" />
                                               <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                           </Avatar>
