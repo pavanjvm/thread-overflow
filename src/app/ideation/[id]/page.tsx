@@ -97,9 +97,7 @@ export default function IdeaDetailsPage() {
   }
   
   const config = typeConfig[idea.type] || typeConfig.default;
-  
   const isProjectOwner = currentUser?.id === idea.authorId;
-
   const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status && p.status.toUpperCase() === 'ACCEPTED') : false;
 
   console.log('Current User:', currentUser);
@@ -141,7 +139,7 @@ export default function IdeaDetailsPage() {
       default:
         return null;
     }
-  }
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
