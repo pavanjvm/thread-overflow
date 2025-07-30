@@ -188,29 +188,35 @@ export default function BuildPrototypePage() {
               <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl> <Textarea placeholder="Describe your prototype. What does it do? How does it solve the problem?" className="min-h-32" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
               <FormField control={form.control} name="imageUrl" render={({ field }) => ( <FormItem> <FormLabel>Image URL</FormLabel> <FormControl> <Input placeholder="https://placehold.co/600x400.png" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
               <FormField control={form.control} name="liveUrl" render={({ field }) => ( <FormItem> <FormLabel>Live URL</FormLabel> <FormControl> <Input placeholder="https://example.com/live-demo" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-              <FormItem>
-                <FormLabel>Team Members</FormLabel>
-                <FormControl>
-                    <div>
-                        <Combobox options={availableUsersForTeam} onChange={(value) => handleAddTeamMember(value)} value="" placeholder="Add a team member..." searchPlaceholder="Search for a user..." emptyText="No users found or all added." />
-                        <div className="mt-3 space-y-2">
-                            {teamMembers.map(user => (
-                                <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
-                                    <div className="flex items-center gap-2">
-                                        <Avatar className="h-5 w-5">
-                                            <AvatarImage src={user.avatarUrl ?? undefined} />
-                                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        {user.name}
-                                    </div>
-                                    <button type="button" onClick={() => handleRemoveTeamMember(user.id)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5"> <X className="h-3 w-3" /> </button>
-                                </Badge>
-                            ))}
+              <FormField
+                control={form.control}
+                name="team"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Team Members</FormLabel>
+                    <FormControl>
+                        <div>
+                            <Combobox options={availableUsersForTeam} onChange={(value) => handleAddTeamMember(value)} value="" placeholder="Add a team member..." searchPlaceholder="Search for a user..." emptyText="No users found or all added." />
+                            <div className="mt-3 space-y-2">
+                                {teamMembers.map(user => (
+                                    <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <Avatar className="h-5 w-5">
+                                                <AvatarImage src={user.avatarUrl ?? undefined} />
+                                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            {user.name}
+                                        </div>
+                                        <button type="button" onClick={() => handleRemoveTeamMember(user.id)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5"> <X className="h-3 w-3" /> </button>
+                                    </Badge>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+                />
             </CardContent>
             <CardFooter> <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? 'Submitting...' : 'Submit Prototype'} </Button> </CardFooter>
           </form>
