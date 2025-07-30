@@ -195,7 +195,6 @@ export default function BuildPrototypePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Team Members</FormLabel>
-                    {/* NO FormControl HERE - THIS IS THE FIX */}
                     <Combobox 
                         options={availableUsersForTeam} 
                         onChange={(value) => handleAddTeamMember(value)} 
