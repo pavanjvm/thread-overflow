@@ -256,7 +256,7 @@ export default function IdeaDetailsPage() {
                               </CardHeader>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
-                              </Content>
+                              </CardContent>
                               <CardFooter className="flex justify-between items-center">
                                 <VoteButtons initialVotes={proto.votes} />
                                 <div className="flex -space-x-2">
