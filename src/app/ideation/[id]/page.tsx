@@ -250,7 +250,7 @@ export default function IdeaDetailsPage() {
                                 <VoteButtons initialVotes={proto.votes} />
                                 <div className="flex -space-x-2">
                                   <TooltipProvider>
-                                    {proto.team.map(member => (
+                                    {proto.team?.map(member => (
                                       <Tooltip key={member.id}>
                                         <TooltipTrigger>
                                           <Avatar className="h-8 w-8 border-2 border-card">
