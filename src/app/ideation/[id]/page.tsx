@@ -100,7 +100,11 @@ export default function IdeaDetailsPage() {
   
   const isProjectOwner = currentUser?.id === idea.authorId;
 
-  const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status === 'ACCEPTED') : false;
+  const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status && p.status.toUpperCase() === 'ACCEPTED') : false;
+
+  console.log('Current User:', currentUser);
+  console.log('Proposals:', proposals);
+  console.log('Has Accepted Proposal:', hasAcceptedProposal);
 
   const renderActionButton = () => {
     switch(activeTab) {
@@ -255,7 +259,7 @@ export default function IdeaDetailsPage() {
                                   <CardDescription>
                                     by {proto.author.name}
                                   </CardDescription>
-                              </CardHeader>
+                              </Header>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
                               </CardContent>
