@@ -225,7 +225,7 @@ export default function BuildPrototypePage() {
                 )}
                 />
             </CardContent>
-            <CardFooter> <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? 'Submitting...' : 'Submit Prototype'} </Button> </CardFooter>
+            <CardFooter> <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? 'Submitting...' : 'Submit Prototype'} </Button> </Footer>
           </form>
         </Form>
       </Card>
