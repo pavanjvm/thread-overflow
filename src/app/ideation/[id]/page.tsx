@@ -98,11 +98,25 @@ export default function IdeaDetailsPage() {
   
   const config = typeConfig[idea.type] || typeConfig.default;
   const isProjectOwner = currentUser?.id === idea.authorId;
-  const hasAcceptedProposal = currentUser ? proposals.some(p => String(p.author.id) === String(currentUser.id) && p.status && p.status.toUpperCase() === 'ACCEPTED') : false;
+  
+  console.log('--- Debugging hasAcceptedProposal ---');
+  const hasAcceptedProposal = currentUser ? proposals.some(p => {
+    console.log('Checking proposal ID:', p.id);
+    console.log('Proposal author ID:', p.author?.id, '| Type:', typeof p.author?.id);
+    console.log('Current user ID:', currentUser?.id, '| Type:', typeof currentUser?.id);
+    const isAuthor = String(p.author?.id) === String(currentUser?.id);
+    console.log('-> Is author?', isAuthor);
+    
+    console.log('Proposal status:', p.status, '| Type:', typeof p.status);
+    const isAccepted = p.status?.trim().toUpperCase() === 'ACCEPTED';
+    console.log('-> Is accepted?', isAccepted);
+    console.log('---------------------------------');
+    return isAuthor && isAccepted;
+  }) : false;
 
-  console.log('Current User:', currentUser);
-  console.log('Proposals:', proposals);
-  console.log('Has Accepted Proposal:', hasAcceptedProposal);
+  console.log('Final Result | Has Accepted Proposal:', hasAcceptedProposal);
+  console.log('--- End of Debug ---');
+
 
   const renderActionButton = () => {
     switch(activeTab) {
