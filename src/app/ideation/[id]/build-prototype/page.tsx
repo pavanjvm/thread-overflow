@@ -195,24 +195,31 @@ export default function BuildPrototypePage() {
                   <FormItem>
                     <FormLabel>Team Members</FormLabel>
                     <FormControl>
-                        <div>
-                            <Combobox options={availableUsersForTeam} onChange={(value) => handleAddTeamMember(value)} value="" placeholder="Add a team member..." searchPlaceholder="Search for a user..." emptyText="No users found or all added." />
-                            <div className="mt-3 space-y-2">
-                                {teamMembers.map(user => (
-                                    <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
-                                        <div className="flex items-center gap-2">
-                                            <Avatar className="h-5 w-5">
-                                                <AvatarImage src={user.avatarUrl ?? undefined} />
-                                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            {user.name}
-                                        </div>
-                                        <button type="button" onClick={() => handleRemoveTeamMember(user.id)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5"> <X className="h-3 w-3" /> </button>
-                                    </Badge>
-                                ))}
-                            </div>
-                        </div>
+                        <Combobox 
+                            options={availableUsersForTeam} 
+                            onChange={(value) => handleAddTeamMember(value)} 
+                            value="" 
+                            placeholder="Add a team member..." 
+                            searchPlaceholder="Search for a user..." 
+                            emptyText="No users found or all added." 
+                        />
                     </FormControl>
+                    <div className="mt-3 space-y-2">
+                        {teamMembers.map(user => (
+                            <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                    <Avatar className="h-5 w-5">
+                                        <AvatarImage src={user.avatarUrl ?? undefined} />
+                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    {user.name}
+                                </div>
+                                <button type="button" onClick={() => handleRemoveTeamMember(user.id)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </Badge>
+                        ))}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
