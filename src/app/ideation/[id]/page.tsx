@@ -214,18 +214,6 @@ export default function IdeaDetailsPage() {
             </TabsContent>
             <TabsContent value="prototypes">
                <div className="space-y-6">
-                  {activeTab === 'prototypes' && hasAcceptedProposal ? (
-                         <div className="flex justify-end">
-                            <Button asChild>
-                            <Link href={`/ideation/${id}/build-prototype`}>
-                              <span>
-                                <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
-                              </span>
-                            </Link>
-                            </Button>
-                         </div>
-                     ) : null}
-
                     {activeTab === 'prototypes' && !hasAcceptedProposal ? (
                         <Card className="bg-muted/50 w-full">
                             <CardContent className="p-4 flex items-center gap-3">
