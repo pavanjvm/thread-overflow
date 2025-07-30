@@ -185,10 +185,65 @@ export default function BuildPrototypePage() {
               <CardDescription> You are building a prototype for the idea: <span className="font-semibold text-foreground">{idea.title}</span> </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Prototype Title</FormLabel> <FormControl> <Input placeholder="e.g., Working Model v1" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl> <Textarea placeholder="Describe your prototype. What does it do? How does it solve the problem?" className="min-h-32" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={form.control} name="imageUrl" render={({ field }) => ( <FormItem> <FormLabel>Image URL</FormLabel> <FormControl> <Input placeholder="https://placehold.co/600x400.png" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={form.control} name="liveUrl" render={({ field }) => ( <FormItem> <FormLabel>Live URL</FormLabel> <FormControl> <Input placeholder="https://example.com/live-demo" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+              <FormField 
+                control={form.control} 
+                name="title" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prototype Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Working Model v1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField 
+                control={form.control} 
+                name="description" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Describe your prototype. What does it do? How does it solve the problem?" 
+                        className="min-h-32" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField 
+                control={form.control} 
+                name="imageUrl" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://placehold.co/600x400.png" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField 
+                control={form.control} 
+                name="liveUrl" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Live URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/live-demo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="team"
