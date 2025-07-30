@@ -98,7 +98,7 @@ export default function IdeaDetailsPage() {
   
   const config = typeConfig[idea.type] || typeConfig.default;
   const isProjectOwner = currentUser?.id === idea.authorId;
-  const hasAcceptedProposal = currentUser ? proposals.some(p => p.author.id === currentUser.id && p.status && p.status.toUpperCase() === 'ACCEPTED') : false;
+  const hasAcceptedProposal = currentUser ? proposals.some(p => String(p.author.id) === String(currentUser.id) && p.status && p.status.toUpperCase() === 'ACCEPTED') : false;
 
   console.log('Current User:', currentUser);
   console.log('Proposals:', proposals);
