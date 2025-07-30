@@ -101,10 +101,12 @@ export default function IdeaDetailsPage() {
   
   console.log('--- Debugging hasAcceptedProposal ---');
   const hasAcceptedProposal = currentUser ? proposals.some(p => {
+    // @ts-ignore - The API sends authorId directly, not a nested author object.
+    const authorId = p.authorId ?? p.author?.id;
     console.log('Checking proposal ID:', p.id);
-    console.log('Proposal author ID:', p.author?.id, '| Type:', typeof p.author?.id);
+    console.log('Proposal author ID:', authorId, '| Type:', typeof authorId);
     console.log('Current user ID:', currentUser?.id, '| Type:', typeof currentUser?.id);
-    const isAuthor = String(p.author?.id) === String(currentUser?.id);
+    const isAuthor = String(authorId) === String(currentUser?.id);
     console.log('-> Is author?', isAuthor);
     
     console.log('Proposal status:', p.status, '| Type:', typeof p.status);
