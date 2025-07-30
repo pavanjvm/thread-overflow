@@ -24,9 +24,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Idea, SubIdea, Proposal, Prototype } from '@/lib/types';
 
 const typeConfig = {
-    'IDEATION': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
-    'SOLUTION_REQUEST': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
-    default: { variant: 'secondary' as const, className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300' },
+  'IDEATION': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
+  'SOLUTION_REQUEST': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
+  default: { variant: 'secondary' as const, className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300' },
 };
 
 
@@ -50,11 +50,15 @@ export default function IdeaDetailsPage() {
           axios.get<Proposal[]>(`${API_BASE_URL}/api/proposals/${id}/proposals`, { withCredentials: true }),
           axios.get<Prototype[]>(`${API_BASE_URL}/api/prototypes/${id}/prototypes`, { withCredentials: true }),
         ]);
-        
+
         setIdea(ideaRes.data);
         setIdeaSubmissions(subIdeasRes.data || []);
         setProposals(proposalsRes.data || []);
-        setPrototypes(prototypesRes.data || []);
+        // Map team to array of User objects if needed
+        setPrototypes((prototypesRes.data || []).map(proto => ({
+          ...proto,
+          team: proto.team?.map((member: any) => member.user || member) || []
+        })));
       } catch (error) {
         console.error('Error fetching idea data:', error);
         notFound();
@@ -72,37 +76,37 @@ export default function IdeaDetailsPage() {
 
   if (loading) {
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <header className="space-y-4">
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-12 w-3/4" />
-                <div className="flex items-center gap-2">
-                    <Skeleton className="h-5 w-5 rounded-full" />
-                    <Skeleton className="h-4 w-48" />
-                </div>
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-2/h-full" />
-            </header>
-            <Tabs defaultValue="ideas" className="w-full">
-                <TabsList>
-                    <Skeleton className="h-10 w-24" />
-                    <Skeleton className="h-10 w-24" />
-                    <Skeleton className="h-10 w-24" />
-                </TabsList>
-            </Tabs>
-        </div>
+      <div className="max-w-6xl mx-auto space-y-8">
+        <header className="space-y-4">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-12 w-3/4" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-5 rounded-full" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-2/h-full" />
+        </header>
+        <Tabs defaultValue="ideas" className="w-full">
+          <TabsList>
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+          </TabsList>
+        </Tabs>
+      </div>
     );
   }
 
   if (!idea) {
     notFound();
   }
-  
+
   const config = typeConfig[idea.type] || typeConfig.default;
   const isProjectOwner = currentUser?.id === idea.authorId;
 
   const renderActionButton = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'ideas':
         return (
           <Button asChild>
@@ -152,7 +156,7 @@ export default function IdeaDetailsPage() {
           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
             <Avatar className="h-5 w-5">
               <AvatarImage src={idea.author.avatarUrl || ''} data-ai-hint="user avatar" />
-              <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{idea.author?.name?.charAt(0) || '?'}</AvatarFallback>
             </Avatar>
             <span>Posted by {idea.author.name}</span>
             <span>•</span>
@@ -162,119 +166,119 @@ export default function IdeaDetailsPage() {
         <p className="text-lg text-muted-foreground">{idea.description}</p>
         {idea.potentialDollarValue && (
           <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <CircleDollarSign className="h-5 w-5" />
-              <span className="font-semibold text-lg">
-                  ${idea.potentialDollarValue.toLocaleString()}
-              </span>
-              <span className="text-sm text-muted-foreground">Potential Value</span>
+            <CircleDollarSign className="h-5 w-5" />
+            <span className="font-semibold text-lg">
+              ${idea.potentialDollarValue.toLocaleString()}
+            </span>
+            <span className="text-sm text-muted-foreground">Potential Value</span>
           </div>
         )}
       </header>
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-between items-center">
-            <TabsList>
-              <TabsTrigger value="ideas">Ideas and Suggestions ({ideaSubmissions.length})</TabsTrigger>
-              <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
-              <TabsTrigger value="prototypes">Prototypes ({prototypes.length})</TabsTrigger>
-            </TabsList>
-            {renderActionButton()}
+          <TabsList>
+            <TabsTrigger value="ideas">Ideas and Suggestions ({ideaSubmissions.length})</TabsTrigger>
+            <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
+            <TabsTrigger value="prototypes">Prototypes ({prototypes.length})</TabsTrigger>
+          </TabsList>
+          {renderActionButton()}
         </div>
         <div className="py-6">
-            <TabsContent value="ideas" className="space-y-6">
-                <div className="space-y-6">
-                    {ideaSubmissions.length > 0 ? (
-                      ideaSubmissions.map((subIdea) => (
-                        <Link
-                          key={subIdea.id}
-                          href={`/ideation/${id}/ideas/${subIdea.id}`}
-                          className="block">
-                          <SubIdeaCard 
-                              subIdea={subIdea}
-                          />
-                        </Link>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
-                    )}
-                </div>
-            </TabsContent>
-            <TabsContent value="proposals" className="space-y-6">
-               <div className="space-y-6 mt-6">
-                  {proposals.length > 0 ? (
-                    proposals.map((proposal) => (
-                      <ProposalCard 
-                        key={proposal.id}
-                        proposal={proposal}
-                        isProjectOwner={isProjectOwner}
-                      />
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground text-center py-8">No proposals submitted yet.</p>
-                  )}
-              </div>
-            </TabsContent>
-            <TabsContent value="prototypes">
-               <div className="space-y-6">
-                    {activeTab === 'prototypes' && !acceptedProposal ? (
-                        <Card className="bg-muted/50 w-full">
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <Info className="h-5 w-5 text-muted-foreground" />
-                                <p className="text-sm text-muted-foreground">
-                                    You must have an accepted proposal to build a prototype. <Link href={`/ideation/${id}/submit-proposal`} className="text-primary hover:underline font-medium">Submit a proposal</Link> to get started.
-                                </p>
-                            </CardContent>
-                        </Card>
-                    ) : null }
+          <TabsContent value="ideas" className="space-y-6">
+            <div className="space-y-6">
+              {ideaSubmissions.length > 0 ? (
+                ideaSubmissions.map((subIdea) => (
+                  <Link
+                    key={subIdea.id}
+                    href={`/ideation/${id}/ideas/${subIdea.id}`}
+                    className="block">
+                    <SubIdeaCard
+                      subIdea={subIdea}
+                    />
+                  </Link>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="proposals" className="space-y-6">
+            <div className="space-y-6 mt-6">
+              {proposals.length > 0 ? (
+                proposals.map((proposal) => (
+                  <ProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    isProjectOwner={isProjectOwner}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-8">No proposals submitted yet.</p>
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="prototypes">
+            <div className="space-y-6">
+              {activeTab === 'prototypes' && !acceptedProposal ? (
+                <Card className="bg-muted/50 w-full">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Info className="h-5 w-5 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      You must have an accepted proposal to build a prototype. <Link href={`/ideation/${id}/submit-proposal`} className="text-primary hover:underline font-medium">Submit a proposal</Link> to get started.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : null}
 
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                    {prototypes.length > 0 ? (
-                      prototypes.map((proto) => (
-                        <Link
-                          key={proto.id}
-                          href={`/ideation/${id}/prototypes/${proto.id}`}
-                          className="block">
-                          <Card className="h-full hover:border-primary/50 transition-colors">
-                              <div className="relative aspect-video w-full rounded-t-lg overflow-hidden">
-                                  <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />
-                              </div>
-                              <CardHeader>
-                                  <CardTitle className="text-lg">{proto.title}</CardTitle>
-                                  <CardDescription>
-                                    by {proto.author.name}
-                                  </CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
-                              </CardContent>
-                              <CardFooter className="flex justify-between items-center">
-                                <VoteButtons initialVotes={proto.votes} />
-                                <div className="flex -space-x-2 overflow-hidden">
-                                  <TooltipProvider>
-                                    {proto.team?.map(member => (
-                                      <Tooltip key={member.id}>
-                                        <TooltipTrigger>
-                                          <Avatar className="h-8 w-8 border-2 border-background">
-                                              <AvatarImage src={member.avatarUrl || ''} data-ai-hint="user avatar" />
-                                              <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                          </Avatar>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          {member.name}
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    ))}
-                                  </TooltipProvider>
-                                </div>
-                              </CardFooter>
-                          </Card>
-                        </Link>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground text-center py-8 col-span-full">No prototypes submitted yet.</p>
-                    )}
-                  </div>
-               </div>
-            </TabsContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                {prototypes.length > 0 ? (
+                  prototypes.map((proto) => (
+                    <Link
+                      key={proto.id}
+                      href={`/ideation/${id}/prototypes/${proto.id}`}
+                      className="block">
+                      <Card className="h-full hover:border-primary/50 transition-colors">
+                        <div className="relative aspect-video w-full rounded-t-lg overflow-hidden">
+                          <Image src={proto.imageUrl} alt={proto.title} fill className="object-cover" data-ai-hint="prototype screenshot" />
+                        </div>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{proto.title}</CardTitle>
+                          <CardDescription>
+                            by {proto.author.name}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
+                        </CardContent>
+                        <CardFooter className="flex justify-between items-center">
+                          <VoteButtons initialVotes={proto.votes} />
+                          <div className="flex -space-x-2 overflow-hidden">
+                            <TooltipProvider>
+                              {proto.team?.map((member, idx) => (
+                                <Tooltip key={member.id || idx}>
+                                  <TooltipTrigger>
+                                    <Avatar className="h-8 w-8 border-2 border-background">
+                                      <AvatarImage src={member.avatarUrl || ''} data-ai-hint="user avatar" />
+                                      <AvatarFallback>{member.name?.charAt(0) || '?'}</AvatarFallback>
+                                    </Avatar>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {member.name}
+                                  </TooltipContent>
+                                </Tooltip>
+                              ))}
+                            </TooltipProvider>
+                          </div>
+                        </CardFooter>
+                      </Card>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-8 col-span-full">No prototypes submitted yet.</p>
+                )}
+              </div>
+            </div>
+          </TabsContent>
         </div>
       </Tabs>
     </div>
