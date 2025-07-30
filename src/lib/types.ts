@@ -83,10 +83,11 @@ export interface Proposal {
   subIdeaId: number;
   title: string;
   description: string;
+  authorId: number;
   author: User;
   createdAt: string;
   votes: number;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED'; // Corrected to uppercase
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED'; 
   rejectionReason?: string;
   presentationUrl?: string;
 }
@@ -113,6 +114,7 @@ export interface Prototype {
   proposalId: string;
   title: string;
   description: string;
+  authorId: number;
   author: User;
   team: User[];
   createdAt: string;

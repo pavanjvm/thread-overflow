@@ -98,27 +98,7 @@ export default function IdeaDetailsPage() {
   
   const config = typeConfig[idea.type] || typeConfig.default;
   const isProjectOwner = currentUser?.id === idea.authorId;
-  
-  console.log('--- Debugging hasAcceptedProposal ---');
-  const hasAcceptedProposal = currentUser ? proposals.some(p => {
-    // @ts-ignore - The API sends authorId directly, not a nested author object.
-    const authorId = p.authorId ?? p.author?.id;
-    console.log('Checking proposal ID:', p.id);
-    console.log('Proposal author ID:', authorId, '| Type:', typeof authorId);
-    console.log('Current user ID:', currentUser?.id, '| Type:', typeof currentUser?.id);
-    const isAuthor = String(authorId) === String(currentUser?.id);
-    console.log('-> Is author?', isAuthor);
-    
-    console.log('Proposal status:', p.status, '| Type:', typeof p.status);
-    const isAccepted = p.status?.trim().toUpperCase() === 'ACCEPTED';
-    console.log('-> Is accepted?', isAccepted);
-    console.log('---------------------------------');
-    return isAuthor && isAccepted;
-  }) : false;
-
-  console.log('Final Result | Has Accepted Proposal:', hasAcceptedProposal);
-  console.log('--- End of Debug ---');
-
+  const hasAcceptedProposal = currentUser ? proposals.some(p => String(p.authorId) === String(currentUser.id) && p.status?.trim().toUpperCase() === 'ACCEPTED') : false;
 
   const renderActionButton = () => {
     switch(activeTab) {
@@ -276,7 +256,7 @@ export default function IdeaDetailsPage() {
                               </CardHeader>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{proto.description}</p>
-                              </CardContent>
+                              </Content>
                               <CardFooter className="flex justify-between items-center">
                                 <VoteButtons initialVotes={proto.votes} />
                                 <div className="flex -space-x-2">
