@@ -68,6 +68,8 @@ export default function IdeaDetailsPage() {
     }
   }, [id]);
 
+  const acceptedProposal = currentUser ? proposals.find(p => String(p.authorId) === String(currentUser.id) && p.status?.trim().toUpperCase() === 'ACCEPTED') : undefined;
+
   if (loading) {
     return (
         <div className="max-w-6xl mx-auto space-y-8">
@@ -98,7 +100,6 @@ export default function IdeaDetailsPage() {
   
   const config = typeConfig[idea.type] || typeConfig.default;
   const isProjectOwner = currentUser?.id === idea.authorId;
-  const hasAcceptedProposal = currentUser ? proposals.some(p => String(p.authorId) === String(currentUser.id) && p.status?.trim().toUpperCase() === 'ACCEPTED') : false;
 
   const renderActionButton = () => {
     switch(activeTab) {
@@ -123,9 +124,9 @@ export default function IdeaDetailsPage() {
           </Button>
         );
       case 'prototypes':
-        return hasAcceptedProposal ? (
+        return acceptedProposal ? (
           <Button asChild>
-            <Link href={`/ideation/${id}/build-prototype`}>
+            <Link href={`/ideation/${id}/build-prototype?proposalId=${acceptedProposal.id}`}>
               <span>
                 <Wrench className="mr-2 h-4 w-4" /> Build a Prototype
               </span>
@@ -214,7 +215,7 @@ export default function IdeaDetailsPage() {
             </TabsContent>
             <TabsContent value="prototypes">
                <div className="space-y-6">
-                    {activeTab === 'prototypes' && !hasAcceptedProposal ? (
+                    {activeTab === 'prototypes' && !acceptedProposal ? (
                         <Card className="bg-muted/50 w-full">
                             <CardContent className="p-4 flex items-center gap-3">
                                 <Info className="h-5 w-5 text-muted-foreground" />
