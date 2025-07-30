@@ -162,7 +162,9 @@ export default function BuildPrototypePage() {
         <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-semibold mb-4">Idea not found</h2>
             <p className="text-muted-foreground">The idea you are trying to build a prototype for could not be found.</p>
-            <Button asChild className="mt-4"> <Link href="/ideation">Back to Ideation Portal</Link> </Button>
+            <Button asChild className="mt-4">
+              <Link href="/ideation">Back to Ideation Portal</Link>
+            </Button>
         </div>
       );
   }
@@ -172,7 +174,7 @@ export default function BuildPrototypePage() {
       <div className="mb-4">
           <Button variant="ghost" asChild>
               <Link href={`/ideation/${id}`}>
-                  <> <ArrowLeft className="mr-2 h-4 w-4" /> Back to Idea </>
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Back to Idea
               </Link>
           </Button>
       </div>
@@ -225,7 +227,11 @@ export default function BuildPrototypePage() {
                 )}
                 />
             </CardContent>
-            <CardFooter> <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? 'Submitting...' : 'Submit Prototype'} </Button> </Footer>
+            <CardFooter>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Submitting...' : 'Submit Prototype'}
+              </Button>
+            </CardFooter>
           </form>
         </Form>
       </Card>
