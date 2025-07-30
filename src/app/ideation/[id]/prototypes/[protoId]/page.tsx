@@ -10,10 +10,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import CommentCard from '@/components/CommentCard';
+import AnimatedTooltipPreview from '@/components/animated-tooltip-demo';
 
 export default async function PrototypeDetailsPage({ params }: { params: { id: string, protoId: string } }) {
-  const idea = ideas.find((p) => p.id === params.id);
-  const prototype = idea?.prototypes.find((p) => p.id === params.protoId);
+  const idea = ideas.find((p) => p.id === parseInt(params.id, 10));
+  const prototype = idea?.prototypes?.find((p) => p.id === params.protoId);
 
   if (!idea || !prototype) {
     notFound();
@@ -43,7 +44,7 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
           <CardDescription>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Avatar className="h-5 w-5">
-                <AvatarImage src={prototype.author.avatarUrl} data-ai-hint="user avatar" />
+                <AvatarImage src={prototype.author.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                 <AvatarFallback>{prototype.author.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <span>Built by {prototype.author.name}</span>
@@ -66,15 +67,7 @@ export default async function PrototypeDetailsPage({ params }: { params: { id: s
                <CardTitle className="flex items-center gap-2 text-xl"><Users className="h-5 w-5" /> Team Members</CardTitle>
            </CardHeader>
            <CardContent className="flex flex-wrap gap-4">
-               {teamMembers.map(member => (
-                   <div key={member.id} className="flex items-center gap-2">
-                       <Avatar className="h-8 w-8">
-                           <AvatarImage src={member.avatarUrl} data-ai-hint="user avatar" />
-                           <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                       </Avatar>
-                       <span className="font-medium">{member.name}</span>
-                   </div>
-               ))}
+               <AnimatedTooltipPreview />
            </CardContent>
        </Card>
      )}
