@@ -216,7 +216,7 @@ export default function IdeaDetailsPage() {
             </TabsContent>
             <TabsContent value="prototypes">
                <div className="space-y-6">
-                  {activeTab !== 'prototypes' && hasAcceptedProposal ? (
+                  {activeTab === 'prototypes' && hasAcceptedProposal ? (
                          <div className="flex justify-end">
                             <Button asChild>
                             <Link href={`/ideation/${id}/build-prototype`}>
