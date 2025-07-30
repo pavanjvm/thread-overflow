@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -196,16 +195,15 @@ export default function BuildPrototypePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Team Members</FormLabel>
-                    <FormControl>
-                        <Combobox 
-                            options={availableUsersForTeam} 
-                            onChange={(value) => handleAddTeamMember(value)} 
-                            value="" 
-                            placeholder="Add a team member..." 
-                            searchPlaceholder="Search for a user..." 
-                            emptyText="No users found or all added." 
-                        />
-                    </FormControl>
+                    {/* NO FormControl HERE - THIS IS THE FIX */}
+                    <Combobox 
+                        options={availableUsersForTeam} 
+                        onChange={(value) => handleAddTeamMember(value)} 
+                        value="" 
+                        placeholder="Add a team member..." 
+                        searchPlaceholder="Search for a user..." 
+                        emptyText="No users found or all added." 
+                    />
                     <div className="mt-3 space-y-2">
                         {teamMembers.map(user => (
                             <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
