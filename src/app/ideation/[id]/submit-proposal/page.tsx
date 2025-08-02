@@ -26,17 +26,19 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lightbulb, Upload } from 'lucide-react';
-import { ideas, users } from '@/lib/mock-data';
+import { ArrowLeft, Lightbulb, Upload, Link2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Idea, SubIdea } from '@/lib/types';
 import { Combobox } from '@/components/ui/combobox';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 const formSchema = z.object({
-  ideaId: z.string({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
+  subIdeaId: z.coerce.number({ required_error: "Please select an idea." }).min(1, { message: "Please select an idea to propose for." }),
   title: z.string().min(10, 'Title must be at least 10 characters.').max(100),
   description: z.string().min(20, 'Description must be at least 20 characters.').max(2000),
-  presentation: z.any().optional(),
+  presentationFile: z.any().optional(),
+  presentationUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 export default function SubmitProposalPage() {
@@ -45,52 +47,123 @@ export default function SubmitProposalPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [idea, setIdea] = useState<Idea | null>(null);
-  const [availableIdeas, setAvailableIdeas] = useState<{label: string, value: string}[]>([]);
-
-  // Assume current user is the first user for prototyping
-  const currentUser = users[0];
+  const [availableSubIdeas, setAvailableSubIdeas] = useState<{label: string, value: string}[]>([]);
 
   useEffect(() => {
-    const foundIdea = ideas.find(p => p.id === id);
-    if (foundIdea) {
-      setIdea(foundIdea);
-      const openIdeas = foundIdea.subIdeas.filter(si => 
-        si.status === 'Open for prototyping' || (si.status === 'Self-prototyping' && si.author.id === currentUser.id)
-      ).map(si => ({ label: `${si.title} (${si.id})`, value: si.id }));
-      setAvailableIdeas(openIdeas);
+    const fetchOpenSubIdeas = async () => {
+        try {
+            const response = await axios.get<SubIdea[]>(`${API_BASE_URL}/api/subidea/${id}/subideas`, { withCredentials: true });
+            // Directly use response.data as it's the array
+            if (response.data && Array.isArray(response.data)) {
+                const openSubIdeas = response.data
+                    .filter((subIdea) => subIdea.status === 'OPEN_FOR_PROTOTYPING')
+                    .map((subIdea) => ({
+                        label: subIdea.title,
+                        value: String(subIdea.id),
+                    }));
+                setAvailableSubIdeas(openSubIdeas);
+            } else {
+                setAvailableSubIdeas([]);
+            }
+        } catch (error) {
+            console.error("Error fetching open sub-ideas:", error);
+            toast({
+                title: 'Error',
+                description: 'Could not fetch open sub-ideas for this project.',
+                variant: 'destructive',
+            });
+        }
+    };
+    
+    const fetchParentIdea = async () => {
+        try {
+            // Corrected to expect the Idea object directly
+            const response = await axios.get<Idea>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
+            setIdea(response.data); // Set the idea directly from response.data
+        } catch (error) {
+            console.error("Error fetching parent idea:", error);
+        }
     }
-  }, [id, currentUser.id]);
+
+    if (id) {
+        fetchOpenSubIdeas();
+        fetchParentIdea();
+    }
+  }, [id, toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ideaId: '',
+      subIdeaId: 0,
       title: '',
       description: '',
+      presentationFile: undefined,
+      presentationUrl: '',
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to submit a proposal
-    console.log('Submitting proposal for project:', id, values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+        const { subIdeaId, title, description, presentationFile, presentationUrl } = values;
 
-    toast({
-      title: 'Proposal Submitted!',
-      description: `Your proposal has been successfully submitted.`,
-    });
-    router.push(`/ideation/${id}`);
+        const url = `${API_BASE_URL}/api/proposals/submit/${subIdeaId}`;
+
+        if (presentationFile && presentationFile.length > 0) {
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('file', presentationFile[0]);
+
+            await axios.post(url, formData, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        } 
+        else {
+            const payload = {
+                title,
+                description,
+                presentationUrl: presentationUrl || undefined,
+            };
+
+            await axios.post(url, payload, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
+
+        toast({
+            title: 'Proposal Submitted!',
+            description: `Your proposal has been successfully submitted.`,
+        });
+        router.push(`/ideation/${id}`);
+
+    } catch (error: any) {
+        console.error('Error submitting proposal:', error);
+        toast({
+            title: 'Submission Failed',
+            description: error.response?.data?.error || 'An error occurred while submitting your proposal.',
+            variant: 'destructive',
+        });
+    }
   };
 
   return (
     <div className="max-w-2xl mx-auto">
-        <div className="mb-4">
-            <Button variant="ghost" asChild>
-                <Link href={id ? `/ideation/${id}` : '/ideation'}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to {idea ? 'Project' : 'Ideation Portal'}
-                </Link>
-            </Button>
-        </div>
+      <div className="mb-4">
+          <Button variant="ghost" asChild>
+              <Link href={id ? `/ideation/${id}` : '/ideation'}>
+                  <span>
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Back to {idea ? 'Project' : 'Ideation Portal'}
+                  </span>
+              </Link>
+          </Button>
+      </div>
       <Card>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -103,16 +176,16 @@ export default function SubmitProposalPage() {
             <CardContent className="space-y-4">
                <FormField
                   control={form.control}
-                  name="ideaId"
+                  name="subIdeaId"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Idea to Build On</FormLabel>
                       <Combobox
-                        options={availableIdeas}
-                        value={field.value}
-                        onChange={field.onChange}
+                        options={availableSubIdeas}
+                        value={String(field.value)}
+                        onChange={(value) => field.onChange(Number(value))}
                         placeholder="Select an idea..."
-                        searchPlaceholder="Search ideas by title or ID..."
+                        searchPlaceholder="Search ideas by title..."
                       />
                       <FormMessage />
                     </FormItem>
@@ -148,28 +221,60 @@ export default function SubmitProposalPage() {
                   </FormItem>
                 )}
               />
-               <FormField
-                control={form.control}
-                name="presentation"
-                render={({ field: { onChange, value, ...rest }}) => (
-                  <FormItem>
-                    <FormLabel>Upload Presentation (PPTX)</FormLabel>
-                     <FormControl>
-                        <div className="relative">
-                            <Input 
-                                type="file" 
-                                accept=".pptx"
-                                onChange={(e) => onChange(e.target.files)}
-                                className="pl-12"
-                                {...rest}
-                            />
-                            <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <FormLabel>Presentation (Optional)</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="presentationFile"
+                  render={({ field: { onChange, value, ...rest }}) => (
+                    <FormItem className="mt-2">
+                       <FormControl>
+                          <div className="relative">
+                              <Input 
+                                  type="file" 
+                                  accept=".pptx,.pdf,.doc,.docx"
+                                  onChange={(e) => onChange(e.target.files)}
+                                  className="pl-12"
+                                  {...rest}
+                              />
+                              <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">
+                            Or
+                        </span>
+                    </div>
+                </div>
+                <FormField
+                    control={form.control}
+                    name="presentationUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                         <FormControl>
+                            <div className="relative">
+                                <Input 
+                                    type="url"
+                                    placeholder="e.g., https://slides.com/your-deck"
+                                    className="pl-12"
+                                    {...field}
+                                />
+                                <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                />
+              </div>
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>

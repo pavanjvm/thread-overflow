@@ -1,11 +1,10 @@
 
-
 export interface User {
-  id: string;
+  id: number;
   name: string;
-  avatarUrl: string;
-  stars: number;
-  role: 'admin' | 'user';
+  avatarUrl: string | null;
+  stars?: number;
+  role?: 'ADMIN' | 'USER';
 }
 
 export interface Community {
@@ -70,40 +69,44 @@ export interface Conversation {
 }
 
 export interface SubIdea {
-    id: string;
+    id: number; 
     title: string;
     description: string;
     author: User;
     createdAt: string;
     votes: number;
-    status: 'Open for prototyping' | 'Self-prototyping';
+    status: 'OPEN_FOR_PROTOTYPING' | 'SELF_PROTOTYPING';
 }
 
 export interface Proposal {
-  id: string;
-  subIdeaId: string;
+  id: number;
+  subIdeaId: number;
   title: string;
   description: string;
+  authorId: number;
   author: User;
   createdAt: string;
   votes: number;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED'; 
   rejectionReason?: string;
   presentationUrl?: string;
 }
 
-// A submitted Idea or a requested Solution
 export interface Idea {
-  id: string;
+  id: number;
   title: string;
   description: string;
   author: User;
+  authorId: number;
   createdAt: string;
-  type: 'Ideation' | 'Solution Request';
+  type: 'IDEATION' | 'SOLUTION_REQUEST';
+  status: 'OPEN' | 'CLOSED';
+  totalProposals: number;
+  totalPrototypes: number;
   potentialDollarValue?: number;
-  subIdeas: SubIdea[];
-  proposals: Proposal[];
-  prototypes: Prototype[];
+  subIdeas?: SubIdea[];
+  proposals?: Proposal[];
+  prototypes?: Prototype[];
 }
 
 export interface Prototype {
@@ -111,6 +114,7 @@ export interface Prototype {
   proposalId: string;
   title: string;
   description: string;
+  authorId: number;
   author: User;
   team: User[];
   createdAt: string;

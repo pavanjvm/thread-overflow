@@ -28,6 +28,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lightbulb, DollarSign } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
 
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
@@ -50,28 +52,41 @@ export default function SubmitIdeaPage() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to create a new idea.
-    // The `type` would be 'Ideation' here.
-    console.log('Form values:', { ...values, type: 'Ideation' });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/ideas`,
+        { ...values, type: 'IDEATION' },
+        { withCredentials: true }
+      );
 
-    toast({
-      title: 'Idea Submitted!',
-      description: `Your idea "${values.title}" has been submitted.`,
-    });
-    router.push('/ideation');
+      toast({
+        title: 'Idea Submitted!',
+        description: `Your idea "${values.title}" has been submitted.`,
+      });
+      router.push('/ideation');
+    } catch (error: any) {
+      console.error('Error submitting idea:', error);
+      toast({
+        title: 'Submission Failed',
+        description: error.response?.data?.error || 'An error occurred while submitting your idea.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
     <div className="max-w-2xl mx-auto">
-        <div className="mb-4">
-            <Button variant="ghost" asChild>
-                <Link href="/ideation">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Ideation Portal
-                </Link>
-            </Button>
-        </div>
+      <div className="mb-4">
+          <Button variant="ghost" asChild>
+              <Link href="/ideation">
+                <>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Ideation Portal
+                </>
+              </Link>
+          </Button>
+      </div>
       <Card>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

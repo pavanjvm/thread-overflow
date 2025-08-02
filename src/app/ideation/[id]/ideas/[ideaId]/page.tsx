@@ -23,16 +23,17 @@ export default async function SubIdeaDetailsPage({ params }: { params: { id: str
 
   return (
     <div className="max-w-4xl mx-auto grid md:grid-cols-[64px_1fr] gap-4">
-       <div className="flex justify-center">
-            <VoteButtons initialVotes={subIdea.votes} />
-        </div>
-      
+      <div className="flex justify-center">
+           <VoteButtons initialVotes={subIdea.votes} />
+       </div>
       <div>
         <div className="mb-4">
             <Button variant="ghost" asChild>
                 <Link href={`/ideation/${idea.id}`}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Project
+                    <>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Project
+                    </>
                 </Link>
             </Button>
         </div>
@@ -73,4 +74,3 @@ export default async function SubIdeaDetailsPage({ params }: { params: { id: str
     </div>
   );
 }
-

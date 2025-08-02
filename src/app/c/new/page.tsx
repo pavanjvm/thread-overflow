@@ -103,138 +103,138 @@ export default function NewCommunityPage() {
 
   return (
     <div className="flex justify-center items-center py-12">
-        <Card className="max-w-2xl w-full">
-        <CardHeader>
-            <CardTitle>Create a Community</CardTitle>
-            <CardDescription>Start a new community and grow your audience.</CardDescription>
-        </CardHeader>
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6">
-                <FormField
+      <Card className="max-w-2xl w-full">
+      <CardHeader>
+          <CardTitle>Create a Community</CardTitle>
+          <CardDescription>Start a new community and grow your audience.</CardDescription>
+      </CardHeader>
+      <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <CardContent className="space-y-6">
+              <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Community Name</FormLabel>
+                  <FormControl>
+                      <Input placeholder="e.g. Awesome Developers" {...field} onChange={(e) => {
+                          field.onChange(e);
+                          const slug = e.target.value
+                              .trim()
+                              .toLowerCase()
+                              .replace(/\s+/g, '-')
+                              .replace(/[^\w-]+/g, '')
+                              .replace(/--+/g, '-')
+                              .substring(0, 30);
+                          form.setValue('slug', slug, { shouldValidate: true });
+                      }} />
+                  </FormControl>
+                  <FormDesc>This will be the display name for your community. It will also be used to generate the slug.</FormDesc>
+                  <FormMessage />
+                  </FormItem>
+              )}
+              />
+              <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Community Slug</FormLabel>
+                  <FormControl>
+                      <div className="flex items-center">
+                          <span className="text-muted-foreground bg-muted px-3 py-2 rounded-l-md border border-r-0 border-input text-sm">c/</span>
+                          <Input placeholder="e.g. awesome-devs" {...field} className="rounded-l-none" />
+                      </div>
+                  </FormControl>
+                   <FormDesc>This is the URL for your community. It must be unique.</FormDesc>
+                  <FormMessage />
+                  </FormItem>
+              )}
+              />
+               <FormField
                 control={form.control}
-                name="name"
+                name="description"
                 render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Community Name</FormLabel>
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g. Awesome Developers" {...field} onChange={(e) => {
-                            field.onChange(e);
-                            const slug = e.target.value
-                                .trim()
-                                .toLowerCase()
-                                .replace(/\s+/g, '-')
-                                .replace(/[^\w-]+/g, '')
-                                .replace(/--+/g, '-')
-                                .substring(0, 30);
-                            form.setValue('slug', slug, { shouldValidate: true });
-                        }} />
+                      <Textarea
+                        placeholder="Tell us about your community"
+                        className="min-h-24"
+                        {...field}
+                      />
                     </FormControl>
-                    <FormDesc>This will be the display name for your community. It will also be used to generate the slug.</FormDesc>
+                    <FormDesc>A brief description of what your community is about.</FormDesc>
                     <FormMessage />
-                    </FormItem>
+                  </FormItem>
                 )}
-                />
-                <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
+              />
+              <div className="space-y-2">
+                <FormLabel>Visuals</FormLabel>
+                <FormDesc>Add an icon and cover image for your community.</FormDesc>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                     <FormItem>
-                    <FormLabel>Community Slug</FormLabel>
-                    <FormControl>
-                        <div className="flex items-center">
-                            <span className="text-muted-foreground bg-muted px-3 py-2 rounded-l-md border border-r-0 border-input text-sm">c/</span>
-                            <Input placeholder="e.g. awesome-devs" {...field} className="rounded-l-none" />
-                        </div>
-                    </FormControl>
-                     <FormDesc>This is the URL for your community. It must be unique.</FormDesc>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Tell us about your community"
-                          className="min-h-24"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDesc>A brief description of what your community is about.</FormDesc>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="space-y-2">
-                  <FormLabel>Visuals</FormLabel>
-                  <FormDesc>Add an icon and cover image for your community.</FormDesc>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-                      <FormItem>
-                        <FormLabel className="text-sm font-normal">Community Icon</FormLabel>
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-20 w-20 border">
-                              <AvatarImage src={iconPreview ?? undefined} alt="Icon preview" />
-                              <AvatarFallback>
-                                  <Camera className="h-8 w-8 text-muted-foreground" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <Button type="button" variant="outline" onClick={() => iconInputRef.current?.click()}>
-                              Upload
-                            </Button>
-                            <Input
-                              type="file"
-                              className="hidden"
-                              accept="image/*"
-                              ref={iconInputRef}
-                              onChange={handleIconChange}
-                            />
-                        </div>
-                        <FormField
-                            control={form.control} name="icon" render={() => <FormMessage />}
-                        />
-                      </FormItem>
-                      <FormItem>
-                        <FormLabel className="text-sm font-normal">Cover Photo</FormLabel>
-                        <div
-                          className="relative flex items-center justify-center h-20 w-full rounded-md border-2 border-dashed border-input bg-muted/50 cursor-pointer hover:border-primary transition-colors"
-                          onClick={() => coverInputRef.current?.click()}
-                        >
+                      <FormLabel className="text-sm font-normal">Community Icon</FormLabel>
+                      <div className="flex items-center gap-4">
+                          <Avatar className="h-20 w-20 border">
+                            <AvatarImage src={iconPreview ?? undefined} alt="Icon preview" />
+                            <AvatarFallback>
+                                <Camera className="h-8 w-8 text-muted-foreground" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <Button type="button" variant="outline" onClick={() => iconInputRef.current?.click()}>
+                            Upload
+                          </Button>
                           <Input
                             type="file"
                             className="hidden"
                             accept="image/*"
-                            ref={coverInputRef}
-                            onChange={handleCoverChange}
+                            ref={iconInputRef}
+                            onChange={handleIconChange}
                           />
-                          {coverPreview ? (
-                            <Image src={coverPreview} alt="Cover preview" fill className="object-cover rounded-md" />
-                          ) : (
-                            <div className="text-center text-muted-foreground p-2">
-                              <ImageIcon className="mx-auto h-6 w-6" />
-                              <p className="text-xs mt-1">Upload Cover</p>
-                            </div>
-                          )}
-                        </div>
-                        <FormField
-                            control={form.control} name="coverImage" render={() => <FormMessage />}
+                      </div>
+                      <FormField
+                          control={form.control} name="icon" render={() => <FormMessage />}
+                      />
+                    </FormItem>
+                    <FormItem>
+                      <FormLabel className="text-sm font-normal">Cover Photo</FormLabel>
+                      <div
+                        className="relative flex items-center justify-center h-20 w-full rounded-md border-2 border-dashed border-input bg-muted/50 cursor-pointer hover:border-primary transition-colors"
+                        onClick={() => coverInputRef.current?.click()}
+                      >
+                        <Input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          ref={coverInputRef}
+                          onChange={handleCoverChange}
                         />
-                      </FormItem>
-                  </div>
+                        {coverPreview ? (
+                          <Image src={coverPreview} alt="Cover preview" fill className="object-cover rounded-md" />
+                        ) : (
+                          <div className="text-center text-muted-foreground p-2">
+                            <ImageIcon className="mx-auto h-6 w-6" />
+                            <p className="text-xs mt-1">Upload Cover</p>
+                          </div>
+                        )}
+                      </div>
+                      <FormField
+                          control={form.control} name="coverImage" render={() => <FormMessage />}
+                      />
+                    </FormItem>
                 </div>
-            </CardContent>
-            <CardFooter>
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? "Creating..." : "Create Community"}
-                </Button>
-            </CardFooter>
-            </form>
-        </Form>
-        </Card>
+              </div>
+          </CardContent>
+          <CardFooter>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? "Creating..." : "Create Community"}
+              </Button>
+          </CardFooter>
+          </form>
+      </Form>
+      </Card>
     </div>
   );
 }

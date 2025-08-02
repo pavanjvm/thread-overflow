@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -25,11 +26,19 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { DollarSign } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
+
 
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
-  problem: z.string().min(50, 'Problem statement must be at least 50 characters long.').max(2000, "Problem statement can't be longer than 2000 characters."),
-   potentialDollarValue: z.number({ invalid_type_error: 'Must be a number' }).min(0, 'Value must be zero or more').optional(),
+
+  description: z.string().min(50, 'Description must be at least 50 characters long.').max(2000, "Description can't be longer than 2000 characters."),
+  potentialDollarValue: z.string().optional().refine(
+    (val) => !val || !isNaN(parseFloat(val)), { message: "Must be a valid number."}
+  ).transform((val) => val ? parseFloat(val) : undefined),
+
 });
 
 export default function RequestSolutionDialog() {
@@ -40,21 +49,33 @@ export default function RequestSolutionDialog() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      problem: '',
+      description: '',
+      potentialDollarValue: undefined,
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // TODO: Replace with your API call to create a new request.
-    // The `type` would be 'Solution Request' here.
-    console.log('Form values:', { ...values, type: 'Solution Request' });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/ideas`,
+        { ...values, type: 'SOLUTION_REQUEST' },
+        { withCredentials: true }
+      );
 
-    toast({
-      title: 'Solution Requested!',
-      description: `Your request "${values.title}" has been submitted.`,
-    });
-    setOpen(false);
-    form.reset();
+      toast({
+        title: 'Solution Requested!',
+        description: `Your request "${values.title}" has been submitted.`,
+      });
+      setOpen(false);
+      form.reset();
+    } catch (error: any) {
+      console.error('Error submitting solution request:', error);
+      toast({
+        title: 'Submission Failed',
+        description: error.response?.data?.error || 'An error occurred while submitting your request.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -87,10 +108,10 @@ export default function RequestSolutionDialog() {
               />
               <FormField
                 control={form.control}
-                name="problem"
+                name="description" 
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Problem Statement</FormLabel>
+                    <FormLabel>Problem Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Describe the problem in detail. What are the pain points? Who is affected? What would a good solution look like?"
@@ -102,18 +123,28 @@ export default function RequestSolutionDialog() {
                   </FormItem>
                 )}
               />
+
               <FormField
+
                 control={form.control}
                 name="potentialDollarValue"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Potential Dollar Value</FormLabel>
+
+                    <FormLabel>Potential Dollar Value ($)</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Enter estimated value (e.g., 50000)"
-                        {...field}
-                      />
+                       <div className="relative">
+                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="number"
+                            placeholder="e.g., 50000"
+                            className="pl-8"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)} 
+                            value={field.value ?? ''}
+                          />
+                       </div>
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>

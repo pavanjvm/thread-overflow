@@ -79,7 +79,7 @@ export default function HackathonLayout({
         <div className="absolute top-6 right-6 flex gap-2">
           {currentUser?.role === 'admin' ? (
              <Button asChild variant="secondary">
-                <Link href={`/hackathons/${hackathon.slug}/edit`}>
+                <Link href={`/hackathons/${hackathon.slug}/edit`} legacyBehavior>
                   <Edit className="mr-2 h-4 w-4" /> Edit
                 </Link>
               </Button>

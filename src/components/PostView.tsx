@@ -27,7 +27,10 @@ export default function PostView({ post }: PostViewProps) {
                 <AvatarImage src={post.community.iconUrl} data-ai-hint="community icon" />
                 <AvatarFallback>{post.community.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <Link href={`/c/${post.community.slug}`} className="font-semibold hover:underline hover:text-primary transition-colors">
+              <Link
+                href={`/c/${post.community.slug}`}
+                className="font-semibold hover:underline hover:text-primary transition-colors"
+                legacyBehavior>
                 c/{post.community.slug}
               </Link>
               <span className="text-xs">•</span>

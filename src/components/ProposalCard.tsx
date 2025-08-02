@@ -6,13 +6,16 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import VoteButtons from './VoteButtons';
 import { Badge } from './ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, titleCase } from '@/lib/utils';
 import { Button } from './ui/button';
-import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Hourglass, FileText } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Hourglass, FileText, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -20,42 +23,78 @@ interface ProposalCardProps {
 }
 
 const statusConfig = {
-    'Pending': { 
+    'PENDING': { 
         className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
         icon: Hourglass
     },
-    'Accepted': { 
+    'ACCEPTED': { 
         className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
         icon: CheckCircle,
     },
-    'Rejected': { 
+    'REJECTED': { 
         className: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
         icon: XCircle,
     },
 };
+
+const defaultConfig = {
+    className: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    icon: HelpCircle,
+}
   
 
 const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
+  const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState(proposal.status);
   const [rejectionReason, setRejectionReason] = useState(proposal.rejectionReason);
   const [comment, setComment] = useState('');
   const [actionType, setActionType] = useState<'accept' | 'reject' | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const config = statusConfig[currentStatus];
+  const config = statusConfig[currentStatus] || defaultConfig;
+  const authorName = proposal.author?.name || 'Unknown Author';
+  const authorAvatarUrl = proposal.author?.avatarUrl;
 
-  const handleAction = () => {
-    // In a real app, this would be an API call
-    if (actionType === 'accept') {
-        console.log(`Accepting proposal ${proposal.id} with comment: ${comment}`);
-        setCurrentStatus('Accepted');
-    } else if (actionType === 'reject') {
-        console.log(`Rejecting proposal ${proposal.id} with reason: ${comment}`);
-        setCurrentStatus('Rejected');
+  const handleAction = async () => {
+    if (!actionType) return;
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        status: actionType === 'accept' ? 'ACCEPTED' : 'REJECTED',
+        rejectionReason: actionType === 'reject' ? comment : undefined,
+      };
+
+      await axios.patch(
+        `${API_BASE_URL}/api/proposals/${proposal.id}/status`,
+        payload,
+        { withCredentials: true }
+      );
+
+      const newStatus = actionType === 'accept' ? 'ACCEPTED' : 'REJECTED';
+      setCurrentStatus(newStatus);
+      if (actionType === 'reject') {
         setRejectionReason(comment);
+      }
+
+      toast({
+        title: `Proposal ${titleCase(newStatus)}`,
+        description: `The proposal has been successfully ${newStatus.toLowerCase()}.`,
+      });
+
+    } catch (error: any) {
+      console.error('Failed to update proposal status:', error);
+      toast({
+        title: 'Update Failed',
+        description: error.response?.data?.error || 'An error occurred while updating the status.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+      setIsDialogOpen(false);
+      setComment('');
     }
-    setIsDialogOpen(false);
-    setComment('');
   };
 
   return (
@@ -80,23 +119,23 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
                 </div>
                 <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
                     <config.icon className="mr-1.5 h-3.5 w-3.5" />
-                    {currentStatus}
+                    {titleCase(currentStatus)}
                 </Badge>
               </div>
             <CardDescription className="text-sm text-muted-foreground mt-2">
                 <div className="flex items-center space-x-2">
                     <Avatar className="h-5 w-5">
-                      <AvatarImage src={proposal.author.avatarUrl} data-ai-hint="user avatar" />
-                      <AvatarFallback>{proposal.author.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={authorAvatarUrl || ''} data-ai-hint="user avatar" />
+                      <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span>Proposed by {proposal.author.name}</span>
+                    <span>Proposed by {authorName}</span>
                     <span>•</span>
                     <span>{proposal.createdAt}</span>
                   </div>
               </CardDescription>
             <CardContent className="p-0 mt-3">
               <p className="text-muted-foreground line-clamp-3">{proposal.description}</p>
-               {currentStatus === 'Rejected' && rejectionReason && (
+               {currentStatus === 'REJECTED' && rejectionReason && (
                   <div className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-md border border-red-200 dark:border-red-500/30">
                       <span className="font-semibold">Reason:</span> {rejectionReason}
                   </div>
@@ -104,7 +143,7 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
             </CardContent>
             <CardFooter className="p-0 mt-4 flex justify-between items-center">
               <div></div>
-              {isProjectOwner && currentStatus === 'Pending' && (
+              {isProjectOwner && currentStatus === 'PENDING' && (
                   <div className="flex gap-2">
                       <DialogTrigger asChild>
                           <Button 
@@ -160,10 +199,10 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
+            <Button variant="ghost" disabled={isSubmitting}>Cancel</Button>
           </DialogClose>
-          <Button onClick={handleAction} disabled={actionType === 'reject' && !comment.trim()}>
-            {actionType === 'accept' ? 'Accept and Send' : 'Reject and Send'}
+          <Button onClick={handleAction} disabled={isSubmitting || (actionType === 'reject' && !comment.trim())}>
+            {isSubmitting ? 'Submitting...' : (actionType === 'accept' ? 'Accept and Send' : 'Reject and Send')}
           </Button>
         </DialogFooter>
       </DialogContent>
