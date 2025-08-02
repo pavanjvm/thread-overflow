@@ -33,10 +33,12 @@ import { API_BASE_URL } from '@/lib/constants';
 
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters long.').max(100, "Title can't be longer than 100 characters."),
+
   description: z.string().min(50, 'Description must be at least 50 characters long.').max(2000, "Description can't be longer than 2000 characters."),
   potentialDollarValue: z.string().optional().refine(
     (val) => !val || !isNaN(parseFloat(val)), { message: "Must be a valid number."}
   ).transform((val) => val ? parseFloat(val) : undefined),
+
 });
 
 export default function RequestSolutionDialog() {
@@ -121,11 +123,14 @@ export default function RequestSolutionDialog() {
                   </FormItem>
                 )}
               />
-               <FormField
+
+              <FormField
+
                 control={form.control}
                 name="potentialDollarValue"
                 render={({ field }) => (
                   <FormItem>
+
                     <FormLabel>Potential Dollar Value ($)</FormLabel>
                     <FormControl>
                        <div className="relative">
@@ -139,6 +144,7 @@ export default function RequestSolutionDialog() {
                             value={field.value ?? ''}
                           />
                        </div>
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>

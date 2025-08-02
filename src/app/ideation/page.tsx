@@ -15,6 +15,8 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/lib/constants';
 import type { Idea } from '@/lib/types'; // Import the corrected Idea type
 
+
+
 // Define a specific type for the configuration object keys
 type IdeaType = 'IDEATION' | 'SOLUTION_REQUEST';
 
@@ -59,6 +61,7 @@ export default function IdeationPortalPage() {
   return (
     <div className="space-y-8">
       <header className="flex justify-between items-center">
+
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Ideation Portal</h1>
             <p className="text-muted-foreground mt-1">Submit ideas or request solutions from the community.</p>
@@ -80,6 +83,10 @@ export default function IdeationPortalPage() {
             </Button>
           </div>
       </header>
+
+ 
+
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {ideas.map((idea) => {
           const config = typeConfig[idea.type] || defaultConfig;
