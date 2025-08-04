@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import VoteButtons from './VoteButtons';
 import { Badge } from './ui/badge';
-import { cn, titleCase } from '@/lib/utils';
+import { cn, titleCase, formatRelativeTime } from '@/lib/utils';
 import { Button } from './ui/button';
 import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Hourglass, FileText, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
@@ -23,25 +23,25 @@ interface ProposalCardProps {
 }
 
 const statusConfig = {
-    'PENDING': { 
-        className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-        icon: Hourglass
-    },
-    'ACCEPTED': { 
-        className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-        icon: CheckCircle,
-    },
-    'REJECTED': { 
-        className: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-        icon: XCircle,
-    },
+  'PENDING': {
+    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+    icon: Hourglass
+  },
+  'ACCEPTED': {
+    className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+    icon: CheckCircle,
+  },
+  'REJECTED': {
+    className: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+    icon: XCircle,
+  },
 };
 
 const defaultConfig = {
-    className: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-    icon: HelpCircle,
+  className: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+  icon: HelpCircle,
 }
-  
+
 
 const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
   const { toast } = useToast();
@@ -105,67 +105,67 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
             <VoteButtons initialVotes={proposal.votes} />
           </div>
           <div className="flex-grow py-4 pr-4">
-              <div className="flex justify-between items-start gap-2">
-                <div>
-                  <CardTitle className="text-lg mb-1">{proposal.title}</CardTitle>
-                   {proposal.presentationUrl && (
-                    <a href={proposal.presentationUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2">
-                      <Badge variant="outline" className="text-sm font-normal cursor-pointer hover:bg-accent py-1">
-                        <FileText className="mr-1.5 h-4 w-4" />
-                        Presentation
-                      </Badge>
-                    </a>
-                  )}
-                </div>
-                <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
-                    <config.icon className="mr-1.5 h-3.5 w-3.5" />
-                    {titleCase(currentStatus)}
-                </Badge>
+            <div className="flex justify-between items-start gap-2">
+              <div>
+                <CardTitle className="text-lg mb-1">{proposal.title}</CardTitle>
+                {proposal.presentationUrl && (
+                  <a href={proposal.presentationUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2">
+                    <Badge variant="outline" className="text-sm font-normal cursor-pointer hover:bg-accent py-1">
+                      <FileText className="mr-1.5 h-4 w-4" />
+                      Presentation
+                    </Badge>
+                  </a>
+                )}
               </div>
+              <Badge variant="secondary" className={cn('whitespace-nowrap', config.className)}>
+                <config.icon className="mr-1.5 h-3.5 w-3.5" />
+                {titleCase(currentStatus)}
+              </Badge>
+            </div>
             <CardDescription className="text-sm text-muted-foreground mt-2">
-                <div className="flex items-center space-x-2">
-                    <Avatar className="h-5 w-5">
-                      <AvatarImage src={authorAvatarUrl || ''} data-ai-hint="user avatar" />
-                      <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span>Proposed by {authorName}</span>
-                    <span>•</span>
-                    <span>{proposal.createdAt}</span>
-                  </div>
-              </CardDescription>
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={authorAvatarUrl || ''} data-ai-hint="user avatar" />
+                  <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span>Proposed by {authorName}</span>
+                <span>•</span>
+                <span>{formatRelativeTime(proposal.createdAt)}</span>
+              </div>
+            </CardDescription>
             <CardContent className="p-0 mt-3">
               <p className="text-muted-foreground line-clamp-3">{proposal.description}</p>
-               {currentStatus === 'REJECTED' && rejectionReason && (
-                  <div className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-md border border-red-200 dark:border-red-500/30">
-                      <span className="font-semibold">Reason:</span> {rejectionReason}
-                  </div>
+              {currentStatus === 'REJECTED' && rejectionReason && (
+                <div className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-md border border-red-200 dark:border-red-500/30">
+                  <span className="font-semibold">Reason:</span> {rejectionReason}
+                </div>
               )}
             </CardContent>
             <CardFooter className="p-0 mt-4 flex justify-between items-center">
               <div></div>
               {isProjectOwner && currentStatus === 'PENDING' && (
-                  <div className="flex gap-2">
-                      <DialogTrigger asChild>
-                          <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50 dark:border-green-700/50"
-                              onClick={() => setActionType('accept')}
-                            >
-                              <ThumbsUp className="mr-2" /> Accept
-                          </Button>
-                      </DialogTrigger>
-                       <DialogTrigger asChild>
-                           <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 dark:border-red-700/50"
-                              onClick={() => setActionType('reject')}
-                            >
-                              <ThumbsDown className="mr-2" /> Reject
-                          </Button>
-                       </DialogTrigger>
-                  </div>
+                <div className="flex gap-2">
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50 dark:border-green-700/50"
+                      onClick={() => setActionType('accept')}
+                    >
+                      <ThumbsUp className="mr-2" /> Accept
+                    </Button>
+                  </DialogTrigger>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 dark:border-red-700/50"
+                      onClick={() => setActionType('reject')}
+                    >
+                      <ThumbsDown className="mr-2" /> Reject
+                    </Button>
+                  </DialogTrigger>
+                </div>
               )}
             </CardFooter>
           </div>
@@ -178,9 +178,9 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
             {actionType === 'accept' ? 'Accept Proposal' : 'Reject Proposal'}
           </DialogTitle>
           <DialogDescription>
-             {actionType === 'accept' 
-                ? 'You are about to accept this proposal. You can add an optional comment below.' 
-                : 'You are about to reject this proposal. Please provide a reason for your decision.'}
+            {actionType === 'accept'
+              ? 'You are about to accept this proposal. You can add an optional comment below.'
+              : 'You are about to reject this proposal. Please provide a reason for your decision.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

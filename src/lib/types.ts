@@ -76,6 +76,7 @@ export interface SubIdea {
     createdAt: string;
     votes: number;
     status: 'OPEN_FOR_PROTOTYPING' | 'SELF_PROTOTYPING';
+    comments?: Comment[];
 }
 
 export interface Proposal {
