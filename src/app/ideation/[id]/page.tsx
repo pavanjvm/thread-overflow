@@ -67,48 +67,64 @@ export default function IdeaDetailsPage() {
         team: proto.team?.map((member: any) => member.user || member) || []
       })));
 
-      // Fetch comments for each SubIdea
-      const subIdeasWithComments = await Promise.all(
+      // Fetch comments and vote data for each SubIdea
+      const subIdeasWithCommentsAndVotes = await Promise.all(
         (subIdeasRes.data || []).map(async (subIdea) => {
           try {
-            const commentsRes = await axios.get(`${API_BASE_URL}/api/comments/${subIdea.id}`, { withCredentials: true });
+            const [commentsRes, voteRes] = await Promise.all([
+              axios.get(`${API_BASE_URL}/api/comments/${subIdea.id}`, { withCredentials: true }),
+              axios.get(`${API_BASE_URL}/api/votes/subideas?subIdeaId=${subIdea.id}`, { withCredentials: true })
+            ]);
+            
             return {
               ...subIdea,
-              comments: commentsRes.data.comments || []
+              comments: commentsRes.data.comments || [],
+              votes: voteRes.data.voteCounts.total || 0
             };
           } catch (error) {
-            console.error(`Error fetching comments for SubIdea ${subIdea.id}:`, error);
+            console.error(`Error fetching data for SubIdea ${subIdea.id}:`, error);
             return {
               ...subIdea,
-              comments: []
+              comments: [],
+              votes: subIdea.votes || 0
             };
           }
         })
       );
 
-      // Fetch comments for each Prototype
-      const prototypesWithComments = await Promise.all(
+      // Fetch comments and vote data for each Prototype
+      const prototypesWithCommentsAndVotes = await Promise.all(
         (prototypesRes.data || []).map(async (proto) => {
           try {
-            const commentsRes = await axios.get(`${API_BASE_URL}/api/comments/${proto.id}/prototype`, { withCredentials: true });
+            const [commentsRes, voteRes] = await Promise.all([
+              axios.get(`${API_BASE_URL}/api/comments/${proto.id}/prototype`, { withCredentials: true }),
+              axios.get(`${API_BASE_URL}/api/votes/prototypes?prototypeId=${proto.id}`, { withCredentials: true })
+            ]);
+            
             return {
               ...proto,
               team: proto.team?.map((member: any) => member.user || member) || [],
-              comments: commentsRes.data.comments || []
+              comments: commentsRes.data.comments || [],
+              votes: voteRes.data.voteCounts.total || 0
             };
           } catch (error) {
-            console.error(`Error fetching comments for Prototype ${proto.id}:`, error);
+            console.error(`Error fetching data for Prototype ${proto.id}:`, error);
             return {
               ...proto,
               team: proto.team?.map((member: any) => member.user || member) || [],
-              comments: []
+              comments: [],
+              votes: proto.votes || 0
             };
           }
         })
       );
 
-      setIdeaSubmissions(subIdeasWithComments);
-      setPrototypes(prototypesWithComments);
+      // Sort by vote count (descending order - highest votes first)
+      const sortedSubIdeas = subIdeasWithCommentsAndVotes.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+      const sortedPrototypes = prototypesWithCommentsAndVotes.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+      
+      setIdeaSubmissions(sortedSubIdeas);
+      setPrototypes(sortedPrototypes);
     } catch (error) {
       console.error('Error fetching idea data:', error);
       notFound();
@@ -209,7 +225,7 @@ export default function IdeaDetailsPage() {
   }
 
   const config = typeConfig[idea.type] || typeConfig.default;
-  const isProjectOwner = currentUser?.id === idea.authorId;
+  const isProjectOwner = Number(currentUser?.id) === idea.authorId;
 
   const renderActionButton = () => {
     switch (activeTab) {
@@ -361,7 +377,7 @@ export default function IdeaDetailsPage() {
         <div className="flex justify-between items-center">
           <TabsList>
             <TabsTrigger value="ideas">Ideas and Suggestions ({ideaSubmissions.length})</TabsTrigger>
-            <TabsTrigger value="proposals">Proposals ({proposals.length})</TabsTrigger>
+            <TabsTrigger value="proposals">Solution Proposals ({proposals.length})</TabsTrigger>
             <TabsTrigger value="prototypes">Prototypes ({prototypes.length})</TabsTrigger>
           </TabsList>
           {renderActionButton()}

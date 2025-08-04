@@ -56,7 +56,7 @@ export default function AppClientLayout({
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const topUsers = [...users].sort((a, b) => b.stars - a.stars).slice(0, 3);
+  const topUsers = [...users].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 3);
 
   useEffect(() => {
     setMounted(true);

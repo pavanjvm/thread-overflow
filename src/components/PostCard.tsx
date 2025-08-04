@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Post } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import VoteButtons from './VoteButtons';
+import SimpleVoteButtons from './SimpleVoteButtons';
 import { MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -17,7 +17,7 @@ const PostCard = ({ post }: PostCardProps) => {
     <Card className="hover:border-primary/50 transition-colors duration-300">
       <div className="flex">
         <div className="p-4">
-          <VoteButtons initialVotes={post.votes} />
+          <SimpleVoteButtons initialVotes={post.votes} />
         </div>
         <div className="flex-grow">
           <CardHeader>
@@ -28,8 +28,7 @@ const PostCard = ({ post }: PostCardProps) => {
               </Avatar>
               <Link
                 href={`/c/${post.community.slug}`}
-                className="font-semibold hover:underline hover:text-primary transition-colors"
-                legacyBehavior>
+                className="font-semibold hover:underline hover:text-primary transition-colors">
                 c/{post.community.slug}
               </Link>
               <span className="text-xs">•</span>
@@ -40,8 +39,7 @@ const PostCard = ({ post }: PostCardProps) => {
             <CardTitle className="flex items-center">
               <Link
                 href={`/posts/${post.id}`}
-                className="hover:text-primary transition-colors"
-                legacyBehavior>
+                className="hover:text-primary transition-colors">
                 {post.title}
               </Link>
               {post.status === 'draft' && <Badge variant="secondary" className="ml-2">Draft</Badge>}

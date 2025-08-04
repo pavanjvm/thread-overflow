@@ -79,7 +79,7 @@ export default function RequestSolutionDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Request a Solution</Button>
+        <Button variant="secondary">Request a Solution</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <Form {...form}>

@@ -59,7 +59,7 @@ const CommentCard = ({ comment, subIdeaId, prototypeId, onCommentAdded, depth = 
   };
 
   return (
-    <div className={cn("space-y-2", depth > 0 && "ml-4 border-l border-muted/50 pl-3")}>
+    <div className={cn("space-y-2", depth > 0 && "ml-4 border-l-2 border-gray-300 dark:border-gray-600 pl-3")}>
       <div className="flex space-x-2">
         <Avatar className="h-6 w-6 flex-shrink-0 mt-0.5">
           <AvatarImage src={comment.author.avatarUrl || ''} />

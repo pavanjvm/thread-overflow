@@ -74,7 +74,11 @@ const SubIdeaCard = ({ subIdea, onCommentAdded }: SubIdeaCardProps) => {
     <Card className="hover:border-primary/50 transition-colors duration-300">
       <div className="flex">
         <div className="p-4 flex-shrink-0">
-          <VoteButtons initialVotes={subIdea.votes} />
+          <VoteButtons 
+            initialVotes={subIdea.votes} 
+            itemId={subIdea.id} 
+            type="subidea" 
+          />
         </div>
         <div className="flex-grow py-4 pr-4">
           <div className="flex justify-between items-start gap-2">

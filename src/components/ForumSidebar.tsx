@@ -44,22 +44,28 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/ideation')}>
-              <Link href="/ideation" legacyBehavior>
-                <Rocket /> Ideation Portal
+              <Link href="/ideation">
+                <span className="flex items-center gap-2">
+                  <Rocket /> Ideation Portal
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/hackathons')}>
-              <Link href="/hackathons" legacyBehavior>
-                <Swords /> Hackathon Portal
+              <Link href="/hackathons">
+                <span className="flex items-center gap-2">
+                  <Swords /> Hackathon Portal
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/feed'}>
-              <Link href="/feed" legacyBehavior>
-                <Newspaper /> All Posts
+              <Link href="/feed">
+                <span className="flex items-center gap-2">
+                  <Newspaper /> All Posts
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -74,9 +80,11 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
                 asChild
                 isActive={pathname === '/search' && searchParams.get('q') === topic.slug}
               >
-                <Link href={`/search?q=${topic.slug}`} legacyBehavior>
-                  <topic.icon />
-                  <span>{topic.name}</span>
+                <Link href={`/search?q=${topic.slug}`}>
+                  <span className="flex items-center gap-2">
+                    <topic.icon />
+                    <span>{topic.name}</span>
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -88,8 +96,10 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/drafts'}>
-              <Link href="/drafts" legacyBehavior>
-                <FileText /> Drafts
+              <Link href="/drafts">
+                <span className="flex items-center gap-2">
+                  <FileText /> Drafts
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -100,20 +110,24 @@ export default function ForumSidebar({ pathname, communities }: ForumSidebarProp
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/c/new'}>
-              <Link href="/c/new" legacyBehavior>
-                <Plus /> Create Community
+              <Link href="/c/new">
+                <span className="flex items-center gap-2">
+                  <Plus /> Create Community
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           {communities.map((community) => (
             <SidebarMenuItem key={community.id}>
               <SidebarMenuButton asChild isActive={pathname === `/c/${community.slug}`}>
-                <Link href={`/c/${community.slug}`} legacyBehavior>
-                  <Avatar className="size-5">
-                    <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
-                    <AvatarFallback>{community.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span>{community.name}</span>
+                <Link href={`/c/${community.slug}`}>
+                  <span className="flex items-center gap-2">
+                    <Avatar className="size-5">
+                      <AvatarImage src={community.iconUrl} data-ai-hint="community icon" />
+                      <AvatarFallback>{community.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span>{community.name}</span>
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

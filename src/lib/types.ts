@@ -1,10 +1,16 @@
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   avatarUrl: string | null;
   stars?: number;
   role?: 'ADMIN' | 'USER';
+  bio?: string;
+  email?: string;
+  totalIdeas?: number;
+  totalPrototypes?: number;
+  totalProposals?: number;
+  joinedAt?: string;
 }
 
 export interface Community {

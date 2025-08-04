@@ -162,22 +162,42 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
                 <DropdownMenuSeparator />
                 {!isHackathonSection && !isIdeationSection && !isDashboardPage &&(
                   <DropdownMenuItem asChild className="md:hidden">
-                    <Link href="/posts/new"><Plus className="mr-2" />New Post</Link>
+                    <Link href="/posts/new">
+                      <span className="flex items-center">
+                        <Plus className="mr-2" />New Post
+                      </span>
+                    </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href="/c/new"><Users className="mr-2" />Create Community</Link>
+                  <Link href="/c/new">
+                    <span className="flex items-center">
+                      <Users className="mr-2" />Create Community
+                    </span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/leaderboard"><Trophy className="mr-2" />Leaderboard</Link>
+                  <Link href="/leaderboard">
+                    <span className="flex items-center">
+                      <Trophy className="mr-2" />Leaderboard
+                    </span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/profile"><User className="mr-2" />Profile</Link>
+                  <Link href="/profile">
+                    <span className="flex items-center">
+                      <User className="mr-2" />Profile
+                    </span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem><Settings className="mr-2" />Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/login"><LogOut className="mr-2" />Log out</Link>
+                  <Link href="/login">
+                    <span className="flex items-center">
+                      <LogOut className="mr-2" />Log out
+                    </span>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

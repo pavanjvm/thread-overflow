@@ -160,7 +160,11 @@ const PrototypeCard = ({ prototype, onCommentAdded }: PrototypeCardProps) => {
             </CardContent>
 
             <CardFooter className="flex justify-between items-center">
-                <VoteButtons initialVotes={prototype.votes} />
+                <VoteButtons 
+                    initialVotes={prototype.votes} 
+                    itemId={prototype.id} 
+                    type="prototype" 
+                />
                 <div className="flex -space-x-2 overflow-hidden">
                     <TooltipProvider>
                         {prototype.team?.map((member, idx) => (

@@ -4,7 +4,6 @@
 import type { Proposal } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import VoteButtons from './VoteButtons';
 import { Badge } from './ui/badge';
 import { cn, titleCase, formatRelativeTime } from '@/lib/utils';
 import { Button } from './ui/button';
@@ -99,17 +98,19 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <Card className="hover:border-primary/50 transition-colors duration-300 overflow-hidden">
-        <div className="flex">
-          <div className="p-4 flex-shrink-0">
-            <VoteButtons initialVotes={proposal.votes} />
-          </div>
-          <div className="flex-grow py-4 pr-4">
+      <>
+        <Card className="hover:border-primary/50 transition-colors duration-300 overflow-hidden">
+          <div className="p-4">
             <div className="flex justify-between items-start gap-2">
               <div>
                 <CardTitle className="text-lg mb-1">{proposal.title}</CardTitle>
                 {proposal.presentationUrl && (
-                  <a href={proposal.presentationUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2">
+                  <a
+                    href={proposal.presentationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2"
+                  >
                     <Badge variant="outline" className="text-sm font-normal cursor-pointer hover:bg-accent py-1">
                       <FileText className="mr-1.5 h-4 w-4" />
                       Presentation
@@ -169,43 +170,43 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
               )}
             </CardFooter>
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {actionType === 'accept' ? 'Accept Proposal' : 'Reject Proposal'}
-          </DialogTitle>
-          <DialogDescription>
-            {actionType === 'accept'
-              ? 'You are about to accept this proposal. You can add an optional comment below.'
-              : 'You are about to reject this proposal. Please provide a reason for your decision.'}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="comment" className="text-right">
-              {actionType === 'accept' ? 'Comment' : 'Reason'}
-            </Label>
-            <Textarea
-              id="comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="col-span-3"
-              placeholder={actionType === 'accept' ? 'Optional feedback...' : 'Required reason for rejection...'}
-            />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === 'accept' ? 'Accept Proposal' : 'Reject Proposal'}
+            </DialogTitle>
+            <DialogDescription>
+              {actionType === 'accept'
+                ? 'You are about to accept this proposal. You can add an optional comment below.'
+                : 'You are about to reject this proposal. Please provide a reason for your decision.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="comment" className="text-right">
+                {actionType === 'accept' ? 'Comment' : 'Reason'}
+              </Label>
+              <Textarea
+                id="comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="col-span-3"
+                placeholder={actionType === 'accept' ? 'Optional feedback...' : 'Required reason for rejection...'}
+              />
+            </div>
           </div>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="ghost" disabled={isSubmitting}>Cancel</Button>
-          </DialogClose>
-          <Button onClick={handleAction} disabled={isSubmitting || (actionType === 'reject' && !comment.trim())}>
-            {isSubmitting ? 'Submitting...' : (actionType === 'accept' ? 'Accept and Send' : 'Reject and Send')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="ghost" disabled={isSubmitting}>Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleAction} disabled={isSubmitting || (actionType === 'reject' && !comment.trim())}>
+              {isSubmitting ? 'Submitting...' : (actionType === 'accept' ? 'Accept and Send' : 'Reject and Send')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </>
     </Dialog>
   );
 };

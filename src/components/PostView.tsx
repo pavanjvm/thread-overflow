@@ -3,7 +3,7 @@
 import type { Post } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import VoteButtons from '@/components/VoteButtons';
+import SimpleVoteButtons from '@/components/SimpleVoteButtons';
 import CommentCard from '@/components/CommentCard';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ export default function PostView({ post }: PostViewProps) {
   return (
     <div className="max-w-4xl mx-auto grid md:grid-cols-[64px_1fr] gap-4">
       <div className="flex justify-center">
-        <VoteButtons initialVotes={post.votes} />
+        <SimpleVoteButtons initialVotes={post.votes} />
       </div>
       <div>
         <Card>
@@ -29,8 +29,7 @@ export default function PostView({ post }: PostViewProps) {
               </Avatar>
               <Link
                 href={`/c/${post.community.slug}`}
-                className="font-semibold hover:underline hover:text-primary transition-colors"
-                legacyBehavior>
+                className="font-semibold hover:underline hover:text-primary transition-colors">
                 c/{post.community.slug}
               </Link>
               <span className="text-xs">•</span>
