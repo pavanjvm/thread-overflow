@@ -110,7 +110,7 @@ export interface Idea {
   status: 'OPEN' | 'CLOSED';
   totalProposals: number;
   totalPrototypes: number;
-  potentialDollarValue?: number;
+  potentialBenefits?: string[];
   subIdeas?: SubIdea[];
   proposals?: Proposal[];
   prototypes?: Prototype[];

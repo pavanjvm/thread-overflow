@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 interface ProposalCardProps {
   proposal: Proposal;
   isProjectOwner: boolean;
+  onStatusChange?: () => void;
 }
 
 const statusConfig = {
@@ -42,7 +43,7 @@ const defaultConfig = {
 }
 
 
-const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
+const ProposalCard = ({ proposal, isProjectOwner, onStatusChange }: ProposalCardProps) => {
   const { toast } = useToast();
   const [currentStatus, setCurrentStatus] = useState(proposal.status);
   const [rejectionReason, setRejectionReason] = useState(proposal.rejectionReason);
@@ -81,6 +82,11 @@ const ProposalCard = ({ proposal, isProjectOwner }: ProposalCardProps) => {
         title: `Proposal ${titleCase(newStatus)}`,
         description: `The proposal has been successfully ${newStatus.toLowerCase()}.`,
       });
+
+      // Call parent refresh if provided
+      if (typeof onStatusChange === 'function') {
+        onStatusChange();
+      }
 
     } catch (error: any) {
       console.error('Failed to update proposal status:', error);

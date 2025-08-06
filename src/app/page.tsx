@@ -68,7 +68,7 @@ export default function LandingPage() {
           />
         </div>
         <p className="mt-4 text-xl text-muted-foreground max-w-3xl">
-          From community forums to ideation and hackathon portals, we connect brilliant minds with real-world challenges.
+          From community forums to ideation and hackathons, we connect brilliant minds with real-world challenges.
         </p>
         <div className="flex space-x-4 pt-8">
           <Button asChild size="lg">

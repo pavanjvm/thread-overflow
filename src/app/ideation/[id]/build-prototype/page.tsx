@@ -73,9 +73,9 @@ export default function BuildPrototypePage() {
   useEffect(() => {
     const fetchInitialData = async () => {
       if (!proposalId) {
-          toast({ title: 'Error', description: 'No proposal ID was provided.', variant: 'destructive' });
-          router.push(`/ideation/${id}`);
-          return;
+        toast({ title: 'Error', description: 'No proposal ID was provided.', variant: 'destructive' });
+        router.push(`/ideation/${id}`);
+        return;
       }
       try {
         const ideaRes = await axios.get<Idea>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
@@ -84,23 +84,22 @@ export default function BuildPrototypePage() {
         const usersRes = await axios.get<User[]>(`${API_BASE_URL}/api/profile/users`, { withCredentials: true });
         setAllUsers(usersRes.data);
         
-        if(currentUser) {
-            setTeamMembers([currentUser]);
-            form.setValue('team', [currentUser.id.toString()]);
+        if (currentUser) {
+          setTeamMembers([currentUser]);
+          form.setValue('team', [currentUser.id.toString()]);
         }
       } catch (error) {
-          console.error("Failed to fetch initial data:", error);
-          toast({ title: 'Error', description: 'Failed to load page details.', variant: 'destructive' });
-          router.push(`/ideation/${id}`);
+        console.error("Failed to fetch initial data:", error);
+        toast({ title: 'Error', description: 'Failed to load page details.', variant: 'destructive' });
+        router.push(`/ideation/${id}`);
       } finally {
-          setLoading(false);
+        setLoading(false);
       }
     };
     if (id && currentUser) {
-        fetchInitialData();
+      fetchInitialData();
     }
   }, [id, proposalId, currentUser, toast, router, form]);
-
 
   const availableUsersForTeam = useMemo(() => {
     return allUsers
@@ -126,63 +125,80 @@ export default function BuildPrototypePage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!proposalId) {
-        toast({ title: 'Error', description: 'Cannot submit without a proposal ID.', variant: 'destructive' });
-        return;
+      toast({ title: 'Error', description: 'Cannot submit without a proposal ID.', variant: 'destructive' });
+      return;
     }
     try {
-        const payload = { ...values, team: teamMembers.map(tm => tm.id) };
-        await axios.post(`${API_BASE_URL}/api/prototypes/submit/${proposalId}`, payload, { withCredentials: true });
-        toast({
-            title: 'Prototype Submitted!',
-            description: `Your prototype "${values.title}" has been successfully submitted.`,
-        });
-        router.push(`/ideation/${id}`);
+      const payload = { ...values, team: teamMembers.map(tm => tm.id) };
+      await axios.post(`${API_BASE_URL}/api/prototypes/submit/${proposalId}`, payload, { withCredentials: true });
+      toast({
+        title: 'Prototype Submitted!',
+        description: `Your prototype "${values.title}" has been successfully submitted.`,
+      });
+      router.push(`/ideation/${id}`);
     } catch (error) {
-        console.error('Failed to submit prototype:', error);
-        toast({ title: 'Submission Failed', description: 'There was an error submitting your prototype.', variant: 'destructive' });
+      console.error('Failed to submit prototype:', error);
+      toast({ title: 'Submission Failed', description: 'There was an error submitting your prototype.', variant: 'destructive' });
     }
   };
   
   if (loading) {
-      return (
-        <div className="max-w-2xl mx-auto">
-            <div className="mb-4"> <Skeleton className="h-8 w-48" /> </div>
-            <Card>
-                <CardHeader> <Skeleton className="h-8 w-3/4" /> <Skeleton className="h-4 w-1/2" /> </CardHeader>
-                <CardContent className="space-y-4"> <Skeleton className="h-10 w-full" /> <Skeleton className="h-24 w-full" /> <Skeleton className="h-10 w-full" /> <Skeleton className="h-10 w-full" /> </CardContent>
-                <CardFooter> <Skeleton className="h-10 w-24" /> </CardFooter>
-            </Card>
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-4">
+          <Skeleton className="h-8 w-48" />
         </div>
-      );
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+          <CardFooter>
+            <Skeleton className="h-10 w-24" />
+          </CardFooter>
+        </Card>
+      </div>
+    );
   }
   
   if (!idea) {
-      return (
-        <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-semibold mb-4">Idea not found</h2>
-            <p className="text-muted-foreground">The idea you are trying to build a prototype for could not be found.</p>
-            <Button asChild className="mt-4">
-              <Link href="/ideation">Back to Ideation Portal</Link>
-            </Button>
-        </div>
-      );
+    return (
+      <div className="max-w-2xl mx-auto text-center">
+        <h2 className="text-2xl font-semibold mb-4">Idea not found</h2>
+        <p className="text-muted-foreground">The idea you are trying to build a prototype for could not be found.</p>
+        <Button asChild className="mt-4">
+          <Link href="/ideation">Back to Ideation Portal</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-4">
-          <Button variant="ghost" asChild>
-              <Link href={`/ideation/${id}`}>
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Back to Idea
-              </Link>
-          </Button>
+        <Button variant="ghost" asChild>
+          <Link href={`/ideation/${id}`}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Idea
+          </Link>
+        </Button>
       </div>
       <Card>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardHeader>
-              <CardTitle className="flex items-center"><Wrench className="mr-2 h-6 w-6 text-yellow-500" />Build a Prototype</CardTitle>
-              <CardDescription> You are building a prototype for the idea: <span className="font-semibold text-foreground">{idea.title}</span> </CardDescription>
+              <CardTitle className="flex items-center">
+                <Wrench className="mr-2 h-6 w-6 text-yellow-500" />
+                Build a Prototype
+              </CardTitle>
+              <CardDescription>
+                You are building a prototype for the idea: <span className="font-semibold text-foreground">{idea.title}</span>
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <FormField 
@@ -244,6 +260,7 @@ export default function BuildPrototypePage() {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="team"
@@ -251,33 +268,37 @@ export default function BuildPrototypePage() {
                   <FormItem>
                     <FormLabel>Team Members</FormLabel>
                     <Combobox 
-                        options={availableUsersForTeam} 
-                        onChange={(value) => handleAddTeamMember(value)} 
-                        value="" 
-                        placeholder="Add a team member..." 
-                        searchPlaceholder="Search for a user..." 
-                        emptyText="No users found or all added." 
+                      options={availableUsersForTeam} 
+                      onChange={(value) => handleAddTeamMember(value)} 
+                      value="" 
+                      placeholder="Add a team member..." 
+                      searchPlaceholder="Search for a user..." 
+                      emptyText="No users found or all added." 
                     />
                     <div className="mt-3 space-y-2">
-                        {teamMembers.map(user => (
-                            <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
-                                <div className="flex items-center gap-2">
-                                    <Avatar className="h-5 w-5">
-                                        <AvatarImage src={user.avatarUrl ?? undefined} />
-                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    {user.name}
-                                </div>
-                                <button type="button" onClick={() => handleRemoveTeamMember(user.id)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </Badge>
-                        ))}
+                      {teamMembers.map(user => (
+                        <Badge key={user.id} variant="secondary" className="p-2 text-sm font-normal flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                              <AvatarImage src={user.avatarUrl ?? undefined} />
+                              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            {user.name}
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => handleRemoveTeamMember(user.id)} 
+                            className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
                     </div>
                     <FormMessage />
                   </FormItem>
                 )}
-                />
+              />
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>

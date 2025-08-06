@@ -81,7 +81,7 @@ export default function SubmitSubIdeaPage() {
         description: 'Your idea has been successfully submitted.',
       });
 
-      router.push(`/ideation/${id}`);
+      router.push(`/ideation/${id}?new=1`);
     } catch (error: any) {
       console.error('Error submitting idea:', error);
       toast({

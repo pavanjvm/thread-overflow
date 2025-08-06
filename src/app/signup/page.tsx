@@ -53,11 +53,11 @@ export default function SignupPage() {
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label> {/* Changed from first-name to name */}
-                <Input id="name" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} /> {/* Changed from username to name and setUsername to setName */}
+                <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>

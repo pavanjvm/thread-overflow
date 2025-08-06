@@ -1,4 +1,3 @@
-
 'use client';
 
 import { notFound, useParams } from 'next/navigation';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Wrench, FileText, Info, CircleDollarSign, Lock, Trash2 } from 'lucide-react';
+import { Lightbulb, Wrench, FileText, Info, Lock, Trash2 } from 'lucide-react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
@@ -15,23 +14,20 @@ import SubIdeaCard from '@/components/SubIdeaCard';
 import ProposalCard from '@/components/ProposalCard';
 import PrototypeCard from '@/components/PrototypeCard';
 import { useAuth } from '@/context/AuthContext';
-import Image from 'next/image';
-import VoteButtons from '@/components/VoteButtons';
-import { useState, useEffect } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Idea, SubIdea, Proposal, Prototype } from '@/lib/types';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import type { Idea, SubIdea, Proposal, Prototype, User } from '@/lib/types';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const typeConfig = {
   'IDEATION': { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
   'SOLUTION_REQUEST': { variant: 'secondary' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' },
   default: { variant: 'secondary' as const, className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300' },
 };
-
 
 export default function IdeaDetailsPage() {
   const params = useParams();
@@ -46,10 +42,9 @@ export default function IdeaDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const fetchIdeaData = async () => {
+  const fetchIdeaData = useCallback(async () => {
     try {
       const [ideaRes, subIdeasRes, proposalsRes, prototypesRes] = await Promise.all([
         axios.get<Idea>(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true }),
@@ -61,13 +56,11 @@ export default function IdeaDetailsPage() {
       setIdea(ideaRes.data);
       setProposals(proposalsRes.data || []);
 
-      // Map team to array of User objects if needed
       setPrototypes((prototypesRes.data || []).map(proto => ({
         ...proto,
         team: proto.team?.map((member: any) => member.user || member) || []
       })));
 
-      // Fetch comments and vote data for each SubIdea
       const subIdeasWithCommentsAndVotes = await Promise.all(
         (subIdeasRes.data || []).map(async (subIdea) => {
           try {
@@ -75,7 +68,7 @@ export default function IdeaDetailsPage() {
               axios.get(`${API_BASE_URL}/api/comments/${subIdea.id}`, { withCredentials: true }),
               axios.get(`${API_BASE_URL}/api/votes/subideas?subIdeaId=${subIdea.id}`, { withCredentials: true })
             ]);
-            
+
             return {
               ...subIdea,
               comments: commentsRes.data.comments || [],
@@ -92,61 +85,27 @@ export default function IdeaDetailsPage() {
         })
       );
 
-      // Fetch comments and vote data for each Prototype
-      const prototypesWithCommentsAndVotes = await Promise.all(
-        (prototypesRes.data || []).map(async (proto) => {
-          try {
-            const [commentsRes, voteRes] = await Promise.all([
-              axios.get(`${API_BASE_URL}/api/comments/${proto.id}/prototype`, { withCredentials: true }),
-              axios.get(`${API_BASE_URL}/api/votes/prototypes?prototypeId=${proto.id}`, { withCredentials: true })
-            ]);
-            
-            return {
-              ...proto,
-              team: proto.team?.map((member: any) => member.user || member) || [],
-              comments: commentsRes.data.comments || [],
-              votes: voteRes.data.voteCounts.total || 0
-            };
-          } catch (error) {
-            console.error(`Error fetching data for Prototype ${proto.id}:`, error);
-            return {
-              ...proto,
-              team: proto.team?.map((member: any) => member.user || member) || [],
-              comments: [],
-              votes: proto.votes || 0
-            };
-          }
-        })
-      );
-
-      // Sort by vote count (descending order - highest votes first)
       const sortedSubIdeas = subIdeasWithCommentsAndVotes.sort((a, b) => (b.votes || 0) - (a.votes || 0));
-      const sortedPrototypes = prototypesWithCommentsAndVotes.sort((a, b) => (b.votes || 0) - (a.votes || 0));
-      
       setIdeaSubmissions(sortedSubIdeas);
-      setPrototypes(sortedPrototypes);
     } catch (error) {
-      console.error('Error fetching idea data:', error);
+      console.error('Failed to fetch idea data:', error);
+      setIdea(null);
       notFound();
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) {
       fetchIdeaData();
     }
-  }, [id]);
+  }, [id, fetchIdeaData]);
 
-  const acceptedProposal = currentUser ? proposals.find(p => String(p.authorId) === String(currentUser.id) && p.status?.trim().toUpperCase() === 'ACCEPTED') : undefined;
-
-  const handleCloseIdea = async () => {
-    if (!idea) return;
-
+  const handleCloseIdea = async (ideaId: number) => {
     setIsClosing(true);
     try {
-      await axios.patch(`${API_BASE_URL}/api/ideas/${idea.id}/close`, {}, { withCredentials: true });
+      await axios.patch(`${API_BASE_URL}/api/ideas/${ideaId}/close`, {}, { withCredentials: true });
 
       // Update the idea status locally
       setIdea(prev => prev ? { ...prev, status: 'CLOSED' } : null);
@@ -155,8 +114,6 @@ export default function IdeaDetailsPage() {
         title: "Idea Closed",
         description: "The idea has been successfully closed.",
       });
-
-      setShowCloseDialog(false);
     } catch (error: any) {
       console.error('Error closing idea:', error);
       toast({
@@ -207,7 +164,7 @@ export default function IdeaDetailsPage() {
             <Skeleton className="h-4 w-48" />
           </div>
           <Skeleton className="h-6 w-full" />
-          <Skeleton className="h-6 w-2/h-full" />
+          <Skeleton className="h-6 w-2/3" />
         </header>
         <Tabs defaultValue="ideas" className="w-full">
           <TabsList>
@@ -221,11 +178,15 @@ export default function IdeaDetailsPage() {
   }
 
   if (!idea) {
-    notFound();
+    // This can happen briefly after deleting an idea, before redirect.
+    // Or if the idea is not found.
+    // Returning null prevents a crash.
+    return null;
   }
 
   const config = typeConfig[idea.type] || typeConfig.default;
   const isProjectOwner = Number(currentUser?.id) === idea.authorId;
+  const acceptedProposal = currentUser ? proposals.find(p => String(p.authorId) === String(currentUser.id) && p.status?.trim().toUpperCase() === 'ACCEPTED') : undefined;
 
   const renderActionButton = () => {
     switch (activeTab) {
@@ -234,7 +195,7 @@ export default function IdeaDetailsPage() {
           <Button asChild>
             <Link href={`/ideation/${id}/submit-idea`}>
               <span>
-                <Lightbulb className="mr-2 h-4 w-4" /> Share Your Thoughts
+                <Lightbulb className="mr-2 h-4 w-4" /> Share Your ideas
               </span>
             </Link>
           </Button>
@@ -287,14 +248,18 @@ export default function IdeaDetailsPage() {
                 <span>{formatRelativeTime(idea.createdAt)}</span>
               </div>
             </div>
-            <p className="text-lg text-muted-foreground mt-4">{idea.description}</p>
-            {idea.potentialDollarValue && (
-              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mt-4">
-                <CircleDollarSign className="h-5 w-5" />
-                <span className="font-semibold text-lg">
-                  ${idea.potentialDollarValue.toLocaleString()}
-                </span>
-                <span className="text-sm text-muted-foreground">Potential Value</span>
+            <p className="text-lg text-muted-foreground mb-2">{idea?.description}</p>
+            {/* Potential benefits */}
+            {idea?.potentialBenefits?.length && (
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className="font-medium">Potential Benefits:</span>
+                {(idea?.potentialBenefits || []).map((tag: string, idx: number) => {
+                  const palette = ['bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300'];
+                  const colorClass = palette[idx % palette.length];
+                  return (
+                    <Badge key={idx} variant="secondary" className={colorClass}>{tag}</Badge>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -318,32 +283,31 @@ export default function IdeaDetailsPage() {
             {isProjectOwner && (
               <div className="flex gap-2">
                 {idea.status === 'OPEN' && (
-                  <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+                  <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50">
-                        <Lock className="h-4 w-4 mr-1" />
+                        <Lock className="mr-2 h-4 w-4" />
                         Close
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Close Idea</DialogTitle>
+                        <DialogTitle>Are you sure you want to close this idea?</DialogTitle>
                         <DialogDescription>
-                          Are you sure you want to close this idea? Once closed, no new submissions will be accepted.
+                          This will prevent new submissions. This action cannot be undone.
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowCloseDialog(false)} disabled={isClosing}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleCloseIdea} disabled={isClosing} className="bg-orange-600 hover:bg-orange-700">
-                          {isClosing ? 'Closing...' : 'Close Idea'}
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button variant="destructive" onClick={() => handleCloseIdea(Number(id))} disabled={isClosing}>
+                          {isClosing ? 'Closing...' : 'Confirm Close'}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
                 )}
-
                 <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">
@@ -397,7 +361,7 @@ export default function IdeaDetailsPage() {
                   />
                 ))
               ) : (
-                <p className="text-muted-foreground text-center py-8">No ideas submitted yet. Be the first!</p>
+                <p className="text-muted-foreground text-center py-8">Be the first to post your thoughts here.</p>
               )}
             </div>
           </TabsContent>
@@ -409,10 +373,11 @@ export default function IdeaDetailsPage() {
                     key={proposal.id}
                     proposal={proposal}
                     isProjectOwner={isProjectOwner}
+                    onStatusChange={fetchIdeaData}
                   />
                 ))
               ) : (
-                <p className="text-muted-foreground text-center py-8">No proposals submitted yet.</p>
+                <p className="text-muted-foreground text-center py-8">Be the first to post your thoughts here.</p>
               )}
             </div>
           </TabsContent>
@@ -441,7 +406,7 @@ export default function IdeaDetailsPage() {
                     />
                   ))
                 ) : (
-                  <p className="text-muted-foreground text-center py-8 col-span-full">No prototypes submitted yet.</p>
+                  <p className="text-muted-foreground text-center py-8 col-span-full">Be the first to post your thoughts here.</p>
                 )}
               </div>
             </div>

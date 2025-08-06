@@ -223,7 +223,7 @@ export default function ProfilePage() {
         <CardHeader className="flex flex-col md:flex-row items-start gap-6">
           <div className="relative">
             <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
-              <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
+              <AvatarImage src={user.avatarUrl ?? undefined} data-ai-hint="user avatar" />
               <AvatarFallback className="text-4xl">{user.name.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <Button 
@@ -243,7 +243,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="secondary">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Joined {formatDate(user.joinedAt)}
+                    Joined {user.joinedAt ? formatDate(user.joinedAt) : "Unknown"}
                   </Badge>
                 </div>
               </div>
