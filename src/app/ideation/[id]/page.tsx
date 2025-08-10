@@ -127,11 +127,9 @@ export default function IdeaDetailsPage() {
   };
 
   const handleDeleteIdea = async () => {
-    if (!idea) return;
-
     setIsDeleting(true);
     try {
-      await axios.delete(`${API_BASE_URL}/api/ideas/${idea.id}`, { withCredentials: true });
+      await axios.delete(`${API_BASE_URL}/api/ideas/${id}`, { withCredentials: true });
 
       toast({
         title: "Idea Deleted",
