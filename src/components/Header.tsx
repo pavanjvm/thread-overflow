@@ -15,21 +15,48 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import React, { type FormEvent } from 'react';
+import React, { type FormEvent, useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { notifications, conversations } from '@/lib/mock-data';
 import { ThemeToggle } from './ThemeToggle';
+import axios from 'axios';
+import { API_BASE_URL } from '@/lib/constants';
+
+interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  role: string;
+}
 
 const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, setIsChatOpen: (open: boolean) => void }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultSearch = searchParams.get('q') ?? '';
   const pathname = usePathname();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   
   const isHackathonSection = pathname.startsWith('/hackathons');
   const isIdeationSection = pathname.startsWith('/ideation') || pathname === '/leaderboard';
   const isDashboardPage = pathname === '/dashboard';
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/profile/me`, { withCredentials: true });
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
   
   const unreadNotificationCount = notifications.filter(n => !n.read).length;
   const unreadMessagesCount = conversations.filter(c => !c.lastMessage.read && c.lastMessage.senderId !== 'user-1').length;
@@ -147,16 +174,25 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src="https://placehold.co/40x40.png" alt="@shadcn" data-ai-hint="user avatar" />
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarImage src={user?.avatarUrl || "https://placehold.co/40x40.png"} alt={user?.name || 'User'} data-ai-hint="user avatar" />
+                    <AvatarFallback>{(user?.name || 'U').charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Test User</p>
-                    <p className="text-xs leading-none text-muted-foreground">test@example.com</p>
+                    {loading ? (
+                      <>
+                        <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-1"></div>
+                        <div className="h-3 w-32 bg-gray-200 rounded animate-pulse"></div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium leading-none">{user?.name || 'User'}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user?.email || ''}</p>
+                      </>
+                    )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

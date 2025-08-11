@@ -96,7 +96,18 @@ export default function CreatePostDialog({ onSuccess }: CreatePostDialogProps) {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.post(`${API_BASE_URL}/api/ideas`, values, { withCredentials: true });
-
+      
+      // Call the onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      // Close the dialog
+      setOpen(false);
+      
+      // Reset the form
+      form.reset();
+      
       toast({
         title: `${postType === 'IDEATION' ? 'Idea' : 'Solution Request'} Submitted!`,
         description: `Your post "${values.title}" has been submitted.`,

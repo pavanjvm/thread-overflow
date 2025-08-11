@@ -87,6 +87,25 @@ export default function IdeationPortalPage() {
     }
   }, [searchParams, filter, router]);
 
+  // Function to refresh the ideas list
+  const refreshIdeas = async () => {
+    try {
+      let url = `${API_BASE_URL}/api/ideas`;
+      if (filter !== 'all') {
+        url = `${API_BASE_URL}/api/ideas?status=${filter.toUpperCase()}`;
+      }
+      const response = await axios.get<Idea[]>(url, { withCredentials: true });
+      if (Array.isArray(response.data)) {
+        setIdeas(response.data.filter(idea => idea && idea.type && idea.id));
+      } else {
+        setIdeas([]);
+      }
+    } catch (error) {
+      console.error('Error refreshing ideas:', error);
+      setIdeas([]);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <header className="flex justify-between items-center">
@@ -95,7 +114,7 @@ export default function IdeationPortalPage() {
             <p className="text-muted-foreground mt-1">Submit ideas or request solutions from the community.</p>
           </div>
           <div className="flex items-center gap-4">
-             <DropdownMenu>
+            <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline">Filter Ideas: {filter.charAt(0).toUpperCase() + filter.slice(1)}</Button>
                 </DropdownMenuTrigger>
@@ -105,7 +124,7 @@ export default function IdeationPortalPage() {
                     <DropdownMenuItem onClick={() => setFilter('all')}>All Ideas</DropdownMenuItem>
                 </DropdownMenuContent>
              </DropdownMenu>
-            <CreatePostDialog onSuccess={() => router.refresh()} />
+             <CreatePostDialog onSuccess={refreshIdeas} />
           </div>
       </header>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
