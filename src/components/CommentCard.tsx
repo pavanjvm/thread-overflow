@@ -19,7 +19,7 @@ const CommentCard = ({ comment }: CommentCardProps) => {
     <div className="flex gap-4">
       <div className="flex flex-col items-center">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={comment.author.avatarUrl} data-ai-hint="user avatar" />
+          <AvatarImage src={comment.author.avatarUrl ?? undefined} data-ai-hint="user avatar" />
           <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="w-px flex-grow bg-border my-2"></div>

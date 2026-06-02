@@ -140,7 +140,9 @@ export function IconCloud({ iconSlugs }: IconCloudProps) {
         {iconData.map((icon, i) => (
           <div
             key={`${icon.slug}-${i}`}
-            ref={(el) => (iconRefs.current[i] = el)}
+            ref={(el) => {
+              iconRefs.current[i] = el;
+            }}
             className="absolute flex h-[50px] w-[50px] items-center justify-center"
             style={{
               left: '50%',

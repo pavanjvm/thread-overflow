@@ -1,34 +1,19 @@
 'use client';
 
 import { notFound, useParams } from 'next/navigation';
-import { hackathons as mockHackathons } from '@/lib/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import OverviewTab from './_components/OverviewTab';
-import PrizesTab from './_components/PrizesTab';
-import SpeakersAndJudgesTab from './_components/SpeakersAndJudgesTab';
-import ScheduleTab from './_components/ScheduleTab';
+import { hackathons } from '@/lib/mock-data';
+import ProgramOverviewTab from './_components/ProgramOverviewTab';
+import StagesTab from './_components/StagesTab';
+import ParticipantHubTab from './_components/ParticipantHubTab';
+import ClientConsoleTab from './_components/ClientConsoleTab';
 import ProjectsTab from './_components/ProjectsTab';
-import { useEffect, useState } from 'react';
-import type { Hackathon } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import InsightsTab from './_components/InsightsTab';
 
 export default function HackathonPage() {
   const params = useParams();
-  const slug = params.slug as string;
-  const [hackathon, setHackathon] = useState<Hackathon | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (slug) {
-      const foundHackathon = mockHackathons.find((h) => h.slug === slug);
-      setHackathon(foundHackathon || null);
-      setLoading(false);
-    }
-  }, [slug]);
-
-  if (loading) {
-    return <Skeleton className="h-96 w-full" />;
-  }
+  const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+  const hackathon = hackathons.find((item) => item.slug === slug);
 
   if (!hackathon) {
     notFound();
@@ -36,32 +21,48 @@ export default function HackathonPage() {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="schedule" className="w-full">
-        <div className="flex justify-center border-b">
-            <TabsList className="bg-transparent p-0 rounded-none">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Overview</TabsTrigger>
-              <TabsTrigger value="prizes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Prizes</TabsTrigger>
-              <TabsTrigger value="speakers" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Speakers & Judges</TabsTrigger>
-              <TabsTrigger value="schedule" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Schedule</TabsTrigger>
-              <TabsTrigger value="projects" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Projects</TabsTrigger>
-            </TabsList>
+      <Tabs defaultValue="overview" className="w-full">
+        <div className="overflow-x-auto border-b">
+          <TabsList className="h-auto min-w-max bg-transparent p-0">
+            <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="stages" className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+              Stages
+            </TabsTrigger>
+            <TabsTrigger value="participant-hub" className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+              Participant Hub
+            </TabsTrigger>
+            <TabsTrigger value="client-console" className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+              Client Console
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+              Projects
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+              Insights
+            </TabsTrigger>
+          </TabsList>
         </div>
         <div className="py-6">
-            <TabsContent value="overview">
-              <OverviewTab hackathon={hackathon} />
-            </TabsContent>
-            <TabsContent value="prizes">
-              <PrizesTab hackathon={hackathon} />
-            </TabsContent>
-            <TabsContent value="speakers">
-                <SpeakersAndJudgesTab hackathon={hackathon} />
-            </TabsContent>
-            <TabsContent value="schedule">
-              <ScheduleTab hackathon={hackathon} />
-            </TabsContent>
-            <TabsContent value="projects">
-              <ProjectsTab hackathon={hackathon} />
-            </TabsContent>
+          <TabsContent value="overview">
+            <ProgramOverviewTab hackathon={hackathon} />
+          </TabsContent>
+          <TabsContent value="stages">
+            <StagesTab hackathon={hackathon} />
+          </TabsContent>
+          <TabsContent value="participant-hub">
+            <ParticipantHubTab hackathon={hackathon} />
+          </TabsContent>
+          <TabsContent value="client-console">
+            <ClientConsoleTab hackathon={hackathon} />
+          </TabsContent>
+          <TabsContent value="projects">
+            <ProjectsTab hackathon={hackathon} />
+          </TabsContent>
+          <TabsContent value="insights">
+            <InsightsTab hackathon={hackathon} />
+          </TabsContent>
         </div>
       </Tabs>
     </div>

@@ -10,9 +10,10 @@ import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import CommentCard from '@/components/CommentCard';
 
-export default async function SubIdeaDetailsPage({ params }: { params: { id: string, ideaId: string } }) {
-  const idea = ideas.find((p) => p.id === params.id);
-  const subIdea = idea?.subIdeas.find((p) => p.id === params.ideaId);
+export default async function SubIdeaDetailsPage({ params }: { params: Promise<{ id: string; ideaId: string }> }) {
+  const { id, ideaId } = await params;
+  const idea = ideas.find((p) => p.id === id);
+  const subIdea = idea?.subIdeas?.find((p) => p.id === ideaId);
 
   if (!idea || !subIdea) {
     notFound();
@@ -44,7 +45,7 @@ export default async function SubIdeaDetailsPage({ params }: { params: { id: str
             <CardDescription>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Avatar className="h-5 w-5">
-                  <AvatarImage src={subIdea.author.avatarUrl} data-ai-hint="user avatar" />
+                  <AvatarImage src={subIdea.author.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                   <AvatarFallback>{subIdea.author.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <span>Posted by {subIdea.author.name}</span>

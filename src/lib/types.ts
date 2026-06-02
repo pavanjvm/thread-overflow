@@ -1,6 +1,6 @@
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   avatarUrl: string | null;
   stars?: number;
@@ -69,7 +69,7 @@ export interface Conversation {
 }
 
 export interface SubIdea {
-    id: number; 
+    id: string; 
     title: string;
     description: string;
     author: User;
@@ -79,11 +79,11 @@ export interface SubIdea {
 }
 
 export interface Proposal {
-  id: number;
-  subIdeaId: number;
+  id: string;
+  subIdeaId: string;
   title: string;
   description: string;
-  authorId: number;
+  authorId: string;
   author: User;
   createdAt: string;
   votes: number;
@@ -93,11 +93,11 @@ export interface Proposal {
 }
 
 export interface Idea {
-  id: number;
+  id: string;
   title: string;
   description: string;
   author: User;
-  authorId: number;
+  authorId: string;
   createdAt: string;
   type: 'IDEATION' | 'SOLUTION_REQUEST';
   status: 'OPEN' | 'CLOSED';
@@ -114,7 +114,7 @@ export interface Prototype {
   proposalId: string;
   title: string;
   description: string;
-  authorId: number;
+  authorId: string;
   author: User;
   team: User[];
   createdAt: string;
@@ -155,6 +155,92 @@ export interface HackathonProject {
   tagline: string;
   thumbnailUrl: string;
   team: User[];
+  stage?: string;
+  score?: string;
+  status?: string;
+  summary?: string;
+}
+
+export interface HackathonMetric {
+  label: string;
+  value: string;
+  delta?: string;
+  trend?: 'up' | 'down' | 'neutral';
+  helperText?: string;
+}
+
+export interface HackathonStage {
+  id: string;
+  name: string;
+  window: string;
+  status: 'COMPLETED' | 'ACTIVE' | 'UPCOMING';
+  owner: string;
+  completion: number;
+  objective: string;
+  deliverables: string[];
+  analytics: {
+    submissions: string;
+    conversion: string;
+    sla: string;
+  };
+}
+
+export interface HackathonParticipantTrack {
+  id: string;
+  title: string;
+  description: string;
+  stage: string;
+  deliverable: string;
+  dueBy: string;
+  teamStatus: string;
+}
+
+export interface HackathonLeaderboardEntry {
+  rank: string;
+  teamName: string;
+  score: string;
+  highlight: string;
+}
+
+export interface HackathonParticipantWorkspace {
+  eligibility: string[];
+  perks: string[];
+  toolkit: string[];
+  tracks: HackathonParticipantTrack[];
+  leaderboard: HackathonLeaderboardEntry[];
+}
+
+export interface HackathonClientPipelineStage {
+  label: string;
+  volume: string;
+  conversion: string;
+  insight: string;
+}
+
+export interface HackathonClientWorkspace {
+  sponsor: string;
+  objective: string;
+  serviceTier: string;
+  metrics: HackathonMetric[];
+  pipeline: HackathonClientPipelineStage[];
+  opsChecklist: string[];
+  judgePanelNotes: string[];
+}
+
+export interface HackathonAnalytics {
+  headline: HackathonMetric[];
+  geography: {
+    region: string;
+    share: string;
+  }[];
+  funnel: {
+    stage: string;
+    value: string;
+  }[];
+  engagement: {
+    label: string;
+    value: string;
+  }[];
 }
 
 export interface Hackathon {
@@ -162,6 +248,10 @@ export interface Hackathon {
   slug: string;
   title: string;
   subtitle: string;
+  theme: string;
+  format: string;
+  audience: string;
+  status: 'PLANNING' | 'LIVE' | 'REVIEW' | 'COMPLETED';
   coverImageUrl: string;
   overview: string;
   prizes: HackathonPrize[];
@@ -172,6 +262,10 @@ export interface Hackathon {
     events: HackathonScheduleItem[];
   }[];
   projects: HackathonProject[];
+  stages: HackathonStage[];
+  participantWorkspace: HackathonParticipantWorkspace;
+  clientWorkspace: HackathonClientWorkspace;
+  analytics: HackathonAnalytics;
   timeline: {
     start: string;
     end: string;

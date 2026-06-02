@@ -7,37 +7,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Ghost } from 'lucide-react';
+import { BadgeCheck, Ghost, Shield, Users2 } from 'lucide-react';
 import { useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '@/lib/constants';
+import { useAuth } from '@/context/AuthContext';
+import type { User } from '@/lib/types';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setCurrentUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [workspaceRole, setWorkspaceRole] = useState<User['role']>('USER');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedEmail = email.trim();
+    const localUser: User = {
+      id: `local-${Date.now()}`,
+      name: trimmedEmail.split('@')[0] || 'User',
+      avatarUrl: null,
+      role: workspaceRole,
+    };
 
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-        email,
-        password,
-      }, {
-        withCredentials: true, // <-- This is the crucial part
-      });
-
-      if (response.status === 200) {
-        // Handle successful login, e.g., redirect to dashboard or show success message
-        router.push('/dashboard');
-      } else {
-        // Handle login error, e.g., show error message
-        console.error('Login failed', response.status);
-      }
-    } catch (error) {
-      console.error('Login failed', error);
-    }
+    setCurrentUser(localUser);
+    router.push('/hackathons');
   };
 
   return (
@@ -48,11 +41,38 @@ export default function LoginPage() {
             <Ghost className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl text-center">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
+          <CardDescription>Choose a role, enter anything, and get into the platform immediately.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label>Workspace</Label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setWorkspaceRole('USER')}
+                    className={`rounded-xl border p-3 text-left transition-colors ${workspaceRole === 'USER' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                  >
+                    <div className="flex items-center gap-2 font-medium">
+                      <Users2 className="h-4 w-4" />
+                      Participant
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">Join programs, submit projects, and track stage progress.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWorkspaceRole('ADMIN')}
+                    className={`rounded-xl border p-3 text-left transition-colors ${workspaceRole === 'ADMIN' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                  >
+                    <div className="flex items-center gap-2 font-medium">
+                      <Shield className="h-4 w-4" />
+                      Admin
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">Manage hackathons and create new programs.</p>
+                  </button>
+                </div>
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -81,6 +101,13 @@ export default function LoginPage() {
                     Forgot your password?
                   </Link>
 
+              </div>
+              <div className="rounded-xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 font-medium text-foreground">
+                  <BadgeCheck className="h-4 w-4" />
+                  No backend validation
+                </div>
+                <p className="mt-1">This local session only decides whether you enter as an admin or participant.</p>
               </div>
               <Button type="submit" className="w-full">
                 Login

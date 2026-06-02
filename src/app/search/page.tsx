@@ -137,7 +137,7 @@ export default function SearchPage() {
                         href={`/profile`}
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
+                          <AvatarImage src={user.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                           <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>

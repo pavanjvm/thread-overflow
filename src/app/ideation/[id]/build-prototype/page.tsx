@@ -118,7 +118,7 @@ export default function BuildPrototypePage() {
     }
   };
 
-  const handleRemoveTeamMember = (userId: number) => {
+  const handleRemoveTeamMember = (userId: string) => {
     const newTeamMembers = teamMembers.filter(u => u.id !== userId);
     setTeamMembers(newTeamMembers);
     form.setValue('team', newTeamMembers.map(u => u.id.toString()));

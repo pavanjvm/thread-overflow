@@ -42,7 +42,7 @@ const SubIdeaCard = ({ subIdea }: SubIdeaCardProps) => {
             <div className="text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
                   <Avatar className="h-5 w-5">
-                    <AvatarImage src={subIdea.author.avatarUrl} data-ai-hint="user avatar" />
+                    <AvatarImage src={subIdea.author.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                     <AvatarFallback>{subIdea.author.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <span>Posted by {subIdea.author.name}</span>

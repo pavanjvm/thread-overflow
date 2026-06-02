@@ -45,7 +45,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
 
-    const onMouseDown = (e: React.MouseEvent<HTMLElement>) => {
+    const onMouseDown: React.MouseEventHandler<HTMLElement> = (e) => {
       const element = e.currentTarget
       const ripple = document.createElement("span")
       const rect = element.getBoundingClientRect()
@@ -72,7 +72,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ripple.remove()
       }, 600)
 
-      props.onMouseDown?.(e)
+      const handler = props.onMouseDown as React.MouseEventHandler<HTMLElement> | undefined
+      handler?.(e)
     }
 
     return (

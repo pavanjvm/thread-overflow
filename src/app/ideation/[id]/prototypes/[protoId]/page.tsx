@@ -12,9 +12,10 @@ import { Separator } from '@/components/ui/separator';
 import CommentCard from '@/components/CommentCard';
 import AnimatedTooltipPreview from '@/components/animated-tooltip-demo';
 
-export default async function PrototypeDetailsPage({ params }: { params: { id: string, protoId: string } }) {
-  const idea = ideas.find((p) => p.id === parseInt(params.id, 10));
-  const prototype = idea?.prototypes?.find((p) => p.id === params.protoId);
+export default async function PrototypeDetailsPage({ params }: { params: Promise<{ id: string; protoId: string }> }) {
+  const { id, protoId } = await params;
+  const idea = ideas.find((p) => p.id === id);
+  const prototype = idea?.prototypes?.find((p) => p.id === protoId);
 
   if (!idea || !prototype) {
     notFound();

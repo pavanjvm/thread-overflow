@@ -20,12 +20,14 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { notifications, conversations } from '@/lib/mock-data';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, setIsChatOpen: (open: boolean) => void }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultSearch = searchParams.get('q') ?? '';
   const pathname = usePathname();
+  const { currentUser, logout } = useAuth();
   
   const isHackathonSection = pathname.startsWith('/hackathons');
   const isIdeationSection = pathname.startsWith('/ideation') || pathname === '/leaderboard';
@@ -45,6 +47,11 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
   return (
     <>
       <header className="bg-card border-b sticky top-0 z-50">
@@ -52,7 +59,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
           <div className="flex items-center gap-2">
             {showSidebar && <SidebarTrigger />}
             <Link
-              href="/dashboard"
+              href="/hackathons"
               className="flex items-center space-x-2 text-primary font-bold text-lg">
               <Ghost className="h-6 w-6" />
               <span className="hidden sm:inline">thread overflow</span>
@@ -147,16 +154,18 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src="https://placehold.co/40x40.png" alt="@shadcn" data-ai-hint="user avatar" />
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarImage src={currentUser?.avatarUrl ?? undefined} alt={currentUser?.name ?? 'User'} data-ai-hint="user avatar" />
+                    <AvatarFallback>{currentUser?.name?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Test User</p>
-                    <p className="text-xs leading-none text-muted-foreground">test@example.com</p>
+                    <p className="text-sm font-medium leading-none">{currentUser?.name ?? 'User'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {currentUser?.role === 'ADMIN' ? 'Admin workspace' : 'Participant workspace'}
+                    </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -176,8 +185,9 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
                 </DropdownMenuItem>
                 <DropdownMenuItem><Settings className="mr-2" />Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/login"><LogOut className="mr-2" />Log out</Link>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2" />
+                  Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

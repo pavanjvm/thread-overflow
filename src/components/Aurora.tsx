@@ -3,6 +3,15 @@
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useRef } from "react";
 
+interface AuroraProps {
+  colorStops?: string[];
+  amplitude?: number;
+  blend?: number;
+  isLight?: boolean;
+  time?: number;
+  speed?: number;
+}
+
 const VERT = `#version 300 es
 in vec2 position;
 void main() {
@@ -118,17 +127,17 @@ void main() {
 }
 `;
 
-export default function Aurora(props) {
+export default function Aurora(props: AuroraProps) {
   const {
     colorStops = ["#5227FF", "#7cff67", "#5227FF"],
     amplitude = 1.0,
     blend = 0.4,
     isLight = false,
   } = props;
-  const propsRef = useRef(props);
+  const propsRef = useRef<AuroraProps>(props);
   propsRef.current = props;
 
-  const ctnDom = useRef(null);
+  const ctnDom = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const ctn = ctnDom.current;
@@ -145,7 +154,7 @@ export default function Aurora(props) {
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.canvas.style.backgroundColor = 'transparent';
 
-    let program;
+    let program: InstanceType<typeof Program> | undefined;
 
     function resize() {
       if (!ctn) return;
@@ -163,7 +172,7 @@ export default function Aurora(props) {
       delete geometry.attributes.uv;
     }
 
-    const colorStopsArray = colorStops.map((hex) => {
+    const colorStopsArray = colorStops.map((hex: string) => {
       const c = new Color(hex);
       return [c.r, c.g, c.b];
     });
@@ -185,7 +194,7 @@ export default function Aurora(props) {
     ctn.appendChild(gl.canvas);
 
     let animateId = 0;
-    const update = (t) => {
+    const update = (t: number) => {
       animateId = requestAnimationFrame(update);
       const { time = t * 0.01, speed = 1.0 } = propsRef.current;
       program.uniforms.uTime.value = time * speed * 0.1;
@@ -193,7 +202,7 @@ export default function Aurora(props) {
       program.uniforms.uBlend.value = propsRef.current.blend ?? blend;
       program.uniforms.uIsLight.value = propsRef.current.isLight ?? isLight;
       const stops = propsRef.current.colorStops ?? colorStops;
-      program.uniforms.uColorStops.value = stops.map((hex) => {
+      program.uniforms.uColorStops.value = stops.map((hex: string) => {
         const c = new Color(hex);
         return [c.r, c.g, c.b];
       });

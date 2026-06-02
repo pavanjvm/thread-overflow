@@ -42,7 +42,7 @@ export default function ChatPanel({ open, onOpenChange }: { open: boolean; onOpe
                 onClick={() => setSelectedConversation(convo)}
                 >
                 <Avatar>
-                    <AvatarImage src={convo.participant.avatarUrl} data-ai-hint="user avatar" />
+                    <AvatarImage src={convo.participant.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                     <AvatarFallback>{convo.participant.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 overflow-hidden">
@@ -68,7 +68,7 @@ export default function ChatPanel({ open, onOpenChange }: { open: boolean; onOpe
                 <ArrowLeft className="h-5 w-5" />
             </Button>
             <Avatar className="h-9 w-9">
-                <AvatarImage src={conversation.participant.avatarUrl} data-ai-hint="user avatar" />
+                <AvatarImage src={conversation.participant.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                 <AvatarFallback>{conversation.participant.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
@@ -87,7 +87,7 @@ export default function ChatPanel({ open, onOpenChange }: { open: boolean; onOpe
                 >
                     {msg.senderId !== currentUserId && (
                         <Avatar className="h-6 w-6">
-                            <AvatarImage src={conversation.participant.avatarUrl} data-ai-hint="user avatar" />
+                            <AvatarImage src={conversation.participant.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                             <AvatarFallback>{conversation.participant.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                     )}

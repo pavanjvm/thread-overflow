@@ -17,14 +17,14 @@ export default function EditHackathonPage() {
 
   useEffect(() => {
     // In a real app, this check should be done on the server.
-    if (currentUser && currentUser.role !== 'admin') {
+    if (currentUser && currentUser.role !== 'ADMIN') {
       // Optionally redirect non-admins away
       // router.push(`/hackathons/${slug}`);
     }
   }, [currentUser, router, slug]);
 
 
-  if (!currentUser || currentUser.role !== 'admin') {
+  if (!currentUser || currentUser.role !== 'ADMIN') {
     return (
       <div className="flex items-center justify-center py-12">
         <Card className="mx-auto max-w-2xl w-full text-center">
@@ -32,7 +32,7 @@ export default function EditHackathonPage() {
             <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
             <CardTitle className="text-2xl mt-4">Access Denied</CardTitle>
             <CardDescription>
-              You do not have permission to edit this hackathon. This action is reserved for administrators.
+              You do not have permission to edit this program. This action is reserved for client operators.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -49,9 +49,9 @@ export default function EditHackathonPage() {
     <div className="flex items-center justify-center py-12">
       <Card className="mx-auto max-w-2xl w-full text-center">
         <CardHeader>
-          <CardTitle className="text-2xl">Edit Hackathon</CardTitle>
+          <CardTitle className="text-2xl">Edit Program Workspace</CardTitle>
           <CardDescription>
-            This page is for admins to edit hackathon details. The form to edit details for <pre className="inline bg-muted p-1 rounded">`{slug}`</pre> would be here.
+            This page is for client operators to edit program details. The form for <code className="rounded bg-muted px-1 py-0.5">{slug}</code> would live here.
           </CardDescription>
         </CardHeader>
         <CardContent>

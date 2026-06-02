@@ -7,37 +7,33 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Ghost } from 'lucide-react';
+import { Ghost, Shield, Users2 } from 'lucide-react';
 import { useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '@/lib/constants';
+import { useAuth } from '@/context/AuthContext';
+import type { User } from '@/lib/types';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState(''); // Changed from username to name
+  const { setCurrentUser } = useAuth();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [workspaceRole, setWorkspaceRole] = useState<User['role']>('USER');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const localUser: User = {
+      id: `local-${Date.now()}`,
+      name: trimmedName || trimmedEmail.split('@')[0] || 'User',
+      avatarUrl: null,
+      role: workspaceRole,
+    };
 
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, {
-        name, // Changed from username to name
-        email,
-        password,
-      });
-
-      if (response.status === 201) { // Changed status code to 201 for successful creation
-        // Handle successful signup, e.g., redirect to login page or show success message
-        router.push('/login');
-      } else {
-        // Handle signup error, e.g., show error message
-        console.error('Signup failed', response.status);
-      }
-    } catch (error) {
-      console.error('Signup failed', error);
-    }
+    void password;
+    setCurrentUser(localUser);
+    router.push('/hackathons');
   };
 
   return (
@@ -46,14 +42,41 @@ export default function SignupPage() {
         <CardHeader className="text-center">
           <Ghost className="mx-auto h-12 w-12 text-primary" />
           <CardTitle className="text-2xl">Sign Up</CardTitle>
-          <CardDescription>Enter your information to create an account</CardDescription>
+          <CardDescription>Create a local admin or participant workspace.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup}>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label> {/* Changed from first-name to name */}
-                <Input id="name" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} /> {/* Changed from username to name and setUsername to setName */}
+                <Label>Workspace</Label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setWorkspaceRole('USER')}
+                    className={`rounded-xl border p-3 text-left transition-colors ${workspaceRole === 'USER' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                  >
+                    <div className="flex items-center gap-2 font-medium">
+                      <Users2 className="h-4 w-4" />
+                      Participant
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">Best for builders joining challenges and shipping submissions.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWorkspaceRole('ADMIN')}
+                    className={`rounded-xl border p-3 text-left transition-colors ${workspaceRole === 'ADMIN' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                  >
+                    <div className="flex items-center gap-2 font-medium">
+                      <Shield className="h-4 w-4" />
+                      Admin
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">Best for managing hackathons and creating new ones.</p>
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>

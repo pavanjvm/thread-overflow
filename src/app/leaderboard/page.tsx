@@ -15,7 +15,7 @@ const LeaderboardPage = () => {
 
   useEffect(() => {
     // Simulating API call and sorting
-    const sorted = [...mockUsers].sort((a, b) => b.stars - a.stars);
+    const sorted = [...mockUsers].sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0));
     setSortedUsers(sorted);
     setLoading(false);
   }, []);
@@ -72,7 +72,7 @@ const LeaderboardPage = () => {
                       {getRankIndicator(index)}
                     </div>
                     <Avatar>
-                      <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
+                      <AvatarImage src={user.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                       <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span className="font-medium text-lg">{user.name}</span>

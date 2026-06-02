@@ -125,7 +125,7 @@ export default function IdeationSidebar({ pathname, topUsers }: IdeationSidebarP
                 <Link href={`/profile`}>
                   <>
                     <Avatar className="size-5">
-                      <AvatarImage src={user.avatarUrl} data-ai-hint="user avatar" />
+                      <AvatarImage src={user.avatarUrl ?? undefined} data-ai-hint="user avatar" />
                       <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span className="flex-grow">{user.name}</span>
