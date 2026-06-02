@@ -1,6 +1,6 @@
 'use client';
 
-import { notFound, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { hackathons } from '@/lib/mock-data';
 import ProgramOverviewTab from './_components/ProgramOverviewTab';
@@ -16,7 +16,7 @@ export default function HackathonPage() {
   const hackathon = hackathons.find((item) => item.slug === slug);
 
   if (!hackathon) {
-    notFound();
+    return null;
   }
 
   return (

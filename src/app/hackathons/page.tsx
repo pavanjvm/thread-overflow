@@ -1,17 +1,25 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { hackathons } from '@/lib/mock-data';
+import type { BrowserHackathon } from '@/lib/browser-hackathons';
+import { readBrowserHackathons } from '@/lib/browser-hackathons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CalendarRange, Plus, Sparkles, Trophy, Users2 } from 'lucide-react';
+import { CalendarRange, Plus, Settings2, Sparkles, Users2 } from 'lucide-react';
 
 export default function HackathonsPage() {
   const { currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'ADMIN';
+  const [hackathons, setHackathons] = useState<BrowserHackathon[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    setHackathons(readBrowserHackathons());
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -26,74 +34,128 @@ export default function HackathonsPage() {
             </Button>
           )}
         </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          {hackathons.map((hackathon) => (
-            <Card key={hackathon.id} className="overflow-hidden">
-              <div className="relative h-52 w-full">
-              <Image src={hackathon.coverImageUrl} alt={hackathon.title} fill className="object-cover" data-ai-hint="hackathon cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4 text-white">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/80">{hackathon.theme}</p>
-                  <h2 className="text-2xl font-semibold">{hackathon.title}</h2>
-                </div>
-                <Badge className="bg-white/15 text-white hover:bg-white/15">{hackathon.status}</Badge>
+        {hackathons.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="flex min-h-72 flex-col items-center justify-center gap-4 p-8 text-center">
+              <div className="rounded-full bg-muted p-4">
+                <Sparkles className="h-8 w-8 text-muted-foreground" />
               </div>
-            </div>
-            <CardContent className="space-y-5 p-6">
               <div>
-                <p className="text-sm font-medium">{hackathon.subtitle}</p>
-                <p className="mt-2 text-sm text-muted-foreground">{hackathon.overview}</p>
+                <h2 className="text-2xl font-semibold">No hackathons created yet</h2>
+                <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                  Create a hackathon to preview it here during this browser session.
+                </p>
               </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl bg-muted/50 p-3">
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-                    <CalendarRange className="h-3.5 w-3.5" />
-                    Timeline
-                  </div>
-                  <p className="mt-1 font-medium">{hackathon.eventDates.start} to {hackathon.eventDates.end}</p>
-                </div>
-                <div className="rounded-xl bg-muted/50 p-3">
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-                    <Users2 className="h-3.5 w-3.5" />
-                    Audience
-                  </div>
-                  <p className="mt-1 font-medium">{hackathon.audience}</p>
-                </div>
-                <div className="rounded-xl bg-muted/50 p-3">
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Tracks
-                  </div>
-                  <p className="mt-1 font-medium">{hackathon.participantWorkspace.tracks.length} tracks</p>
-                </div>
-              </div>
-              <div className="rounded-2xl border p-4">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-                  <Trophy className="h-3.5 w-3.5" />
-                  Top outcomes
-                </div>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  {hackathon.analytics.headline.slice(0, 2).map((metric) => (
-                    <div key={metric.label} className="rounded-xl bg-muted/50 p-3">
-                      <p className="text-xs text-muted-foreground">{metric.label}</p>
-                      <p className="mt-1 text-lg font-semibold">{metric.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm text-muted-foreground">
-                  Sponsor: <span className="font-medium text-foreground">{hackathon.clientWorkspace.sponsor}</span>
-                </div>
+              {isAdmin && (
                 <Button asChild>
-                  <Link href={`/hackathons/${hackathon.slug}`}>Open hackathon</Link>
+                  <Link href="/hackathons/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create hackathon
+                  </Link>
                 </Button>
-              </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {hackathons.map((hackathon) => (
+              <Card
+                key={hackathon.id}
+                className="h-full cursor-pointer overflow-hidden transition hover:border-primary hover:shadow-md"
+                role="link"
+                tabIndex={0}
+                onClick={() => router.push(`/hackathons/${hackathon.slug}`)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    router.push(`/hackathons/${hackathon.slug}`);
+                  }
+                }}
+              >
+                  <div className="relative flex min-h-52 w-full items-end bg-gradient-to-br from-sky-600 via-cyan-500 to-emerald-300 p-6 text-white">
+                    {hackathon.coverImageDataUrl && (
+                      <img
+                        src={hackathon.coverImageDataUrl}
+                        alt={`${hackathon.title} cover`}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+                    <div className="relative z-10 flex w-full items-end justify-between gap-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/80">
+                          {hackathon.participationType === 'TEAM' ? 'Team Hackathon' : 'Individual Hackathon'}
+                        </p>
+                        <h2 className="mt-1 text-2xl font-semibold">{hackathon.title}</h2>
+                      </div>
+                      <Badge className="bg-white/15 text-white hover:bg-white/15">PLANNING</Badge>
+                    </div>
+                  </div>
+                  <CardContent className="space-y-5 p-6">
+                    <div>
+                      <p className="text-sm font-medium">Hackathon Details</p>
+                      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                        {hackathon.overviewText || 'No overview added.'}
+                      </p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-xl bg-muted/50 p-3">
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+                          <CalendarRange className="h-3.5 w-3.5" />
+                          Registration
+                        </div>
+                        <p className="mt-1 font-medium">{hackathon.registrationStart} to {hackathon.registrationEnd}</p>
+                      </div>
+                      <div className="rounded-xl bg-muted/50 p-3">
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+                          <Users2 className="h-3.5 w-3.5" />
+                          Mode
+                        </div>
+                        <p className="mt-1 font-medium">
+                          {hackathon.participationType === 'TEAM'
+                            ? `${hackathon.minTeamSize}-${hackathon.maxTeamSize} members`
+                            : 'Individual'}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-muted/50 p-3">
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+                          <Sparkles className="h-3.5 w-3.5" />
+                          Tracks
+                        </div>
+                        <p className="mt-1 font-medium">{hackathon.tracks.length} tracks</p>
+                      </div>
+                    </div>
+                    <div className="rounded-2xl border p-4">
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Participant Track Options</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {hackathon.tracks.map((track) => (
+                          <Badge key={track} variant="secondary">{track}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Registration fields: <span className="font-medium text-foreground">{hackathon.registrationFields.length}</span>
+                    </div>
+                    {isAdmin && (
+                      <div className="flex justify-end pt-1">
+                        <Button
+                          type="button"
+                          className="rounded-full"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            router.push(`/hackathons/${hackathon.slug}/manage`);
+                          }}
+                        >
+                          <Settings2 className="mr-2 h-4 w-4" />
+                          Manage
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

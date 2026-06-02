@@ -1,15 +1,47 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { type ElementType, useMemo, useRef, useState } from 'react';
+import { format } from 'date-fns';
 import Link from 'next/link';
-import { ShieldAlert, Upload, User, Users, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  CalendarIcon,
+  Copy,
+  ImageIcon,
+  Italic,
+  List,
+  ListOrdered,
+  Scissors,
+  ShieldAlert,
+  Strikethrough,
+  Subscript,
+  Superscript,
+  Underline,
+  Undo2,
+  Upload,
+  User,
+  Users,
+  X,
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import {
+  createHackathonSlug,
+  getTextFromHtml,
+  saveBrowserHackathon,
+} from '@/lib/browser-hackathons';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -17,32 +49,72 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 
 type Step = 1 | 2;
 type ParticipationType = 'INDIVIDUAL' | 'TEAM';
+type EditorCommand = {
+  command: string;
+  icon: ElementType;
+  label: string;
+};
+
+const editorCommands: EditorCommand[] = [
+  { command: 'bold', icon: Bold, label: 'Bold' },
+  { command: 'italic', icon: Italic, label: 'Italic' },
+  { command: 'underline', icon: Underline, label: 'Underline' },
+  { command: 'strikeThrough', icon: Strikethrough, label: 'Strikethrough' },
+  { command: 'justifyLeft', icon: AlignLeft, label: 'Align left' },
+  { command: 'justifyCenter', icon: AlignCenter, label: 'Align center' },
+  { command: 'justifyRight', icon: AlignRight, label: 'Align right' },
+  { command: 'justifyFull', icon: AlignJustify, label: 'Justify' },
+  { command: 'insertUnorderedList', icon: List, label: 'Bullet list' },
+  { command: 'insertOrderedList', icon: ListOrdered, label: 'Numbered list' },
+  { command: 'cut', icon: Scissors, label: 'Cut' },
+  { command: 'copy', icon: Copy, label: 'Copy' },
+  { command: 'superscript', icon: Superscript, label: 'Superscript' },
+  { command: 'subscript', icon: Subscript, label: 'Subscript' },
+];
 
 export default function NewHackathonPage() {
   const { currentUser } = useAuth();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const coverInputRef = useRef<HTMLInputElement | null>(null);
+  const aboutEditorRef = useRef<HTMLDivElement | null>(null);
+  const aboutImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const [step, setStep] = useState<Step>(1);
   const [logoName, setLogoName] = useState('');
+  const [logoDataUrl, setLogoDataUrl] = useState('');
+  const [coverName, setCoverName] = useState('');
+  const [coverImageDataUrl, setCoverImageDataUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [organisationName, setOrganisationName] = useState(currentUser?.name ?? 'Organisation');
   const [trackInput, setTrackInput] = useState('');
   const [tracks, setTracks] = useState<string[]>(['AI Ops', 'Developer Tools']);
   const [registrationStart, setRegistrationStart] = useState('');
   const [registrationEnd, setRegistrationEnd] = useState('');
+  const [registrationStartDate, setRegistrationStartDate] = useState<Date>();
+  const [registrationEndDate, setRegistrationEndDate] = useState<Date>();
+  const [startCalendarOpen, setStartCalendarOpen] = useState(false);
+  const [endCalendarOpen, setEndCalendarOpen] = useState(false);
   const [participationType, setParticipationType] = useState<ParticipationType>('TEAM');
   const [minTeamSize, setMinTeamSize] = useState('1');
   const [maxTeamSize, setMaxTeamSize] = useState('2');
-  const [selectedTrack, setSelectedTrack] = useState('');
+  const [customFieldInput, setCustomFieldInput] = useState('');
+  const [customRegistrationFields, setCustomRegistrationFields] = useState<string[]>([]);
   const [draftSaved, setDraftSaved] = useState(false);
   const [created, setCreated] = useState(false);
 
   const registrationFields = useMemo(() => {
+    const defaultFields = participationType === 'INDIVIDUAL'
+      ? ['Full Name', 'Mobile Number', 'Track']
+      : ['Team Name', 'Team Leader Name', 'Mobile Number', 'Add Team Members', 'Track'];
+
+    return [...defaultFields, ...customRegistrationFields];
+  }, [participationType, customRegistrationFields]);
+
+  const defaultRegistrationFields = useMemo(() => {
     if (participationType === 'INDIVIDUAL') {
       return ['Full Name', 'Mobile Number', 'Track'];
     }
@@ -52,9 +124,9 @@ export default function NewHackathonPage() {
 
   const canMoveToStepTwo =
     logoName.trim() !== '' &&
+    coverName.trim() !== '' &&
     title.trim() !== '' &&
-    description.trim() !== '' &&
-    organisationName.trim() !== '' &&
+    description.replace(/<[^>]*>/g, '').trim() !== '' &&
     tracks.length > 0 &&
     registrationStart.trim() !== '' &&
     registrationEnd.trim() !== '';
@@ -68,22 +140,135 @@ export default function NewHackathonPage() {
 
     setTracks((current) => [...current, trimmed]);
     setTrackInput('');
-
-    if (!selectedTrack) {
-      setSelectedTrack(trimmed);
-    }
   };
 
   const handleRemoveTrack = (track: string) => {
     setTracks((current) => current.filter((item) => item !== track));
+  };
 
-    if (selectedTrack === track) {
-      setSelectedTrack('');
+  const handleLogoUpload = (file?: File) => {
+    if (!file) {
+      setLogoName('');
+      setLogoDataUrl('');
+      return;
     }
+
+    setLogoName(file.name);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setLogoDataUrl(String(reader.result));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCoverUpload = (file?: File) => {
+    if (!file) {
+      setCoverName('');
+      setCoverImageDataUrl('');
+      return;
+    }
+
+    setCoverName(file.name);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCoverImageDataUrl(String(reader.result));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRegistrationStartSelect = (date?: Date) => {
+    if (!date) {
+      return;
+    }
+
+    setRegistrationStartDate(date);
+    setRegistrationStart(format(date, 'dd MMM yyyy'));
+    setStartCalendarOpen(false);
+
+    if (registrationEndDate && registrationEndDate < date) {
+      setRegistrationEndDate(undefined);
+      setRegistrationEnd('');
+    }
+  };
+
+  const handleRegistrationEndSelect = (date?: Date) => {
+    if (!date) {
+      return;
+    }
+
+    setRegistrationEndDate(date);
+    setRegistrationEnd(format(date, 'dd MMM yyyy'));
+    setEndCalendarOpen(false);
+  };
+
+  const handleAddRegistrationField = () => {
+    const trimmed = customFieldInput.trim();
+
+    if (!trimmed || registrationFields.includes(trimmed)) {
+      return;
+    }
+
+    setCustomRegistrationFields((current) => [...current, trimmed]);
+    setCustomFieldInput('');
+  };
+
+  const handleRemoveRegistrationField = (field: string) => {
+    setCustomRegistrationFields((current) => current.filter((item) => item !== field));
+  };
+
+  const syncAboutDescription = () => {
+    setDescription(aboutEditorRef.current?.innerHTML ?? '');
+  };
+
+  const handleEditorCommand = (command: string) => {
+    aboutEditorRef.current?.focus();
+    document.execCommand(command);
+    syncAboutDescription();
+  };
+
+  const handleAboutImageUpload = (file?: File) => {
+    if (!file || !file.type.startsWith('image/')) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      aboutEditorRef.current?.focus();
+      document.execCommand('insertImage', false, String(reader.result));
+      syncAboutDescription();
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleDraftSave = () => {
     setDraftSaved(true);
+  };
+
+  const handleCreateHackathon = () => {
+    const id = `hackathon-${Date.now()}`;
+    const overviewText = getTextFromHtml(description);
+
+    saveBrowserHackathon({
+      id,
+      slug: createHackathonSlug(title, id),
+      title: title.trim(),
+      logoDataUrl,
+      coverImageDataUrl,
+      overviewHtml: description,
+      overviewText,
+      tracks,
+      registrationStart,
+      registrationEnd,
+      participationType,
+      minTeamSize,
+      maxTeamSize,
+      registrationFields,
+      createdAt: new Date().toISOString(),
+    });
+
+    router.push('/hackathons');
   };
 
   if (!currentUser || currentUser.role !== 'ADMIN') {
@@ -119,15 +304,9 @@ export default function NewHackathonPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border p-4">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Opportunity Title</p>
-                <p className="mt-2 text-lg font-semibold">{title}</p>
-              </div>
-              <div className="rounded-2xl border p-4">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Organisation</p>
-                <p className="mt-2 text-lg font-semibold">{organisationName}</p>
-              </div>
+            <div className="rounded-2xl border p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Title</p>
+              <p className="mt-2 text-lg font-semibold">{title}</p>
             </div>
             <div className="rounded-2xl border p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Tracks</p>
@@ -181,7 +360,7 @@ export default function NewHackathonPage() {
                   </div>
                   <div className="pt-1">
                     <p className="text-sm text-muted-foreground">Step 1</p>
-                    <p className="text-2xl font-medium">Opportunity details</p>
+                    <p className="text-2xl font-medium">Hackathon Details</p>
                   </div>
                 </button>
 
@@ -214,7 +393,7 @@ export default function NewHackathonPage() {
                       type="file"
                       accept=".jpg,.jpeg,.png"
                       className="hidden"
-                      onChange={(event) => setLogoName(event.target.files?.[0]?.name ?? '')}
+                      onChange={(event) => handleLogoUpload(event.target.files?.[0])}
                     />
                     <button
                       type="button"
@@ -235,36 +414,123 @@ export default function NewHackathonPage() {
 
                 <div className="space-y-8">
                   <div className="space-y-3">
-                    <Label htmlFor="title" className="text-2xl font-medium">Opportunity Title *</Label>
+                    <Label className="text-2xl font-medium">Cover Image *</Label>
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      className="hidden"
+                      onChange={(event) => handleCoverUpload(event.target.files?.[0])}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => coverInputRef.current?.click()}
+                      className="relative flex min-h-48 w-full overflow-hidden rounded-2xl border border-dashed bg-muted/30 text-left"
+                    >
+                      {coverImageDataUrl ? (
+                        <img
+                          src={coverImageDataUrl}
+                          alt="Selected cover preview"
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex w-full flex-col items-center justify-center gap-3 p-8 text-muted-foreground">
+                          <Upload className="h-8 w-8" />
+                          <span className="text-lg font-medium text-foreground">Add Cover Image</span>
+                          <span className="text-sm">JPG, JPEG, or PNG</span>
+                        </div>
+                      )}
+                      {coverImageDataUrl && (
+                        <div className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-3 text-sm font-medium text-white">
+                          {coverName}
+                        </div>
+                      )}
+                    </button>
+                    <p className="text-sm text-orange-600">{coverName ? coverName : 'Cover image required'}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="title" className="text-2xl font-medium">Title *</Label>
                     <Input
                       id="title"
                       value={title}
                       onChange={(event) => setTitle(event.target.value)}
-                      placeholder="Enter Opportunity Title."
+                      placeholder="Enter title."
                       className="h-16 rounded-2xl text-2xl"
                     />
                     <p className="text-sm text-muted-foreground">Max 190 characters</p>
                   </div>
 
                   <div className="space-y-3">
-                    <Label htmlFor="org-name" className="text-2xl font-medium">Organisation Name *</Label>
-                    <Input
-                      id="org-name"
-                      value={organisationName}
-                      onChange={(event) => setOrganisationName(event.target.value)}
-                      className="h-16 rounded-2xl text-2xl"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="about" className="text-2xl font-medium">About the Opportunity *</Label>
-                    <Textarea
-                      id="about"
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      placeholder="Describe the hackathon, who it is for, what participants will build, and how the process works."
-                      className="min-h-40 rounded-2xl text-lg"
-                    />
+                    <div>
+                      <Label htmlFor="about" className="text-2xl font-medium">About Hackathon *</Label>
+                      <p className="mt-2 text-sm text-muted-foreground">Include rules, eligibility, process, format, etc.</p>
+                    </div>
+                    <div className="overflow-hidden rounded-2xl border border-slate-300 bg-white">
+                      <div className="flex flex-wrap items-center gap-1 border-b bg-white px-4 py-3">
+                        <button
+                          type="button"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleEditorCommand('undo');
+                          }}
+                          className="mr-2 rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                          aria-label="Undo"
+                        >
+                          <Undo2 className="h-5 w-5" />
+                        </button>
+                        {editorCommands.map(({ command, icon: Icon, label }) => (
+                          <button
+                            key={command}
+                            type="button"
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              handleEditorCommand(command);
+                            }}
+                            className="rounded-md p-2 text-blue-600 hover:bg-blue-50"
+                            aria-label={label}
+                            title={label}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </button>
+                        ))}
+                        <input
+                          ref={aboutImageInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(event) => {
+                            handleAboutImageUpload(event.target.files?.[0]);
+                            event.target.value = '';
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => aboutImageInputRef.current?.click()}
+                          className="rounded-md p-2 text-blue-600 hover:bg-blue-50"
+                          aria-label="Upload image"
+                          title="Upload image"
+                        >
+                          <ImageIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                      <div className="relative">
+                        {!description && (
+                          <div className="pointer-events-none absolute inset-x-0 top-0 p-6 text-base text-muted-foreground">
+                            Describe the hackathon, who it is for, what participants will build, rules, eligibility, process, and format.
+                          </div>
+                        )}
+                        <div
+                          id="about"
+                          ref={aboutEditorRef}
+                          contentEditable
+                          suppressContentEditableWarning
+                          onInput={syncAboutDescription}
+                          className="min-h-72 w-full overflow-auto p-6 text-base leading-7 outline-none [&_img]:my-4 [&_img]:max-h-80 [&_img]:max-w-full [&_img]:rounded-xl [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -297,23 +563,58 @@ export default function NewHackathonPage() {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label htmlFor="reg-start">Registration Start</Label>
-                        <Input
-                          id="reg-start"
-                          value={registrationStart}
-                          onChange={(event) => setRegistrationStart(event.target.value)}
-                          placeholder="Eg. 12 Aug 2026, 10:00 AM"
-                          className="h-14 rounded-2xl text-lg"
-                        />
+                        <Popover open={startCalendarOpen} onOpenChange={setStartCalendarOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              id="reg-start"
+                              type="button"
+                              variant="outline"
+                              className={cn(
+                                'h-14 w-full justify-start rounded-2xl px-4 text-left text-lg font-normal',
+                                !registrationStart && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-3 h-5 w-5" />
+                              {registrationStart || 'Select start date'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={registrationStartDate}
+                              onSelect={handleRegistrationStartSelect}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <div className="space-y-3">
                         <Label htmlFor="reg-end">Registration End</Label>
-                        <Input
-                          id="reg-end"
-                          value={registrationEnd}
-                          onChange={(event) => setRegistrationEnd(event.target.value)}
-                          placeholder="Eg. 20 Aug 2026, 11:59 PM"
-                          className="h-14 rounded-2xl text-lg"
-                        />
+                        <Popover open={endCalendarOpen} onOpenChange={setEndCalendarOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              id="reg-end"
+                              type="button"
+                              variant="outline"
+                              className={cn(
+                                'h-14 w-full justify-start rounded-2xl px-4 text-left text-lg font-normal',
+                                !registrationEnd && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-3 h-5 w-5" />
+                              {registrationEnd || 'Select end date'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={registrationEndDate}
+                              onSelect={handleRegistrationEndSelect}
+                              disabled={registrationStartDate ? { before: registrationStartDate } : undefined}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                     </div>
                   </div>
@@ -322,7 +623,7 @@ export default function NewHackathonPage() {
             ) : (
               <div className="space-y-8 pt-8">
                 <div className="space-y-6">
-                  <h2 className="text-4xl font-semibold tracking-tight">Opportunity Mode & Participation Type</h2>
+                  <h2 className="text-4xl font-semibold tracking-tight">Hackathon Details & Participation Type</h2>
 
                   <div className="rounded-[28px] border p-8">
                     <div className="space-y-8">
@@ -389,26 +690,58 @@ export default function NewHackathonPage() {
                   <h3 className="text-3xl font-semibold tracking-tight">Registration Form</h3>
                   <div className="rounded-[28px] border p-8">
                     <div className="grid gap-4 md:grid-cols-2">
-                      {registrationFields.map((field) => (
+                      {defaultRegistrationFields.map((field) => (
                         <div key={field} className="rounded-2xl border bg-muted/30 p-4">
                           <p className="text-base font-medium">{field}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">Required field</p>
+                          {field === 'Track' ? (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {tracks.map((track) => (
+                                <Badge key={track} variant="secondary">{track}</Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="mt-1 text-sm text-muted-foreground">Required field</p>
+                          )}
+                        </div>
+                      ))}
+                      {customRegistrationFields.map((field) => (
+                        <div key={field} className="flex items-start justify-between gap-3 rounded-2xl border bg-muted/30 p-4">
+                          <div>
+                            <p className="text-base font-medium">{field}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">Custom field</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveRegistrationField(field)}
+                            className="rounded-full p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                            aria-label={`Remove ${field}`}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
                       ))}
                     </div>
 
                     <div className="mt-6 space-y-3">
-                      <Label className="text-2xl font-medium">Track Selection</Label>
-                      <Select value={selectedTrack} onValueChange={setSelectedTrack}>
-                        <SelectTrigger className="h-16 rounded-2xl text-xl">
-                          <SelectValue placeholder="Select a track from the tracks you added" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tracks.map((track) => (
-                            <SelectItem key={track} value={track}>{track}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="custom-field" className="text-2xl font-medium">Add Fields</Label>
+                      <div className="flex gap-3">
+                        <Input
+                          id="custom-field"
+                          value={customFieldInput}
+                          onChange={(event) => setCustomFieldInput(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              handleAddRegistrationField();
+                            }
+                          }}
+                          placeholder="Add a field like College Name, GitHub Profile, T-shirt Size"
+                          className="h-14 rounded-2xl text-lg"
+                        />
+                        <Button type="button" onClick={handleAddRegistrationField} className="h-14 rounded-2xl px-6">
+                          Add Field
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -433,7 +766,7 @@ export default function NewHackathonPage() {
                   <Button variant="outline" onClick={() => setStep(1)}>
                     Previous
                   </Button>
-                  <Button onClick={() => setCreated(true)} disabled={!selectedTrack && tracks.length > 0}>
+                  <Button onClick={handleCreateHackathon}>
                     Create hackathon
                   </Button>
                 </>
