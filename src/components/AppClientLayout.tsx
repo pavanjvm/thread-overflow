@@ -3,7 +3,6 @@
 
 import { usePathname } from 'next/navigation';
 import { Toaster } from "@/components/ui/toaster"
-import { cn } from '@/lib/utils';
 import {
   SidebarProvider,
   Sidebar,
@@ -28,7 +27,7 @@ const Header = dynamic(() => import('@/components/Header'), {
                     <Skeleton className="h-7 w-7" />
                     <Skeleton className="h-6 w-32 hidden sm:inline" />
                 </div>
-                <div className="flex-1 max-w-lg mx-4">
+                <div className="flex-1 min-w-0 px-4">
                     <Skeleton className="h-10 w-full" />
                 </div>
                 <div className="flex items-center space-x-2">
@@ -82,7 +81,7 @@ export default function AppClientLayout({
   if (isAuthPage) {
     return (
       <>
-        <main className="container mx-auto px-4 py-8">{children}</main>
+        <main className="w-full max-w-none px-4 py-8">{children}</main>
         <Toaster />
       </>
     );
@@ -112,7 +111,7 @@ export default function AppClientLayout({
         
         <SidebarInset>
             <Header showSidebar={showSidebar} setIsChatOpen={setIsChatOpen} />
-            <main className={cn("flex-grow", "container mx-auto px-4 py-8")}>
+            <main className="flex-grow w-full max-w-none px-4 py-8">
                 <Breadcrumb />
                 {children}
             </main>

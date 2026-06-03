@@ -4,6 +4,8 @@ export interface BrowserHackathon {
   id: string;
   slug: string;
   title: string;
+  organizationName?: string;
+  prizePool?: string;
   logoDataUrl: string;
   coverImageDataUrl: string;
   overviewHtml: string;

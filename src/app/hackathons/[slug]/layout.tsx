@@ -249,7 +249,9 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
                 <div className="flex flex-1 items-start gap-5">
                   <div>
                     <h2 className="max-w-xl text-4xl font-bold tracking-tight">{hackathon.title}</h2>
-                    <p className="mt-3 font-medium text-muted-foreground">Session Preview Hackathon</p>
+                    <p className="mt-3 font-medium text-muted-foreground">
+                      {hackathon.organizationName || 'Session Preview Hackathon'}
+                    </p>
                   </div>
                   {hackathon.logoDataUrl && (
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border bg-white p-2 shadow-sm">
@@ -281,7 +283,9 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
                   <Trophy className="h-8 w-8 text-amber-500" />
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Prize preview</p>
-                    <p className="text-2xl font-bold text-foreground">Prizes worth ₹1,00,000</p>
+                    <p className="text-2xl font-bold text-foreground">
+                      Prizes worth {hackathon.prizePool || '₹1,00,000'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -329,7 +333,7 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total rewards</p>
-                    <p className="text-3xl font-bold text-foreground">₹1,00,000</p>
+                    <p className="text-3xl font-bold text-foreground">{hackathon.prizePool || '₹1,00,000'}</p>
                     <p className="mt-1 text-sm text-muted-foreground">Final prize split can be configured when backend data is connected.</p>
                   </div>
                 </div>
