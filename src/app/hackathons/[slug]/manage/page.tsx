@@ -47,7 +47,6 @@ import {
   ArrowRight,
   Award,
   BarChart3,
-  Building2,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -61,11 +60,9 @@ import {
   Gift,
   Info,
   LayoutDashboard,
-  Laptop,
   ListChecks,
   Mail,
   CalendarDays,
-  MapPin,
   Minus,
   MoreVertical,
   MousePointerClick,
@@ -117,7 +114,7 @@ type RoundDraft = {
   startAt: string;
   endAt: string;
   eliminationMode: 'ELIMINATION' | 'AUTO_ADVANCE';
-  roundType: 'OFFLINE' | 'IN_OFFICE' | 'OTHER' | 'SUBMISSION';
+  roundType: 'OFFLINE' | 'SUBMISSION';
   submissionFieldType: 'FILE';
   submissionFieldRequired: boolean;
   submissionFieldLabel: string;
@@ -902,7 +899,7 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                   disabled={roundDraft.roundType !== 'SUBMISSION'}
                   className="rounded-none border-b-[3px] border-transparent px-0 py-4 text-base data-[state=active]:border-[#173f73] data-[state=active]:bg-transparent data-[state=active]:shadow-none"
                 >
-                  Platform Settings
+                  Submission Form
                 </TabsTrigger>
                 <TabsTrigger
                   value="evaluation"
@@ -922,10 +919,8 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                     <Label className="text-sm font-semibold text-slate-800">Round Type</Label>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {([
-                        { value: 'OFFLINE', label: 'Offline', icon: MapPin },
-                        { value: 'IN_OFFICE', label: 'In-Office', icon: Building2 },
-                        { value: 'OTHER', label: 'Other', icon: Laptop },
                         { value: 'SUBMISSION', label: 'Submission', icon: FileUp },
+                        { value: 'OFFLINE', label: 'Offline / In-Office / Other', icon: CalendarDays },
                       ] as const).map((option) => {
                         const Icon = option.icon;
                         const active = roundDraft.roundType === option.value;
@@ -1115,7 +1110,7 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                   </div>
                 ) : (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
-                    Platform Settings are needed only for submission rounds.
+                    Submission Form is needed only for submission rounds.
                   </div>
                 )}
               </TabsContent>
