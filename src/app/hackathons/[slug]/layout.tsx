@@ -4,10 +4,9 @@ import { useEffect, useState } from 'react';
 import { notFound, useParams, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { hackathons } from '@/lib/mock-data';
 import type { BrowserHackathon } from '@/lib/browser-hackathons';
-import { readBrowserHackathons } from '@/lib/browser-hackathons';
+import { getBrowserHackathonStages, readBrowserHackathons } from '@/lib/browser-hackathons';
 import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,18 +16,11 @@ import {
   CalendarCheck,
   CalendarRange,
   Edit,
-  Heart,
   HelpCircle,
-  Share2,
   Sparkles,
   Trophy,
   Users2,
 } from 'lucide-react';
-
-const ApplyDialog = dynamic(() => import('./_components/ApplyDialog'), {
-  ssr: false,
-  loading: () => <div className="h-11 w-[144px] rounded-md bg-primary/80 animate-pulse" />,
-});
 
 export default function HackathonLayout({
   children,
@@ -38,6 +30,7 @@ export default function HackathonLayout({
   const params = useParams();
   const pathname = usePathname();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+  const baseHackathonPath = slug ? `/hackathons/${slug}` : null;
   const { currentUser } = useAuth();
   const hackathon = hackathons.find((item) => item.slug === slug);
   const [browserHackathon, setBrowserHackathon] = useState<BrowserHackathon | null>(null);
@@ -53,7 +46,7 @@ export default function HackathonLayout({
     setBrowserHackathonChecked(true);
   }, [hackathon, slug]);
 
-  if (pathname?.endsWith('/manage')) {
+  if (baseHackathonPath && pathname && pathname !== baseHackathonPath) {
     return <>{children}</>;
   }
 
@@ -101,34 +94,22 @@ export default function HackathonLayout({
                   <p className="mt-3 max-w-3xl text-lg text-white/80">{activeHackathon.subtitle}</p>
                 </div>
                 <p className="max-w-3xl text-sm leading-6 text-white/70">{activeHackathon.overview}</p>
-                <div className="flex flex-wrap gap-3">
-                  {isClient ? (
-                    <>
-                      <Button asChild variant="secondary">
-                        <Link href={`/hackathons/${activeHackathon.slug}/edit`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit program
-                        </Link>
-                      </Button>
-                      <Button asChild className="bg-cyan-400 text-slate-950 hover:bg-cyan-300">
-                        <Link href={`/hackathons/${activeHackathon.slug}#client-console`}>
-                          <BarChart3 className="mr-2 h-4 w-4" />
-                          Open client console
-                        </Link>
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <ApplyDialog />
-                      <Button asChild variant="secondary">
-                        <Link href={`/hackathons/${activeHackathon.slug}#participant-hub`}>
-                          <Users2 className="mr-2 h-4 w-4" />
-                          Open participant hub
-                        </Link>
-                      </Button>
-                    </>
-                  )}
-                </div>
+                {isClient ? (
+                  <div className="flex flex-wrap gap-3">
+                    <Button asChild variant="secondary">
+                      <Link href={`/hackathons/${activeHackathon.slug}/edit`}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit program
+                      </Link>
+                    </Button>
+                    <Button asChild className="bg-cyan-400 text-slate-950 hover:bg-cyan-300">
+                      <Link href={`/hackathons/${activeHackathon.slug}#client-console`}>
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        Open client console
+                      </Link>
+                    </Button>
+                  </div>
+                ) : null}
               </div>
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
@@ -163,42 +144,41 @@ export default function HackathonLayout({
 }
 
 function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon }) {
+  const { currentUser } = useAuth();
   const teamSize = hackathon.participationType === 'TEAM'
     ? `${hackathon.minTeamSize} - ${hackathon.maxTeamSize} Members`
     : 'Individual';
-  const timelineItems = [
-    {
-      start: `${hackathon.registrationStart}, 08:30 AM IST`,
-      end: `${hackathon.registrationEnd}, 06:00 PM IST`,
-      title: '1. Registration & Team Formation',
-      description: `Form a team of ${hackathon.participationType === 'TEAM' ? `${hackathon.minTeamSize}-${hackathon.maxTeamSize}` : '1'} and submit with a team name.`,
-    },
-    {
-      start: `${hackathon.registrationEnd}, 08:30 AM IST`,
-      end: '28 Jul 25, 08:00 PM IST',
-      title: '2. Idea Submission & Shortlisting',
-      description: 'Submit your ideas under one of the available hackathon tracks.',
-      action: 'Results',
-    },
-    {
-      start: '29 Jul 25, 02:00 PM IST',
-      end: '07 Aug 25, 11:30 PM IST',
-      title: '3. Build Phase (Rapid Prototyping)',
-      description: 'Shortlisted teams work on POCs/MVPs and submit the recorded demo.',
-    },
-    {
-      start: '08 Aug 25, 09:00 AM IST',
-      end: '08 Aug 25, 09:00 PM IST',
-      title: '4. Demonstrate your idea (Show & Tell)',
-      description: 'Each team presents a walkthrough covering the problem statement, tech used, and impact.',
-    },
-    {
-      start: '13 Aug 25, 09:00 AM IST',
-      end: '13 Aug 25, 09:30 PM IST',
-      title: '5. Final Round and Awards Ceremony',
-      description: 'Judges score the idea and demonstration. Winners are announced in the closing session.',
-    },
-  ];
+  const stages = getBrowserHackathonStages(hackathon);
+  const timelineItems = stages.map((stage, index) => {
+    const previousStage = index > 0 ? stages[index - 1] : null;
+    const startAt = stage.startAt || (stage.type === 'REGISTRATION' ? hackathon.registrationStart : hackathon.registrationEnd);
+    const endAt = stage.endAt || (stage.type === 'REGISTRATION' ? hackathon.registrationEnd : hackathon.registrationEnd);
+
+    if (stage.type === 'REGISTRATION') {
+      return {
+        start: startAt,
+        end: endAt,
+        title: stage.name,
+        description: hackathon.participationType === 'TEAM'
+          ? `Teams can register with ${hackathon.minTeamSize}-${hackathon.maxTeamSize} members during this stage.`
+          : 'Participants can register individually during this stage.',
+        action: stage.code,
+        live: isStageLive(startAt, endAt),
+      };
+    }
+
+    const criteriaCount = stage.evaluationCriteria?.length ?? 0;
+    return {
+      start: startAt,
+      end: endAt,
+      title: stage.name,
+      description: criteriaCount > 0
+        ? `${criteriaCount} evaluation criteria configured${previousStage ? ` after ${previousStage.name}` : ''}.`
+        : `Submission round configured${previousStage ? ` after ${previousStage.name}` : ''}.`,
+      action: stage.code,
+      live: isStageLive(startAt, endAt),
+    };
+  });
   const faqs = [
     {
       question: 'Who can participate?',
@@ -206,14 +186,10 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
         ? `Teams with ${teamSize.toLowerCase()} can participate.`
         : 'Individual participants can register and submit their work.',
     },
-    {
+    ...(hackathon.tracks.length > 0 ? [{
       question: 'How do participants choose a track?',
       answer: `Participants select one of the configured tracks: ${hackathon.tracks.join(', ')}.`,
-    },
-    {
-      question: 'Is this connected to a backend?',
-      answer: 'This is a browser-only preview. Created hackathons are stored only for the current session.',
-    },
+    }] : []),
   ];
 
   return (
@@ -246,31 +222,18 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
           <Card className="overflow-hidden rounded-t-3xl rounded-b-none border-t-4 border-t-primary shadow-none">
             <CardContent className="p-6 md:p-8">
               <div className="flex items-start justify-between gap-4">
-                <div className="flex flex-1 items-start gap-5">
-                  <div>
-                    <h2 className="max-w-xl text-4xl font-bold tracking-tight">{hackathon.title}</h2>
-                    <p className="mt-3 font-medium text-muted-foreground">
-                      {hackathon.organizationName || 'Session Preview Hackathon'}
-                    </p>
+                <div>
+                  <h2 className="max-w-xl text-4xl font-bold tracking-tight">{hackathon.title}</h2>
+                </div>
+                {hackathon.logoDataUrl ? (
+                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border bg-white p-2 shadow-sm">
+                    <img
+                      src={hackathon.logoDataUrl}
+                      alt={`${hackathon.title} logo`}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                  {hackathon.logoDataUrl && (
-                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border bg-white p-2 shadow-sm">
-                      <img
-                        src={hackathon.logoDataUrl}
-                        alt={`${hackathon.title} logo`}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" aria-label="Save hackathon">
-                    <Heart className="h-5 w-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" aria-label="Share hackathon">
-                    <Share2 className="h-5 w-5" />
-                  </Button>
-                </div>
+                ) : null}
               </div>
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
                 <InfoTile icon={Users2} label="Team Size" value={teamSize} />
@@ -278,17 +241,19 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
                 <InfoTile icon={CalendarRange} label="Registration Deadline" value={hackathon.registrationEnd} />
               </div>
 
-              <div className="mt-8 rounded-2xl bg-secondary/60 p-5">
-                <div className="flex items-center gap-3">
-                  <Trophy className="h-8 w-8 text-amber-500" />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Prize preview</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      Prizes worth {hackathon.prizePool || '₹1,00,000'}
-                    </p>
+              {hackathon.prizePool ? (
+                <div className="mt-8 rounded-2xl bg-secondary/60 p-5">
+                  <div className="flex items-center gap-3">
+                    <Trophy className="h-8 w-8 text-amber-500" />
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Prize preview</p>
+                      <p className="text-2xl font-bold text-foreground">
+                        Prizes worth {hackathon.prizePool}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -316,30 +281,31 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
             <CardContent>
               <div
                 className="prose prose-sm max-w-none text-muted-foreground [&_img]:my-4 [&_img]:max-h-96 [&_img]:rounded-xl [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
-                dangerouslySetInnerHTML={{ __html: hackathon.overviewHtml || '<p>No details added.</p>' }}
+                dangerouslySetInnerHTML={{ __html: hackathon.overviewHtml }}
               />
             </CardContent>
           </Card>
 
-          <Card className="mt-6 rounded-3xl shadow-none">
-            <CardHeader>
-              <CardTitle>Prize</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-2xl border bg-secondary/60 p-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm">
-                    <Trophy className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total rewards</p>
-                    <p className="text-3xl font-bold text-foreground">{hackathon.prizePool || '₹1,00,000'}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Final prize split can be configured when backend data is connected.</p>
+          {hackathon.prizePool ? (
+            <Card className="mt-6 rounded-3xl shadow-none">
+              <CardHeader>
+                <CardTitle>Prize</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-2xl border bg-secondary/60 p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm">
+                      <Trophy className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total rewards</p>
+                      <p className="text-3xl font-bold text-foreground">{hackathon.prizePool}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ) : null}
 
           <Card className="mt-6 rounded-3xl shadow-none">
             <CardHeader>
@@ -368,12 +334,21 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
                 <p className="font-semibold">Participant</p>
                 <p className="text-sm text-muted-foreground">Preview mode</p>
               </div>
-              <Button className="h-12 w-full rounded-full bg-orange-700 hover:bg-orange-800">
-                Register Now
+              {currentUser?.role === 'ADMIN' ? (
+                <Button asChild className="h-12 w-full rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/85">
+                  <Link href={`/hackathons/${hackathon.slug}/manage`}>
+                    Manage Hackathon
+                  </Link>
+                </Button>
+              ) : null}
+              <Button asChild className="h-12 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link href={`/hackathons/${hackathon.slug}/register`}>
+                  Register Now
+                </Link>
               </Button>
               <div className="flex items-center justify-center gap-2 text-sm font-medium">
                 <Users2 className="h-4 w-4 text-accent" />
-                0 Registered
+                {hackathon.registrationCount ?? 0} Registered
               </div>
             </CardContent>
           </Card>
@@ -418,6 +393,7 @@ function TimelineItem({
   title,
   description,
   action,
+  live = false,
   isFirst,
   isLast,
 }: {
@@ -426,10 +402,13 @@ function TimelineItem({
   title: string;
   description: string;
   action?: string;
+  live?: boolean;
   isFirst: boolean;
   isLast: boolean;
 }) {
   const { day, month } = getTimelineDateParts(start);
+  const startLabel = formatTimelineLabel(start);
+  const endLabel = formatTimelineLabel(end);
 
   return (
     <div className="blue-800-border-before list relative min-h-[154px] pl-[82px] pr-5">
@@ -446,18 +425,28 @@ function TimelineItem({
 
       <div className="round-wrapper-container border-b pb-8 pt-4">
         <div className="date flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-medium text-neutral-800">
-          <span>{start}</span>
-          <span className="text-neutral-500">--&gt; {end}</span>
+          <span>{startLabel}</span>
+          <span className="text-neutral-500">--&gt; {endLabel}</span>
         </div>
 
         <div className="round-wrapper mt-4 rounded-md bg-white">
           <div className="title flex items-start justify-between gap-4">
-            <h3 className="text-base font-bold leading-6 text-neutral-900">{title}</h3>
-            {action && (
-              <Button variant="ghost" size="sm" className="h-8 rounded-md px-4 text-accent hover:bg-accent/10">
-                {action}
-              </Button>
-            )}
+            <div>
+              <h3 className="text-base font-bold leading-6 text-neutral-900">{title}</h3>
+              {live ? (
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                  Live
+                </div>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-2">
+              {action && (
+                <Button variant="ghost" size="sm" className="h-8 rounded-md px-4 text-accent hover:bg-accent/10">
+                  {action}
+                </Button>
+              )}
+            </div>
           </div>
           <p className="mt-3 text-sm leading-6 text-neutral-700">{description}</p>
         </div>
@@ -466,7 +455,39 @@ function TimelineItem({
   );
 }
 
+function isStageLive(startAt: string, endAt: string) {
+  const start = new Date(startAt);
+  const end = new Date(endAt);
+  const now = new Date();
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return false;
+  }
+
+  return now >= start && now <= end;
+}
+
+function formatTimelineLabel(value: string) {
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleString('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  }
+
+  return value;
+}
+
 function getTimelineDateParts(value: string) {
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return {
+      day: parsed.toLocaleDateString('en-US', { day: '2-digit' }),
+      month: parsed.toLocaleDateString('en-US', { month: 'short' }),
+    };
+  }
+
   const match = value.match(/(\d{1,2})\s+([A-Za-z]{3})/);
 
   return {

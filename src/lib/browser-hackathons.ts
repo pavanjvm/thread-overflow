@@ -1,10 +1,28 @@
 export const BROWSER_HACKATHONS_STORAGE_KEY = 'thread-overflow-session-hackathons';
 
+export interface BrowserHackathonEvaluationCriterion {
+  id: string;
+  label: string;
+  maxScore: number;
+}
+
+export interface BrowserHackathonStage {
+  id: string;
+  name: string;
+  code: string;
+  type: 'REGISTRATION' | 'SUBMISSION';
+  startAt?: string;
+  endAt?: string;
+  sourceStageId?: string;
+  evaluationEnabled?: boolean;
+  evaluationMaxScore?: number;
+  evaluationCriteria?: BrowserHackathonEvaluationCriterion[];
+}
+
 export interface BrowserHackathon {
   id: string;
   slug: string;
   title: string;
-  organizationName?: string;
   prizePool?: string;
   logoDataUrl: string;
   coverImageDataUrl: string;
@@ -17,6 +35,8 @@ export interface BrowserHackathon {
   minTeamSize: string;
   maxTeamSize: string;
   registrationFields: string[];
+  stages?: BrowserHackathonStage[];
+  registrationCount?: number;
   createdAt: string;
 }
 
@@ -31,7 +51,6 @@ export interface BrowserHackathonAnalytics {
   totalRegistrations: number;
   totalImpressions: number;
   completionRate: number;
-  uniqueDomains: number;
   activeTracks: number;
   trackStats: BrowserHackathonTrackAnalytics[];
 }
@@ -86,54 +105,40 @@ export function saveBrowserHackathon(hackathon: BrowserHackathon) {
   writeBrowserHackathons([hackathon, ...existing]);
 }
 
+export function removeBrowserHackathon(id: string) {
+  writeBrowserHackathons(readBrowserHackathons().filter((item) => item.id !== id));
+}
+
 export function getBrowserHackathonAnalytics(hackathon: BrowserHackathon): BrowserHackathonAnalytics {
-  const tracks = hackathon.tracks.length > 0 ? hackathon.tracks : ['General'];
-  const baseSeed = createSeed(`${hackathon.id}:${hackathon.title}:${tracks.join('|')}`);
-  let remainingRegistrations = 18 + (baseSeed % 74);
-  let remainingImpressions = remainingRegistrations * (5 + (baseSeed % 4)) + 60 + (baseSeed % 90);
-
-  const trackStats = tracks.map((track, index) => {
-    const trackSeed = createSeed(`${track}:${hackathon.id}:${index}`);
-    const tracksLeft = tracks.length - index;
-    const minRegistrations = index === tracks.length - 1 ? remainingRegistrations : Math.max(4, Math.floor(remainingRegistrations / (tracksLeft + 1)));
-    const maxRegistrations = index === tracks.length - 1 ? remainingRegistrations : Math.max(minRegistrations, remainingRegistrations - (tracksLeft - 1) * 4);
-    const registrations = clampNumber(minRegistrations + (trackSeed % Math.max(1, maxRegistrations - minRegistrations + 1)), minRegistrations, maxRegistrations);
-
-    remainingRegistrations -= registrations;
-
-    const minImpressions = registrations * 4;
-    const maxImpressions = index === tracks.length - 1
-      ? Math.max(minImpressions, remainingImpressions)
-      : Math.max(minImpressions, remainingImpressions - (tracksLeft - 1) * 25);
-    const impressions = clampNumber(minImpressions + (trackSeed % Math.max(1, maxImpressions - minImpressions + 1)), minImpressions, maxImpressions);
-
-    remainingImpressions -= impressions;
-
-    return {
-      track,
-      registrations,
-      impressions,
-      conversionRate: impressions > 0 ? Number(((registrations / impressions) * 100).toFixed(1)) : 0,
-    };
-  });
-
-  const totalRegistrations = trackStats.reduce((sum, item) => sum + item.registrations, 0);
-  const totalImpressions = trackStats.reduce((sum, item) => sum + item.impressions, 0);
+  const trackStats = hackathon.tracks.map((track) => ({
+    track,
+    registrations: 0,
+    impressions: 0,
+    conversionRate: 0,
+  }));
 
   return {
-    totalRegistrations,
-    totalImpressions,
-    completionRate: totalImpressions > 0 ? Number(((totalRegistrations / totalImpressions) * 100).toFixed(1)) : 0,
-    uniqueDomains: Math.min(12, Math.max(3, hackathon.registrationFields.length + tracks.length)),
-    activeTracks: tracks.length,
-    trackStats: trackStats.sort((left, right) => right.registrations - left.registrations),
+    totalRegistrations: 0,
+    totalImpressions: 0,
+    completionRate: 0,
+    activeTracks: hackathon.tracks.length,
+    trackStats,
   };
 }
 
-function createSeed(value: string) {
-  return value.split('').reduce((seed, char, index) => seed + char.charCodeAt(0) * (index + 1), 0);
+export function createDefaultHackathonStages(): BrowserHackathonStage[] {
+  return [
+    {
+      id: 'reg',
+      name: 'Registrations',
+      code: 'REG',
+      type: 'REGISTRATION',
+    },
+  ];
 }
 
-function clampNumber(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
+export function getBrowserHackathonStages(hackathon: BrowserHackathon): BrowserHackathonStage[] {
+  return hackathon.stages && hackathon.stages.length > 0
+    ? hackathon.stages
+    : createDefaultHackathonStages();
 }

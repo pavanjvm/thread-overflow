@@ -1,7 +1,7 @@
 
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Toaster } from "@/components/ui/toaster"
 import {
   SidebarProvider,
@@ -17,6 +17,7 @@ import IdeationSidebar from './IdeationSidebar';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import Breadcrumb from './Breadcrumb';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = dynamic(() => import('@/components/Header'), { 
     ssr: false,
@@ -53,16 +54,42 @@ export default function AppClientLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const { currentUser, loading } = useAuth();
   const topUsers = [...users].sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0)).slice(0, 3);
+  const queryString = searchParams.toString();
+  const returnTo = queryString ? `${pathname}?${queryString}` : pathname;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const isLandingPage = pathname === '/';
-  const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname);
+  const isAuthPage = ['/signup', '/forgot-password'].includes(pathname);
+  const isProtectedRoute = !isLandingPage && !isAuthPage;
+
+  useEffect(() => {
+    if (!loading && !currentUser && isProtectedRoute) {
+      router.replace(`/?returnTo=${encodeURIComponent(returnTo)}`);
+    }
+  }, [currentUser, isProtectedRoute, loading, returnTo, router]);
+
+  if (isProtectedRoute && (loading || !currentUser)) {
+    return (
+      <>
+        <main className="flex min-h-screen items-center justify-center px-4">
+          <div className="text-center">
+            <p className="text-lg font-semibold">Checking your session</p>
+            <p className="text-sm text-muted-foreground">You will be redirected to Microsoft sign-in if needed.</p>
+          </div>
+        </main>
+        <Toaster />
+      </>
+    );
+  }
   
   // Render simple layout for landing page
   if (isLandingPage) {

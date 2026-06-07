@@ -3,16 +3,29 @@
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
+  createDefaultHackathonStages,
   getTextFromHtml,
   getBrowserHackathonAnalytics,
+  getBrowserHackathonStages,
   readBrowserHackathonBySlug,
+  removeBrowserHackathon,
   saveBrowserHackathon,
   type BrowserHackathon,
+  type BrowserHackathonEvaluationCriterion,
+  type BrowserHackathonStage,
   type BrowserHackathonTrackAnalytics,
 } from '@/lib/browser-hackathons';
+import {
+  deleteHackathon,
+  deleteHackathonRegistration,
+  fetchHackathonBySlug,
+  fetchHackathonRegistrations,
+  updateHackathonStages,
+  type HackathonRegistrationItem,
+} from '@/lib/hackathons';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +54,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
 import {
   ArrowLeft,
   ArrowRight,
@@ -63,34 +75,27 @@ import {
   ListChecks,
   Mail,
   CalendarDays,
-  Minus,
   MoreVertical,
-  MousePointerClick,
+  User,
   Settings,
   PenSquare,
   Plus,
   Search,
   Settings2,
   Share2,
-  Upload,
+  Trash2,
+  Users,
   UsersRound,
   X,
 } from 'lucide-react';
 
 type ManageSection = 'dashboard' | 'registrations' | 'edit';
-type StageType = 'REGISTRATION' | 'SUBMISSION';
 type RegistrationFilter = 'ALL' | 'COMPLETE' | 'INCOMPLETE';
 type SubmissionFilter = 'ALL' | 'IN_PROGRESS' | 'SHORTLISTED' | 'REJECTED';
 type SubmissionStatus = Exclude<SubmissionFilter, 'ALL'>;
 type RegistrationStatus = Exclude<RegistrationFilter, 'ALL'>;
 
-type StageDefinition = {
-  id: string;
-  name: string;
-  code: string;
-  type: StageType;
-  sourceStageId?: string;
-};
+type StageDefinition = BrowserHackathonStage;
 
 type StageEntry = {
   status: SubmissionStatus;
@@ -101,9 +106,10 @@ type StageEntry = {
 
 type TeamRecord = {
   id: string;
+  displayName: string;
   participantName: string;
   email: string;
-  company: string;
+  detail: string;
   registrationStatus: RegistrationStatus;
   stageEntries: Record<string, StageEntry>;
 };
@@ -123,6 +129,7 @@ type RoundDraft = {
   submissionMaxSizeMb: number;
   evaluationEnabled: boolean;
   evaluationMaxScore: number;
+  evaluationCriteria: BrowserHackathonEvaluationCriterion[];
   evaluationButtons: {
     shortlist: boolean;
     reject: boolean;
@@ -131,9 +138,10 @@ type RoundDraft = {
   };
 };
 
+type RoundDrawerStep = 'basic' | 'platform' | 'evaluation';
+
 type EditProgramForm = {
   title: string;
-  organizationName: string;
   prizePool: string;
   logoDataUrl: string;
   overview: string;
@@ -183,19 +191,48 @@ const allowedSubmissionTypes = [
 
 export default function ManageHackathonPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
   const { currentUser } = useAuth();
   const [hackathon, setHackathon] = useState<BrowserHackathon | null>(null);
+  const [loadingHackathon, setLoadingHackathon] = useState(true);
   const [activeSection, setActiveSection] = useState<ManageSection>('registrations');
   const [sidebarPinnedOpen, setSidebarPinnedOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!slug) {
       return;
     }
 
-    setHackathon(readBrowserHackathonBySlug(slug));
+    let cancelled = false;
+
+    const loadHackathon = async () => {
+      try {
+        const nextHackathon = await fetchHackathonBySlug(slug);
+        if (cancelled) {
+          return;
+        }
+
+        setHackathon(nextHackathon);
+        saveBrowserHackathon(nextHackathon);
+      } catch {
+        if (!cancelled) {
+          setHackathon(readBrowserHackathonBySlug(slug));
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingHackathon(false);
+        }
+      }
+    };
+
+    void loadHackathon();
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (currentUser?.role !== 'ADMIN') {
@@ -216,6 +253,10 @@ export default function ManageHackathonPage() {
     );
   }
 
+  if (loadingHackathon) {
+    return <div className="min-h-[480px] rounded-[28px] border bg-card shadow-sm" />;
+  }
+
   if (!hackathon) {
     return (
       <Card className="mx-auto max-w-3xl rounded-3xl">
@@ -233,6 +274,29 @@ export default function ManageHackathonPage() {
       </Card>
     );
   }
+
+  const handleDeleteHackathon = async () => {
+    const confirmed = window.confirm(`Delete "${hackathon.title}"? This will remove the hackathon, registrations, and stages.`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteHackathon(hackathon.slug);
+      removeBrowserHackathon(hackathon.id);
+      toast({
+        title: 'Hackathon deleted',
+        description: `${hackathon.title} has been removed.`,
+      });
+      router.push('/hackathons');
+    } catch {
+      toast({
+        title: 'Unable to delete hackathon',
+        description: 'The hackathon could not be removed right now.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const sidebarExpanded = sidebarPinnedOpen || sidebarHovered;
 
@@ -283,8 +347,14 @@ export default function ManageHackathonPage() {
         </div>
 
         <section className="bg-[#f8fafc] p-6">
-          {activeSection === 'dashboard' ? <DashboardView hackathon={hackathon} currentUserName={currentUser?.name} /> : null}
-          {activeSection === 'registrations' ? <ManageRegistrationsTab hackathon={hackathon} /> : null}
+          {activeSection === 'dashboard' ? (
+            <DashboardView
+              hackathon={hackathon}
+              currentUserName={currentUser?.name}
+              onDeleteHackathon={handleDeleteHackathon}
+            />
+          ) : null}
+          {activeSection === 'registrations' ? <ManageRegistrationsTab hackathon={hackathon} onHackathonChange={setHackathon} /> : null}
           {activeSection === 'edit' ? <EditProgramView hackathon={hackathon} onHackathonChange={setHackathon} /> : null}
         </section>
       </div>
@@ -295,9 +365,11 @@ export default function ManageHackathonPage() {
 function DashboardView({
   hackathon,
   currentUserName,
+  onDeleteHackathon,
 }: {
   hackathon: BrowserHackathon;
   currentUserName?: string | null;
+  onDeleteHackathon: () => void;
 }) {
   const analytics = getBrowserHackathonAnalytics(hackathon);
   const topTrack = analytics.trackStats[0];
@@ -310,13 +382,17 @@ function DashboardView({
             Hello {currentUserName || 'Admin'}!
           </h1>
           <p className="mt-2 max-w-2xl text-base text-muted-foreground">
-            Manage and monitor {hackathon.title} with browser-preview analytics from this dashboard.
+            Manage {hackathon.title}. Registration activity will appear here as participants start applying.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="secondary">{hackathon.participationType === 'TEAM' ? 'Team format' : 'Individual format'}</Badge>
           <Button asChild variant="outline">
             <Link href={`/hackathons/${hackathon.slug}`}>Open public page</Link>
+          </Button>
+          <Button variant="destructive" onClick={onDeleteHackathon}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete hackathon
           </Button>
         </div>
       </div>
@@ -342,10 +418,10 @@ function DashboardView({
           helper={topTrack ? `${topTrack.track} leads` : 'No tracks yet'}
         />
         <MetricCard
-          icon={MousePointerClick}
-          title="Domains Captured"
-          value={analytics.uniqueDomains.toString()}
-          helper={`${hackathon.registrationFields.length} form fields`}
+          icon={Settings}
+          title="Registration Fields"
+          value={hackathon.registrationFields.length.toString()}
+          helper="Configured on the hackathon form"
         />
         <ShareCard title={hackathon.title} />
       </div>
@@ -362,14 +438,18 @@ function DashboardView({
               <OverviewPill label="Conversion" value={`${analytics.completionRate}%`} />
             </div>
             <div className="space-y-4">
-              {analytics.trackStats.map((track) => (
-                <TrackOverviewRow
-                  key={track.track}
-                  track={track.track}
-                  registrations={track.registrations}
-                  total={analytics.totalRegistrations}
-                />
-              ))}
+              {analytics.trackStats.length > 0 ? (
+                analytics.trackStats.map((track) => (
+                  <TrackOverviewRow
+                    key={track.track}
+                    track={track.track}
+                    registrations={track.registrations}
+                    total={analytics.totalRegistrations}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No tracks configured yet.</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -379,9 +459,13 @@ function DashboardView({
             <CardTitle>Track Wise Registrations</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {analytics.trackStats.map((track) => (
-              <TrackStatCard key={track.track} track={track} maxRegistrations={analytics.totalRegistrations} />
-            ))}
+            {analytics.trackStats.length > 0 ? (
+              analytics.trackStats.map((track) => (
+                <TrackStatCard key={track.track} track={track} maxRegistrations={analytics.totalRegistrations} />
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">Track analytics will appear after tracks are configured.</p>
+            )}
           </CardContent>
         </Card>
 
@@ -396,7 +480,7 @@ function DashboardView({
             />
             <UpdateItem
               title="Top demand track"
-              body={topTrack ? `${topTrack.track} is currently leading with ${topTrack.registrations} registrations.` : 'Track performance will appear here.'}
+              body={topTrack && topTrack.registrations > 0 ? `${topTrack.track} is currently leading with ${topTrack.registrations} registrations.` : 'Track performance will appear once registrations start.'}
             />
             <UpdateItem
               title="Form configuration ready"
@@ -412,18 +496,25 @@ function DashboardView({
             <CardTitle>Track Distribution</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {analytics.trackStats.map((track, index) => (
-              <div key={track.track} className="rounded-2xl border bg-muted/20 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-foreground">{track.track}</p>
-                    <p className="text-sm text-muted-foreground">{track.impressions} impressions</p>
+            {analytics.trackStats.length > 0 ? (
+              analytics.trackStats.map((track, index) => (
+                <div key={track.track} className="rounded-2xl border bg-muted/20 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-foreground">{track.track}</p>
+                      <p className="text-sm text-muted-foreground">{track.impressions} impressions</p>
+                    </div>
+                    <Badge variant={index === 0 ? 'default' : 'secondary'}>{track.conversionRate}% CVR</Badge>
                   </div>
-                  <Badge variant={index === 0 ? 'default' : 'secondary'}>{track.conversionRate}% CVR</Badge>
+                  <Progress
+                    className="mt-4 h-2.5 bg-secondary/70"
+                    value={analytics.totalRegistrations > 0 ? (track.registrations / analytics.totalRegistrations) * 100 : 0}
+                  />
                 </div>
-                <Progress className="mt-4 h-2.5 bg-secondary/70" value={(track.registrations / analytics.totalRegistrations) * 100} />
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No tracks configured yet.</p>
+            )}
           </CardContent>
         </Card>
 
@@ -433,7 +524,6 @@ function DashboardView({
           </CardHeader>
           <CardContent className="space-y-3">
             <QuickEditRow label="Registration Deadline" value={hackathon.registrationEnd} />
-            <QuickEditRow label="Visibility" value="Browser preview" />
             <QuickEditRow label="Tracks" value={`${hackathon.tracks.length} configured`} />
             <QuickEditRow label="Participation" value={hackathon.participationType === 'TEAM' ? `${hackathon.minTeamSize}-${hackathon.maxTeamSize} members` : 'Individual'} />
           </CardContent>
@@ -444,12 +534,16 @@ function DashboardView({
             <CardTitle>Registration Form</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {hackathon.registrationFields.map((field) => (
-              <div key={field} className="flex items-center justify-between rounded-2xl border px-4 py-3">
-                <span className="font-medium text-foreground">{field}</span>
-                <Badge variant="secondary">Enabled</Badge>
-              </div>
-            ))}
+            {hackathon.registrationFields.length > 0 ? (
+              hackathon.registrationFields.map((field) => (
+                <div key={field} className="flex items-center justify-between rounded-2xl border px-4 py-3">
+                  <span className="font-medium text-foreground">{field}</span>
+                  <Badge variant="secondary">Enabled</Badge>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No registration fields configured yet.</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -457,8 +551,15 @@ function DashboardView({
   );
 }
 
-function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) {
+function ManageRegistrationsTab({
+  hackathon,
+  onHackathonChange,
+}: {
+  hackathon: BrowserHackathon;
+  onHackathonChange: React.Dispatch<React.SetStateAction<BrowserHackathon | null>>;
+}) {
   const { toast } = useToast();
+  const router = useRouter();
   const [stages, setStages] = useState<StageDefinition[]>([]);
   const [selectedStageId, setSelectedStageId] = useState('');
   const [records, setRecords] = useState<TeamRecord[]>([]);
@@ -467,15 +568,47 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
   const [submissionFilter, setSubmissionFilter] = useState<SubmissionFilter>('IN_PROGRESS');
   const [stageInsertMode, setStageInsertMode] = useState(false);
   const [roundDrawerOpen, setRoundDrawerOpen] = useState(false);
+  const [roundDrawerStep, setRoundDrawerStep] = useState<RoundDrawerStep>('basic');
   const [insertAfterIndex, setInsertAfterIndex] = useState<number | null>(null);
   const [roundDraft, setRoundDraft] = useState<RoundDraft>(() => createDefaultRoundDraft());
+  const [loadingRecords, setLoadingRecords] = useState(true);
 
   useEffect(() => {
-    const baseStages = createInitialStages();
+    const baseStages = getBrowserHackathonStages(hackathon);
     setStages(baseStages);
     setSelectedStageId(baseStages[0]?.id ?? '');
-    setRecords(createTeamRecords(hackathon, baseStages));
   }, [hackathon]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRegistrations = async () => {
+      setLoadingRecords(true);
+
+      try {
+        const registrations = await fetchHackathonRegistrations(hackathon.slug);
+        if (cancelled) {
+          return;
+        }
+
+        setRecords(mapRegistrationsToTeamRecords(registrations, stages));
+      } catch {
+        if (!cancelled) {
+          setRecords([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingRecords(false);
+        }
+      }
+    };
+
+    void loadRegistrations();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hackathon.slug, stages]);
 
   const selectedStage = useMemo(
     () => stages.find((stage) => stage.id === selectedStageId) ?? stages[0] ?? null,
@@ -511,7 +644,7 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
 
     return records.filter((record) => {
       const matchesSearch = searchQuery.trim() === ''
-        || [record.participantName, record.email, record.company]
+        || [record.displayName, record.participantName, record.email, record.detail]
           .some((value) => value.toLowerCase().includes(searchQuery.trim().toLowerCase()));
 
       if (!matchesSearch) {
@@ -547,13 +680,9 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
 
   const actionButtons = selectedStage.type === 'REGISTRATION'
     ? [
-      { label: 'Upload Registrations', icon: Upload, onClick: () => handleToastAction('Upload Registrations', selectedStage.name, toast) },
       { label: 'Download Registrations', icon: Download, onClick: () => downloadRegistrations(hackathon.slug, selectedStage.code, visibleRecords, toast) },
-      { label: 'Email', icon: Mail, onClick: () => handleToastAction('Email', selectedStage.name, toast) },
-      { label: 'Certificate', icon: Award, onClick: () => handleToastAction('Certificate', selectedStage.name, toast) },
     ]
     : [
-      { label: 'Email', icon: Mail, onClick: () => handleToastAction('Email', selectedStage.name, toast) },
       { label: 'Certificate', icon: Award, onClick: () => handleToastAction('Certificate', selectedStage.name, toast) },
       { label: 'Download Profiles', icon: Download, onClick: () => downloadProfiles(hackathon.slug, selectedStage.code, visibleRecords, toast) },
       { label: 'Submissions', icon: Download, onClick: () => downloadSubmissions(hackathon.slug, selectedStage.id, selectedStage.code, visibleRecords, toast) },
@@ -564,28 +693,44 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
   const handleOpenRoundDrawer = (index: number) => {
     setInsertAfterIndex(index);
     setRoundDraft(createDefaultRoundDraft(stages.filter((stage) => stage.type === 'SUBMISSION').length + 1));
+    setRoundDrawerStep('basic');
     setRoundDrawerOpen(true);
   };
 
-  const handleCreateRound = () => {
+  const handleCreateRound = async () => {
     if (insertAfterIndex === null) {
       return;
     }
 
     const nextStages = insertSubmissionStageAt(stages, insertAfterIndex, roundDraft);
-    const insertedStage = nextStages[insertAfterIndex + 1];
 
-    setStages(nextStages);
-    setSelectedStageId(insertedStage.id);
-    setSubmissionFilter('IN_PROGRESS');
-    setStageInsertMode(false);
-    setRoundDrawerOpen(false);
-    setInsertAfterIndex(null);
-    setRecords((current) => mergeRecordsWithStages(current, nextStages));
-    toast({
-      title: 'Round added',
-      description: `${insertedStage.name} is now available in Manage Registrations.`,
-    });
+    try {
+      const updatedHackathon = await updateHackathonStages(hackathon.slug, nextStages);
+      const updatedStages = getBrowserHackathonStages(updatedHackathon);
+      const insertedStage = updatedStages[insertAfterIndex + 1];
+
+      saveBrowserHackathon(updatedHackathon);
+      onHackathonChange(updatedHackathon);
+      setStages(updatedStages);
+      if (insertedStage) {
+        setSelectedStageId(insertedStage.id);
+      }
+      setSubmissionFilter('IN_PROGRESS');
+      setStageInsertMode(false);
+      setRoundDrawerOpen(false);
+      setInsertAfterIndex(null);
+      setRecords((current) => mergeRecordsWithStages(current, updatedStages));
+      toast({
+        title: 'Round added',
+        description: `${insertedStage?.name ?? 'The new round'} is now available in Manage Registrations.`,
+      });
+    } catch {
+      toast({
+        title: 'Unable to add round',
+        description: 'The round could not be saved right now.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -682,11 +827,6 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                 </button>
               ))}
             </div>
-
-            <Button variant="outline" className="mb-3 h-11 rounded-xl px-4 text-base">
-              Credit Balance
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
           </div>
 
           <div className="space-y-4 px-5 py-4">
@@ -698,7 +838,6 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="h-11 rounded-xl border-slate-300 pl-11 text-base"
-                    placeholder="Search here"
                   />
                 </div>
                 <Button variant="outline" className="h-11 rounded-xl px-4 text-base">
@@ -731,7 +870,7 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                 className={cn(
                   'grid items-center bg-[#eef4fb] px-4 py-3 text-sm font-semibold text-slate-700',
                   selectedStage.type === 'REGISTRATION'
-                    ? 'grid-cols-[64px_minmax(260px,1.6fr)_164px_250px]'
+                    ? 'grid-cols-[64px_minmax(260px,1.6fr)_164px_190px_92px]'
                     : 'grid-cols-[64px_minmax(260px,1.5fr)_144px_160px_96px_250px]'
                 )}
               >
@@ -741,9 +880,14 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                 <div>{selectedStage.type === 'REGISTRATION' ? 'REG. STATUS' : 'STATUS'}</div>
                 {selectedStage.type === 'SUBMISSION' ? <div>SCORE</div> : null}
                 <div>ACTION / STATUS</div>
+                {selectedStage.type === 'REGISTRATION' ? <div>DELETE</div> : null}
               </div>
 
-              {visibleRecords.length === 0 ? (
+              {loadingRecords ? (
+                <div className="px-6 py-12 text-center text-sm text-slate-500">
+                  Loading registrations...
+                </div>
+              ) : visibleRecords.length === 0 ? (
                 <div className="px-6 py-12 text-center text-sm text-slate-500">
                   No participants match the current filters.
                 </div>
@@ -754,21 +898,31 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                   return (
                     <div
                       key={record.id}
+                      role="button"
+                      tabIndex={0}
                       className={cn(
                         'grid items-center border-t border-slate-200 px-4 py-4',
+                        'cursor-pointer transition hover:bg-slate-50/70',
                         selectedStage.type === 'REGISTRATION'
-                          ? 'grid-cols-[64px_minmax(260px,1.6fr)_164px_250px]'
+                          ? 'grid-cols-[64px_minmax(260px,1.6fr)_164px_190px_92px]'
                           : 'grid-cols-[64px_minmax(260px,1.5fr)_144px_160px_96px_250px]'
                       )}
+                      onClick={() => router.push(`/hackathons/${hackathon.slug}/manage/${record.id}`)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          router.push(`/hackathons/${hackathon.slug}/manage/${record.id}`);
+                        }
+                      }}
                     >
                       <div className="text-lg font-semibold text-slate-800">{index + 1}</div>
 
                       <div className="flex items-center gap-4 pr-4">
-                        <AvatarChip name={record.participantName} />
+                        <AvatarChip name={record.displayName} />
                         <div className="min-w-0">
-                          <p className="truncate text-[1.3rem] font-semibold text-slate-900">{record.participantName}</p>
+                          <p className="truncate text-[1.3rem] font-semibold text-slate-900">{record.displayName}</p>
                           <p className="truncate text-sm text-slate-500">{record.email}</p>
-                          <p className="truncate text-base text-slate-600">{record.company}</p>
+                          {record.detail ? <p className="truncate text-base text-slate-600">{record.detail}</p> : null}
                         </div>
                       </div>
 
@@ -799,14 +953,7 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
 
                       <div className="space-y-3">
                         {selectedStage.type === 'REGISTRATION' ? (
-                          <div className="flex items-center gap-3">
-                            <ActionIconButton
-                              label="Email participant"
-                              onClick={() => handleToastAction(`Email ${record.participantName}`, selectedStage.name, toast)}
-                            >
-                              <Mail className="h-4 w-4" />
-                            </ActionIconButton>
-                          </div>
+                          <div />
                         ) : (
                           <div className="flex items-center gap-2">
                             <ActionIconButton
@@ -858,7 +1005,7 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                                   [
                                     `Participant: ${record.participantName}`,
                                     `Email: ${record.email}`,
-                                    `Company: ${record.company}`,
+                                    `Detail: ${record.detail || '-'}`,
                                     `Stage: ${selectedStage.name}`,
                                     `Panel: ${stageEntry.panel}`,
                                     `Status: ${getSubmissionStatusLabel(stageEntry)}`,
@@ -878,6 +1025,34 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                         )}
                         <StageTransition stage={selectedStage} stages={stages} />
                       </div>
+                      {selectedStage.type === 'REGISTRATION' ? (
+                        <div className="flex items-center justify-center">
+                            <ActionIconButton
+                              label="Delete registration"
+                              className="border-red-300 text-red-500 hover:bg-red-50"
+                              onClick={() => {
+                                void (async () => {
+                                  try {
+                                  await deleteHackathonRegistration(hackathon.slug, record.id);
+                                  setRecords((current) => current.filter((item) => item.id !== record.id));
+                                  toast({
+                                    title: 'Registration deleted',
+                                    description: `${record.displayName} was removed from registrations.`,
+                                  });
+                                } catch {
+                                  toast({
+                                    title: 'Unable to delete registration',
+                                    description: 'Please try again.',
+                                    variant: 'destructive',
+                                  });
+                                }
+                              })();
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </ActionIconButton>
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })
@@ -887,9 +1062,13 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
         </section>
       </div>
       <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-[760px]">
+        <SheetHeader className="sr-only">
+          <SheetTitle>Create Screening Round</SheetTitle>
+          <SheetDescription>Configure the round type, submission requirements, and evaluation settings.</SheetDescription>
+        </SheetHeader>
         <div className="flex min-h-full flex-col bg-white">
           <div className="border-b px-6 pt-6">
-            <Tabs defaultValue="basic" className="w-full">
+            <Tabs value={roundDrawerStep} onValueChange={(value) => setRoundDrawerStep(value as RoundDrawerStep)} className="w-full">
               <TabsList className="h-auto w-full justify-start gap-6 rounded-none bg-transparent p-0 text-base">
                 <TabsTrigger value="basic" className="rounded-none border-b-[3px] border-transparent px-0 py-4 text-base data-[state=active]:border-[#173f73] data-[state=active]:bg-transparent data-[state=active]:shadow-none">
                   Basic Info
@@ -933,7 +1112,10 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                               'flex items-center gap-3 rounded-2xl border px-4 py-4 text-left transition',
                               active ? 'border-[#1463ff] bg-[#eef5ff] text-slate-900' : 'border-slate-200 hover:border-slate-300'
                             )}
-                            onClick={() => setRoundDraft((current) => ({ ...current, roundType: option.value }))}
+                            onClick={() => {
+                              setRoundDraft((current) => ({ ...current, roundType: option.value }));
+                              setRoundDrawerStep('basic');
+                            }}
                           >
                             <div className={cn('rounded-xl p-2', active ? 'bg-[#1463ff] text-white' : 'bg-slate-100 text-slate-600')}>
                               <Icon className="h-4 w-4" />
@@ -1132,44 +1314,8 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
                       </p>
 
                       <div className="mt-8 rounded-2xl border border-slate-200">
-                        <div className="space-y-6 p-5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <p className="text-[2rem] font-semibold text-slate-800">Max Score</p>
-                              <Info className="h-5 w-5 text-slate-400" />
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <button
-                                type="button"
-                                className="rounded-full border p-2 text-slate-700"
-                                onClick={() => setRoundDraft((current) => ({ ...current, evaluationMaxScore: Math.max(0, current.evaluationMaxScore - 1) }))}
-                              >
-                                <Minus className="h-4 w-4" />
-                              </button>
-                              <span className="text-3xl font-semibold text-slate-800">{roundDraft.evaluationMaxScore}</span>
-                              <button
-                                type="button"
-                                className="rounded-full border p-2 text-slate-700"
-                                onClick={() => setRoundDraft((current) => ({ ...current, evaluationMaxScore: Math.min(10, current.evaluationMaxScore + 1) }))}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="px-1">
-                            <Slider
-                              min={0}
-                              max={10}
-                              step={1}
-                              value={[roundDraft.evaluationMaxScore]}
-                              onValueChange={([value]) => setRoundDraft((current) => ({ ...current, evaluationMaxScore: value }))}
-                            />
-                            <div className="mt-2 flex items-center justify-between text-3xl text-slate-500">
-                              <span>0</span>
-                              <span>10</span>
-                            </div>
-                          </div>
+                        <div className="p-5">
+                          <EvaluationCriteriaEditor draft={roundDraft} onChange={setRoundDraft} />
                         </div>
 
                         <div className="grid border-t md:grid-cols-2">
@@ -1224,9 +1370,29 @@ function ManageRegistrationsTab({ hackathon }: { hackathon: BrowserHackathon }) 
             <Button variant="ghost" className="text-base font-medium text-slate-700" onClick={() => setRoundDrawerOpen(false)}>
               Close
             </Button>
-            <Button className="rounded-full px-8" onClick={handleCreateRound}>
-              Save
-            </Button>
+            <div className="flex items-center gap-3">
+              {getPreviousRoundDrawerStep(roundDrawerStep, roundDraft.roundType) ? (
+                <Button
+                  variant="outline"
+                  className="rounded-full px-8"
+                  onClick={() => setRoundDrawerStep(getPreviousRoundDrawerStep(roundDrawerStep, roundDraft.roundType) ?? 'basic')}
+                >
+                  Back
+                </Button>
+              ) : null}
+              {getNextRoundDrawerStep(roundDrawerStep, roundDraft.roundType) ? (
+                <Button
+                  className="rounded-full px-8"
+                  onClick={() => setRoundDrawerStep(getNextRoundDrawerStep(roundDrawerStep, roundDraft.roundType) ?? 'basic')}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button className="rounded-full px-8" onClick={handleCreateRound}>
+                  Save
+                </Button>
+              )}
+            </div>
           </SheetFooter>
         </div>
       </SheetContent>
@@ -1246,15 +1412,77 @@ function EditProgramView({
   const logoInputRef = useRef<HTMLInputElement | null>(null);
   const [activeEditSection, setActiveEditSection] = useState<(typeof editProgramSections)[number]['id']>('basic');
   const [form, setForm] = useState(() => createEditProgramForm(hackathon));
+  const [registrationFieldInput, setRegistrationFieldInput] = useState('');
+  const [trackInput, setTrackInput] = useState('');
+  const [programStages, setProgramStages] = useState<StageDefinition[]>(
+    () => getBrowserHackathonStages(hackathon).filter((stage) => stage.type === 'SUBMISSION')
+  );
+  const [programRoundDrawerOpen, setProgramRoundDrawerOpen] = useState(false);
+  const [programRoundDrawerStep, setProgramRoundDrawerStep] = useState<RoundDrawerStep>('basic');
+  const [programRoundDraft, setProgramRoundDraft] = useState<RoundDraft>(() => createDefaultRoundDraft(1));
 
   useEffect(() => {
     setForm(createEditProgramForm(hackathon));
+    setProgramStages(getBrowserHackathonStages(hackathon).filter((stage) => stage.type === 'SUBMISSION'));
+    setProgramRoundDrawerOpen(false);
+    setProgramRoundDrawerStep('basic');
+    setProgramRoundDraft(createDefaultRoundDraft(1));
   }, [hackathon]);
 
   const activeItem = editProgramSections.find((item) => item.id === activeEditSection) ?? editProgramSections[0];
 
   const updateForm = <K extends keyof EditProgramForm>(key: K, value: EditProgramForm[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
+  };
+  const registrationFieldItems = form.registrationFields
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const trackItems = form.tracks
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const hasValidTeamSize = form.participationType !== 'TEAM'
+    || (
+      form.minTeamSize.trim() !== ''
+      && form.maxTeamSize.trim() !== ''
+      && Number(form.maxTeamSize) >= Number(form.minTeamSize)
+    );
+
+  const syncRegistrationFields = (fields: string[]) => {
+    updateForm('registrationFields', fields.join('\n'));
+  };
+  const syncTracks = (tracks: string[]) => {
+    updateForm('tracks', tracks.join('\n'));
+  };
+
+  const handleAddRegistrationField = () => {
+    const trimmed = registrationFieldInput.trim();
+
+    if (!trimmed || registrationFieldItems.includes(trimmed)) {
+      return;
+    }
+
+    syncRegistrationFields([...registrationFieldItems, trimmed]);
+    setRegistrationFieldInput('');
+  };
+
+  const handleRemoveRegistrationField = (field: string) => {
+    syncRegistrationFields(registrationFieldItems.filter((item) => item !== field));
+  };
+  const handleAddTrack = () => {
+    const trimmed = trackInput.trim();
+
+    if (!trimmed || trackItems.includes(trimmed)) {
+      return;
+    }
+
+    syncTracks([...trackItems, trimmed]);
+    setTrackInput('');
+  };
+
+  const handleRemoveTrack = (track: string) => {
+    syncTracks(trackItems.filter((item) => item !== track));
   };
 
   const handleLogoUpload = (file?: File) => {
@@ -1273,7 +1501,6 @@ function EditProgramView({
     const nextHackathon: BrowserHackathon = {
       ...hackathon,
       title: form.title.trim() || hackathon.title,
-      organizationName: form.organizationName.trim(),
       prizePool: form.prizePool.trim(),
       logoDataUrl: form.logoDataUrl,
       overviewHtml: form.overview.trim()
@@ -1295,6 +1522,10 @@ function EditProgramView({
         .split('\n')
         .map((item) => item.trim())
         .filter(Boolean),
+      stages: [
+        createDefaultHackathonStages()[0],
+        ...programStages,
+      ],
     };
 
     saveBrowserHackathon(nextHackathon);
@@ -1305,8 +1536,75 @@ function EditProgramView({
     });
   };
 
+  const handleOpenProgramRoundDrawer = () => {
+    const nextRoundNumber = programStages.length + 1;
+    setProgramRoundDraft({
+      ...createDefaultRoundDraft(nextRoundNumber),
+      title: `Round ${nextRoundNumber}`,
+    });
+    setProgramRoundDrawerStep('basic');
+    setProgramRoundDrawerOpen(true);
+  };
+
+  const handleCreateProgramRound = async () => {
+    const nextStages = insertSubmissionStageAt(
+      [createDefaultHackathonStages()[0], ...programStages],
+      programStages.length,
+      programRoundDraft,
+    );
+
+    try {
+      const updatedHackathon = await updateHackathonStages(hackathon.slug, nextStages);
+      const updatedProgramStages = getBrowserHackathonStages(updatedHackathon).filter((stage) => stage.type === 'SUBMISSION');
+
+      saveBrowserHackathon(updatedHackathon);
+      onHackathonChange(updatedHackathon);
+      setProgramStages(updatedProgramStages);
+      setProgramRoundDrawerOpen(false);
+      toast({
+        title: 'Round added',
+        description: 'The new stage is now saved for this hackathon.',
+      });
+    } catch {
+      toast({
+        title: 'Unable to add round',
+        description: 'The round could not be saved right now.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRemoveProgramRound = async (stageId: string) => {
+    const remaining = programStages
+      .filter((stage) => stage.id !== stageId)
+      .map((stage, index) => ({
+        ...stage,
+        code: `R${index + 1}`,
+      }));
+
+    try {
+      const updatedHackathon = await updateHackathonStages(hackathon.slug, [createDefaultHackathonStages()[0], ...remaining]);
+      const updatedProgramStages = getBrowserHackathonStages(updatedHackathon).filter((stage) => stage.type === 'SUBMISSION');
+
+      saveBrowserHackathon(updatedHackathon);
+      onHackathonChange(updatedHackathon);
+      setProgramStages(updatedProgramStages);
+      toast({
+        title: 'Round removed',
+        description: 'The stage list has been updated.',
+      });
+    } catch {
+      toast({
+        title: 'Unable to remove round',
+        description: 'The stage could not be removed right now.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+      <Sheet open={programRoundDrawerOpen} onOpenChange={setProgramRoundDrawerOpen}>
       <div className="grid min-h-[760px] lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="border-r bg-slate-50/80 p-4">
           <div className="flex items-center justify-between">
@@ -1398,14 +1696,6 @@ function EditProgramView({
                       <p className="mt-2 text-sm text-slate-500">Max 190 characters</p>
                     </FormField>
 
-                    <FormField label="Organisation Name" required info>
-                      <Input
-                        value={form.organizationName}
-                        onChange={(event) => updateForm('organizationName', event.target.value)}
-                        className="h-12 rounded-xl"
-                      />
-                    </FormField>
-
                     <FormField label="About Program">
                       <Textarea
                         value={form.overview}
@@ -1422,20 +1712,72 @@ function EditProgramView({
                   <section className="space-y-6">
                     <h4 className="text-2xl font-semibold text-slate-900">Registration Settings</h4>
 
-                    <FormField label="Participation Type" required>
-                      <Select
-                        value={form.participationType}
-                        onValueChange={(value) => updateForm('participationType', value as BrowserHackathon['participationType'])}
-                      >
-                        <SelectTrigger className="h-12 rounded-xl">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="TEAM">Team</SelectItem>
-                          <SelectItem value="INDIVIDUAL">Individual</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormField>
+                    <div className="rounded-[28px] border p-8">
+                      <div className="space-y-8">
+                        <div className="space-y-4">
+                          <Label className="text-2xl font-medium text-slate-900">Participation Type</Label>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                updateForm('participationType', 'INDIVIDUAL');
+                                updateForm('minTeamSize', '');
+                                updateForm('maxTeamSize', '');
+                              }}
+                              className={cn(
+                                'flex items-center gap-3 rounded-2xl border border-dashed px-6 py-4 text-xl',
+                                form.participationType === 'INDIVIDUAL' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700'
+                              )}
+                            >
+                              <User className="h-6 w-6" />
+                              Individual
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateForm('participationType', 'TEAM')}
+                              className={cn(
+                                'flex items-center gap-3 rounded-2xl border border-dashed px-6 py-4 text-xl',
+                                form.participationType === 'TEAM' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700'
+                              )}
+                            >
+                              <Users className="h-6 w-6" />
+                              Team Participation
+                            </button>
+                          </div>
+                        </div>
+
+                        {form.participationType === 'TEAM' ? (
+                          <div className="space-y-4">
+                            <Label className="text-2xl font-medium text-slate-900">Set team size</Label>
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <Select value={form.minTeamSize} onValueChange={(value) => updateForm('minTeamSize', value)}>
+                                <SelectTrigger className="h-16 rounded-2xl text-xl">
+                                  <SelectValue placeholder="Select minimum team size" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {['1', '2', '3', '4', '5'].map((value) => (
+                                    <SelectItem key={value} value={value}>Min: {value}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select value={form.maxTeamSize} onValueChange={(value) => updateForm('maxTeamSize', value)}>
+                                <SelectTrigger className="h-16 rounded-2xl text-xl">
+                                  <SelectValue placeholder="Select maximum team size" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {['2', '3', '4', '5', '6'].map((value) => (
+                                    <SelectItem key={value} value={value}>Max: {value}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {!hasValidTeamSize ? (
+                              <p className="text-sm text-destructive">Maximum team size must be greater than or equal to minimum team size.</p>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
                       <FormField label="Registration Opens" required>
@@ -1455,34 +1797,95 @@ function EditProgramView({
                       </FormField>
                     </div>
 
-                    {form.participationType === 'TEAM' ? (
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <FormField label="Minimum Team Size" required>
-                          <Input
-                            value={form.minTeamSize}
-                            onChange={(event) => updateForm('minTeamSize', event.target.value)}
-                            className="h-12 rounded-xl"
-                          />
-                        </FormField>
+                    <div className="rounded-[28px] border p-8">
+                      <div className="space-y-4">
+                        <Label className="text-2xl font-medium text-slate-900">Registration Form</Label>
+                        {registrationFieldItems.length > 0 ? (
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {registrationFieldItems.map((field) => (
+                              <div key={field} className="flex items-start justify-between gap-3 rounded-2xl border bg-muted/30 p-4">
+                                <div>
+                                  <p className="text-base font-medium">{field}</p>
+                                  <p className="mt-1 text-sm text-muted-foreground">Registration field</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRegistrationField(field)}
+                                  className="rounded-full p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                                  aria-label={`Remove ${field}`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="rounded-2xl border border-dashed bg-muted/20 p-6 text-sm text-muted-foreground">
+                            No registration fields added yet.
+                          </div>
+                        )}
 
-                        <FormField label="Maximum Team Size" required>
-                          <Input
-                            value={form.maxTeamSize}
-                            onChange={(event) => updateForm('maxTeamSize', event.target.value)}
-                            className="h-12 rounded-xl"
-                          />
-                        </FormField>
+                        <div className="space-y-3">
+                          <Label htmlFor="edit-registration-field" className="text-2xl font-medium text-slate-900">Add Fields</Label>
+                          <div className="flex gap-3">
+                            <Input
+                              id="edit-registration-field"
+                              value={registrationFieldInput}
+                              onChange={(event) => setRegistrationFieldInput(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                  event.preventDefault();
+                                  handleAddRegistrationField();
+                                }
+                              }}
+                              className="h-14 rounded-2xl text-lg"
+                            />
+                            <Button type="button" onClick={handleAddRegistrationField} className="h-14 rounded-2xl px-6">
+                              Add Field
+                            </Button>
+                          </div>
+                          <p className="text-sm text-slate-500">These fields appear in registration setup and influence preview analytics.</p>
+                        </div>
                       </div>
-                    ) : null}
+                    </div>
 
-                    <FormField label="Registration Fields">
-                      <Textarea
-                        value={form.registrationFields}
-                        onChange={(event) => updateForm('registrationFields', event.target.value)}
-                        className="min-h-[180px] rounded-xl"
-                      />
-                      <p className="mt-2 text-sm text-slate-500">Use one field per line. These fields appear in registration setup and influence preview analytics.</p>
-                    </FormField>
+                    <div className="rounded-[28px] border p-8">
+                      <div className="space-y-4">
+                        <Label className="text-2xl font-medium text-slate-900">Tracks / Themes</Label>
+                        <div className="flex gap-3">
+                          <Input
+                            value={trackInput}
+                            onChange={(event) => setTrackInput(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter') {
+                                event.preventDefault();
+                                handleAddTrack();
+                              }
+                            }}
+                            className="h-14 rounded-2xl text-lg"
+                          />
+                          <Button type="button" onClick={handleAddTrack} className="h-14 rounded-2xl px-6">
+                            Add Track
+                          </Button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {trackItems.map((track) => (
+                            <Badge key={track} variant="secondary" className="gap-2 px-3 py-2 text-base">
+                              {track}
+                              <button type="button" onClick={() => handleRemoveTrack(track)} className="rounded-full">
+                                <X className="h-4 w-4" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                        {trackItems.length === 0 ? (
+                          <div className="rounded-2xl border border-dashed bg-muted/20 p-6 text-sm text-muted-foreground">
+                            No tracks added yet.
+                          </div>
+                        ) : null}
+                        <p className="text-sm text-slate-500">These are shown on the hackathon card and the public preview FAQs.</p>
+                      </div>
+                    </div>
                   </section>
                 </div>
               ) : null}
@@ -1492,23 +1895,61 @@ function EditProgramView({
                   <section className="space-y-6">
                     <h4 className="text-2xl font-semibold text-slate-900">Rounds & Stages</h4>
 
-                    <FormField label="Tracks / Themes">
-                      <Textarea
-                        value={form.tracks}
-                        onChange={(event) => updateForm('tracks', event.target.value)}
-                        className="min-h-[220px] rounded-xl"
-                      />
-                      <p className="mt-2 text-sm text-slate-500">Use one track per line. These are shown on the hackathon card and the public preview FAQs.</p>
-                    </FormField>
+                    <div className="rounded-[24px] border border-dashed border-[#1463ff] bg-white p-8">
+                      {programStages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 text-center">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eef4ff] text-[#1463ff]">
+                            <ListChecks className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-semibold text-slate-900">No round added yet</p>
+                            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                              Please click on the Add Round button to create a round.
+                            </p>
+                          </div>
+                          <Button type="button" className="rounded-full px-6" onClick={handleOpenProgramRoundDrawer}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Round
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <p className="text-lg font-semibold text-slate-900">Configured rounds</p>
+                              <p className="text-sm text-slate-500">These rounds are applied after the registration stage.</p>
+                            </div>
+                            <Button type="button" className="rounded-full px-6" onClick={handleOpenProgramRoundDrawer}>
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add Round
+                            </Button>
+                          </div>
 
-                    <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-5">
-                      <p className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                        <Info className="h-4 w-4 text-slate-500" />
-                        Public preview impact
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
-                        The public session preview already shows a staged timeline. This section controls the visible tracks and participant-facing stage context without exposing payment, eligibility, or additional info panels.
-                      </p>
+                          <div className="space-y-3">
+                            {programStages.map((stage) => (
+                              <div key={stage.id} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-3">
+                                    <Badge variant="outline">{stage.code}</Badge>
+                                    <p className="truncate text-lg font-semibold text-slate-900">{stage.name}</p>
+                                  </div>
+                                  <p className="mt-2 text-sm text-slate-500">Submission round</p>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="rounded-full text-slate-500 hover:text-slate-900"
+                                  onClick={() => handleRemoveProgramRound(stage.id)}
+                                  aria-label={`Remove ${stage.name}`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </section>
                 </div>
@@ -1549,6 +1990,342 @@ function EditProgramView({
           </div>
         </section>
       </div>
+      <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-[760px]">
+        <SheetHeader className="sr-only">
+          <SheetTitle>Edit Screening Round</SheetTitle>
+          <SheetDescription>Configure the round type, submission requirements, and evaluation settings.</SheetDescription>
+        </SheetHeader>
+        <div className="flex min-h-full flex-col bg-white">
+          <div className="border-b px-6 pt-6">
+            <Tabs value={programRoundDrawerStep} onValueChange={(value) => setProgramRoundDrawerStep(value as RoundDrawerStep)} className="w-full">
+              <TabsList className="h-auto w-full justify-start gap-6 rounded-none bg-transparent p-0 text-base">
+                <TabsTrigger value="basic" className="rounded-none border-b-[3px] border-transparent px-0 py-4 text-base data-[state=active]:border-[#173f73] data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                  Basic Info
+                </TabsTrigger>
+                <TabsTrigger
+                  value="platform"
+                  disabled={programRoundDraft.roundType !== 'SUBMISSION'}
+                  className="rounded-none border-b-[3px] border-transparent px-0 py-4 text-base data-[state=active]:border-[#173f73] data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                >
+                  Submission Form
+                </TabsTrigger>
+                <TabsTrigger
+                  value="evaluation"
+                  disabled={programRoundDraft.roundType !== 'SUBMISSION'}
+                  className="rounded-none border-b-[3px] border-transparent px-0 py-4 text-base data-[state=active]:border-[#173f73] data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                >
+                  Evaluation
+                </TabsTrigger>
+                <TabsTrigger value="declare" disabled className="rounded-none border-b-[3px] border-transparent px-0 py-4 text-base text-slate-400 data-[state=active]:border-[#173f73] data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                  Declare Result
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="basic" className="mt-0 px-6 py-6">
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-slate-800">Round Type</Label>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {([
+                        { value: 'SUBMISSION', label: 'Submission', icon: FileUp },
+                        { value: 'OFFLINE', label: 'Offline / In-Office / Other', icon: CalendarDays },
+                      ] as const).map((option) => {
+                        const Icon = option.icon;
+                        const active = programRoundDraft.roundType === option.value;
+
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            className={cn(
+                              'flex items-center gap-3 rounded-2xl border px-4 py-4 text-left transition',
+                              active ? 'border-[#1463ff] bg-[#eef5ff] text-slate-900' : 'border-slate-200 hover:border-slate-300'
+                            )}
+                            onClick={() => {
+                              setProgramRoundDraft((current) => ({ ...current, roundType: option.value }));
+                              setProgramRoundDrawerStep('basic');
+                            }}
+                          >
+                            <div className={cn('rounded-xl p-2', active ? 'bg-[#1463ff] text-white' : 'bg-slate-100 text-slate-600')}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <span className="text-sm font-semibold">{option.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <FormField label="Round Title" required>
+                    <Input
+                      value={programRoundDraft.title}
+                      onChange={(event) => setProgramRoundDraft((current) => ({ ...current, title: event.target.value }))}
+                      className="h-12 rounded-xl"
+                    />
+                  </FormField>
+
+                  <FormField label="Description" required>
+                    <Textarea
+                      value={programRoundDraft.description}
+                      onChange={(event) => setProgramRoundDraft((current) => ({ ...current, description: event.target.value }))}
+                      className="min-h-[120px] rounded-xl"
+                    />
+                  </FormField>
+
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <FormField label="Round Start Date & Time" required>
+                      <div className="relative">
+                        <Input
+                          type="datetime-local"
+                          value={programRoundDraft.startAt}
+                          onChange={(event) => setProgramRoundDraft((current) => ({ ...current, startAt: event.target.value }))}
+                          className="h-12 rounded-xl pr-12"
+                        />
+                        <CalendarDays className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                      </div>
+                    </FormField>
+
+                    <FormField label="Round End Date & Time" required>
+                      <div className="relative">
+                        <Input
+                          type="datetime-local"
+                          value={programRoundDraft.endAt}
+                          onChange={(event) => setProgramRoundDraft((current) => ({ ...current, endAt: event.target.value }))}
+                          className="h-12 rounded-xl pr-12"
+                        />
+                        <CalendarDays className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                      </div>
+                    </FormField>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 p-5">
+                    <RadioGroup
+                      value={programRoundDraft.eliminationMode}
+                      onValueChange={(value) => setProgramRoundDraft((current) => ({ ...current, eliminationMode: value as RoundDraft['eliminationMode'] }))}
+                      className="gap-4"
+                    >
+                      <div className="border-b border-dashed pb-4">
+                        <div className="flex items-start gap-3">
+                          <RadioGroupItem value="ELIMINATION" id="edit-program-elimination" className="mt-1 border-[#173f73] text-[#1463ff]" />
+                          <Label htmlFor="edit-program-elimination" className="text-base font-medium leading-7 text-slate-700">
+                            Yes. It's an eliminator as I'd like to shortlist participants for the next round.
+                          </Label>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <RadioGroupItem value="AUTO_ADVANCE" id="edit-program-auto-advance" className="mt-1 border-[#173f73] text-[#1463ff]" />
+                        <Label htmlFor="edit-program-auto-advance" className="text-base font-medium leading-7 text-[#1463ff]">
+                          No. All participants will move to the next round automatically.
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="platform" className="mt-0 px-6 py-6">
+                {programRoundDraft.roundType === 'SUBMISSION' ? (
+                  <div className="space-y-6">
+                    <div className="rounded-2xl border border-slate-200 p-5">
+                      <p className="text-base font-semibold text-[#173f73]">Create Submission form:</p>
+
+                      <div className="mt-5 rounded-2xl border border-slate-200">
+                        <div className="flex items-center gap-4 border-b px-4 py-4">
+                          <div className="flex min-w-[240px] items-center gap-3 border-r pr-4">
+                            <div className="rounded-xl bg-blue-50 p-2 text-[#1463ff]">
+                              <FileUp className="h-4 w-4" />
+                            </div>
+                            <span className="text-base font-medium text-slate-700">File</span>
+                            <ChevronDown className="ml-auto h-4 w-4 text-slate-500" />
+                          </div>
+                          <div className="ml-auto flex items-center gap-6">
+                            <div className="flex items-center gap-3">
+                              <span className="text-base font-medium text-slate-600">Required</span>
+                              <Switch
+                                checked={programRoundDraft.submissionFieldRequired}
+                                onCheckedChange={(checked) => setProgramRoundDraft((current) => ({ ...current, submissionFieldRequired: checked }))}
+                              />
+                            </div>
+                            <div className="flex items-center gap-3 border-l pl-6 text-slate-700">
+                              <Copy className="h-5 w-5" />
+                              <Plus className="h-5 w-5" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-5 p-4">
+                          <FormField label="Field Label" required>
+                            <Input
+                              value={programRoundDraft.submissionFieldLabel}
+                              onChange={(event) => setProgramRoundDraft((current) => ({ ...current, submissionFieldLabel: event.target.value }))}
+                              className="h-12 rounded-xl"
+                            />
+                          </FormField>
+
+                          <FormField label="Remark/Hint">
+                            <Input
+                              value={programRoundDraft.submissionFieldHint}
+                              onChange={(event) => setProgramRoundDraft((current) => ({ ...current, submissionFieldHint: event.target.value }))}
+                              className="h-12 rounded-xl"
+                            />
+                          </FormField>
+
+                          <div>
+                            <p className="text-base leading-7 text-slate-600">
+                              Enter the file types in lowercase, separated by commas, without spaces or periods (e.g., pdf,jpg,png). By default, all formats are accepted.
+                            </p>
+                            <div className="mt-3 rounded-2xl border border-slate-200 p-4">
+                              <div className="flex flex-wrap gap-3">
+                                {allowedSubmissionTypes.map((type) => {
+                                  const selected = programRoundDraft.submissionAllowedTypes.includes(type);
+
+                                  return (
+                                    <button
+                                      key={type}
+                                      type="button"
+                                      className={cn(
+                                        'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition',
+                                        selected ? 'bg-[#1463ff] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                      )}
+                                      onClick={() => setProgramRoundDraft((current) => ({
+                                        ...current,
+                                        submissionAllowedTypes: current.submissionAllowedTypes.includes(type)
+                                          ? current.submissionAllowedTypes.filter((item) => item !== type)
+                                          : [...current.submissionAllowedTypes, type],
+                                      }))}
+                                    >
+                                      {type}
+                                      <X className="h-4 w-4" />
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              <p className="mt-6 text-base text-slate-400">Please Select file types</p>
+                            </div>
+                          </div>
+
+                          <FormField label="Max. file size allowed for upload (In MB) ?" required>
+                            <Input
+                              type="number"
+                              value={programRoundDraft.submissionMaxSizeMb.toString()}
+                              onChange={(event) => setProgramRoundDraft((current) => ({
+                                ...current,
+                                submissionMaxSizeMb: Number(event.target.value) || 0,
+                              }))}
+                              className="h-12 rounded-xl"
+                            />
+                          </FormField>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+                    Submission Form is needed only for submission rounds.
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="evaluation" className="mt-0 px-6 py-6">
+                {programRoundDraft.roundType === 'SUBMISSION' ? (
+                  <div className="space-y-6">
+                    <div className="rounded-2xl border border-slate-200 p-5">
+                      <div className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4">
+                        <span className="text-xl font-medium text-slate-700">Evaluation Fields and Parameters for this Round</span>
+                        <Switch
+                          checked={programRoundDraft.evaluationEnabled}
+                          onCheckedChange={(checked) => setProgramRoundDraft((current) => ({ ...current, evaluationEnabled: checked }))}
+                        />
+                      </div>
+
+                      <p className="mt-8 text-lg text-slate-700">
+                        <span className="font-semibold">Note:</span> The interview evaluation configuration is defined by these parameters.
+                      </p>
+
+                      <div className="mt-8 rounded-2xl border border-slate-200">
+                        <div className="p-5">
+                          <EvaluationCriteriaEditor draft={programRoundDraft} onChange={setProgramRoundDraft} />
+                        </div>
+
+                        <div className="grid border-t md:grid-cols-2">
+                          <EvaluationToggleRow
+                            label="Shortlist button"
+                            checked={programRoundDraft.evaluationButtons.shortlist}
+                            onCheckedChange={(checked) => setProgramRoundDraft((current) => ({
+                              ...current,
+                              evaluationButtons: { ...current.evaluationButtons, shortlist: checked },
+                            }))}
+                          />
+                          <EvaluationToggleRow
+                            label="Reject button"
+                            checked={programRoundDraft.evaluationButtons.reject}
+                            leftBorder
+                            onCheckedChange={(checked) => setProgramRoundDraft((current) => ({
+                              ...current,
+                              evaluationButtons: { ...current.evaluationButtons, reject: checked },
+                            }))}
+                          />
+                          <EvaluationToggleRow
+                            label="On Hold button"
+                            checked={programRoundDraft.evaluationButtons.onHold}
+                            onCheckedChange={(checked) => setProgramRoundDraft((current) => ({
+                              ...current,
+                              evaluationButtons: { ...current.evaluationButtons, onHold: checked },
+                            }))}
+                          />
+                          <EvaluationToggleRow
+                            label="No Show button"
+                            checked={programRoundDraft.evaluationButtons.noShow}
+                            leftBorder
+                            onCheckedChange={(checked) => setProgramRoundDraft((current) => ({
+                              ...current,
+                              evaluationButtons: { ...current.evaluationButtons, noShow: checked },
+                            }))}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+                    Evaluation controls are needed only for submission rounds.
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <SheetFooter className="mt-auto border-t px-6 py-4 sm:flex-row sm:justify-between sm:space-x-0">
+            <Button variant="ghost" className="text-base font-medium text-slate-700" onClick={() => setProgramRoundDrawerOpen(false)}>
+              Close
+            </Button>
+            <div className="flex items-center gap-3">
+              {getPreviousRoundDrawerStep(programRoundDrawerStep, programRoundDraft.roundType) ? (
+                <Button
+                  variant="outline"
+                  className="rounded-full px-8"
+                  onClick={() => setProgramRoundDrawerStep(getPreviousRoundDrawerStep(programRoundDrawerStep, programRoundDraft.roundType) ?? 'basic')}
+                >
+                  Back
+                </Button>
+              ) : null}
+              {getNextRoundDrawerStep(programRoundDrawerStep, programRoundDraft.roundType) ? (
+                <Button
+                  className="rounded-full px-8"
+                  onClick={() => setProgramRoundDrawerStep(getNextRoundDrawerStep(programRoundDrawerStep, programRoundDraft.roundType) ?? 'basic')}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button className="rounded-full px-8" onClick={handleCreateProgramRound}>
+                  Save
+                </Button>
+              )}
+            </div>
+          </SheetFooter>
+        </div>
+      </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -1556,8 +2333,7 @@ function EditProgramView({
 function createEditProgramForm(hackathon: BrowserHackathon): EditProgramForm {
   return {
     title: hackathon.title,
-    organizationName: hackathon.organizationName || 'Cprime Technologies',
-    prizePool: hackathon.prizePool || '₹1,00,000',
+    prizePool: hackathon.prizePool || '',
     logoDataUrl: hackathon.logoDataUrl,
     overview: hackathon.overviewText || getTextFromHtml(hackathon.overviewHtml),
     registrationStart: hackathon.registrationStart,
@@ -1573,11 +2349,11 @@ function createEditProgramForm(hackathon: BrowserHackathon): EditProgramForm {
 function getEditSectionDescription(section: (typeof editProgramSections)[number]['id']) {
   switch (section) {
     case 'basic':
-      return 'Provide basic details about the program, who is organizing it, and what visitors should understand when they open the public hackathon page.';
+      return 'Provide the core details visitors should understand when they open the public hackathon page.';
     case 'registration':
       return 'Configure participation type, registration window, team size constraints, and the fields expected from applicants.';
     case 'rounds':
-      return 'Shape the participant-facing tracks and stage context that appear across the hackathon preview and registration flow.';
+      return 'Define the screening rounds that follow registration and configure the tracks shown to participants.';
     case 'prizes':
       return 'Set the prize pool shown on the public hackathon page.';
     default:
@@ -1627,31 +2403,167 @@ function EvaluationToggleRow({
   );
 }
 
-function createInitialStages(): StageDefinition[] {
-  return [
-    { id: 'reg', name: 'All Registrations', code: 'REG', type: 'REGISTRATION' },
-    {
-      id: 'submission-r1',
-      name: 'Submission Round (via Unstop)',
-      code: 'R1',
-      type: 'SUBMISSION',
-      sourceStageId: 'reg',
-    },
-  ];
-}
+function EvaluationCriteriaEditor({
+  draft,
+  onChange,
+}: {
+  draft: RoundDraft;
+  onChange: React.Dispatch<React.SetStateAction<RoundDraft>>;
+}) {
+  const [labelInput, setLabelInput] = useState('');
+  const [scoreInput, setScoreInput] = useState('5');
 
-function addSubmissionStage(stages: StageDefinition[]): StageDefinition[] {
-  const submissionCount = stages.filter((stage) => stage.type === 'SUBMISSION').length;
-  const nextCode = `R${submissionCount + 1}`;
-  const nextStage: StageDefinition = {
-    id: `submission-${nextCode.toLowerCase()}`,
-    name: `Submission Round ${submissionCount + 1} (via Unstop)`,
-    code: nextCode,
-    type: 'SUBMISSION',
-    sourceStageId: stages[stages.length - 1]?.id,
+  const handleAddCriterion = () => {
+    const trimmedLabel = labelInput.trim();
+    const maxScore = Number(scoreInput);
+
+    if (!trimmedLabel || !Number.isFinite(maxScore) || maxScore <= 0) {
+      return;
+    }
+
+    onChange((current) => {
+      const nextCriteria = [
+        ...current.evaluationCriteria,
+        {
+          id: `criterion-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          label: trimmedLabel,
+          maxScore,
+        },
+      ];
+
+      return {
+        ...current,
+        evaluationCriteria: nextCriteria,
+        evaluationMaxScore: getEvaluationCriteriaTotal(nextCriteria),
+      };
+    });
+    setLabelInput('');
+    setScoreInput('5');
   };
 
-  return [...stages, nextStage];
+  const handleRemoveCriterion = (criterionId: string) => {
+    onChange((current) => {
+      const nextCriteria = current.evaluationCriteria.filter((criterion) => criterion.id !== criterionId);
+
+      return {
+        ...current,
+        evaluationCriteria: nextCriteria,
+        evaluationMaxScore: getEvaluationCriteriaTotal(nextCriteria),
+      };
+    });
+  };
+
+  const handleCriterionScoreChange = (criterionId: string, maxScore: number) => {
+    onChange((current) => {
+      const nextCriteria = current.evaluationCriteria.map((criterion) => (
+        criterion.id === criterionId
+          ? { ...criterion, maxScore: Math.max(1, Math.floor(maxScore) || 1) }
+          : criterion
+      ));
+
+      return {
+        ...current,
+        evaluationCriteria: nextCriteria,
+        evaluationMaxScore: getEvaluationCriteriaTotal(nextCriteria),
+      };
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-slate-200 p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[2rem] font-semibold text-slate-800">Evaluation Criteria</p>
+            <p className="mt-1 text-sm text-slate-500">Define how judges should score this round.</p>
+          </div>
+          <div className="rounded-2xl bg-slate-100 px-4 py-3 text-right">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total score</p>
+            <p className="text-2xl font-semibold text-slate-900">{draft.evaluationMaxScore}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-3">
+          {draft.evaluationCriteria.map((criterion) => (
+            <div key={criterion.id} className="grid gap-3 rounded-2xl border border-slate-200 p-4 md:grid-cols-[minmax(0,1fr)_140px_44px] md:items-center">
+              <div>
+                <p className="text-base font-semibold text-slate-900">{criterion.label}</p>
+                <p className="text-sm text-slate-500">Scored criterion</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={criterion.id} className="text-xs font-semibold uppercase tracking-wide text-slate-500">Max score</Label>
+                <Input
+                  id={criterion.id}
+                  type="number"
+                  min={1}
+                  value={criterion.maxScore.toString()}
+                  onChange={(event) => handleCriterionScoreChange(criterion.id, Number(event.target.value))}
+                  className="h-11 rounded-xl"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="mt-6 rounded-full text-slate-500 hover:text-slate-900 md:mt-0"
+                onClick={() => handleRemoveCriterion(criterion.id)}
+                aria-label={`Remove ${criterion.label}`}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 grid gap-3 rounded-2xl border border-dashed border-slate-300 p-4 md:grid-cols-[minmax(0,1fr)_140px_auto] md:items-end">
+          <div className="space-y-2">
+            <Label htmlFor="criterion-label" className="text-sm font-semibold text-slate-700">Add criterion</Label>
+            <Input
+              id="criterion-label"
+              value={labelInput}
+              onChange={(event) => setLabelInput(event.target.value)}
+              placeholder="Code quality"
+              className="h-12 rounded-xl"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="criterion-score" className="text-sm font-semibold text-slate-700">Score</Label>
+            <Input
+              id="criterion-score"
+              type="number"
+              min={1}
+              value={scoreInput}
+              onChange={(event) => setScoreInput(event.target.value)}
+              className="h-12 rounded-xl"
+            />
+          </div>
+          <Button type="button" className="h-12 rounded-xl px-6" onClick={handleAddCriterion}>
+            Add Parameter
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getRoundDrawerSteps(roundType: RoundDraft['roundType']): RoundDrawerStep[] {
+  return roundType === 'SUBMISSION' ? ['basic', 'platform', 'evaluation'] : ['basic'];
+}
+
+function getNextRoundDrawerStep(currentStep: RoundDrawerStep, roundType: RoundDraft['roundType']) {
+  const steps = getRoundDrawerSteps(roundType);
+  const index = steps.indexOf(currentStep);
+  return index >= 0 ? steps[index + 1] ?? null : null;
+}
+
+function getPreviousRoundDrawerStep(currentStep: RoundDrawerStep, roundType: RoundDraft['roundType']) {
+  const steps = getRoundDrawerSteps(roundType);
+  const index = steps.indexOf(currentStep);
+  return index > 0 ? steps[index - 1] : null;
+}
+
+function getEvaluationCriteriaTotal(criteria: BrowserHackathonEvaluationCriterion[]) {
+  return criteria.reduce((total, criterion) => total + criterion.maxScore, 0);
 }
 
 function insertSubmissionStageAt(stages: StageDefinition[], index: number, draft?: RoundDraft): StageDefinition[] {
@@ -1664,7 +2576,12 @@ function insertSubmissionStageAt(stages: StageDefinition[], index: number, draft
     name: draft?.title.trim() || (newStageNumber === 1 ? 'Submission Round (via Unstop)' : `Submission Round ${newStageNumber} (via Unstop)`),
     code: `R${newStageNumber}`,
     type: 'SUBMISSION',
+    startAt: draft?.startAt,
+    endAt: draft?.endAt,
     sourceStageId: insertAfterStage?.id,
+    evaluationEnabled: draft?.evaluationEnabled ?? true,
+    evaluationMaxScore: draft?.evaluationMaxScore ?? 0,
+    evaluationCriteria: draft?.evaluationCriteria ?? [],
   };
 
   nextStages.splice(index + 1, 0, nextStage);
@@ -1684,6 +2601,8 @@ function insertSubmissionStageAt(stages: StageDefinition[], index: number, draft
       id: stage.id.startsWith('submission-r')
         ? `submission-r${orderedSubmissionIndex}${stage.id.includes('-') ? `-${stage.id.split('-').slice(2).join('-')}` : ''}`
         : stage.id,
+      startAt: stage.startAt,
+      endAt: stage.endAt,
       name: stage.id === nextStage.id
         ? nextStage.name
         : orderedSubmissionIndex === 1
@@ -1698,6 +2617,7 @@ function insertSubmissionStageAt(stages: StageDefinition[], index: number, draft
 function createDefaultRoundDraft(roundNumber = 1): RoundDraft {
   const nextWeek = new Date();
   nextWeek.setDate(nextWeek.getDate() + 7);
+  const evaluationCriteria = createDefaultEvaluationCriteria();
 
   return {
     title: roundNumber === 1 ? 'Submission Round (via Unstop)' : `Submission Round ${roundNumber} (via Unstop)`,
@@ -1713,7 +2633,8 @@ function createDefaultRoundDraft(roundNumber = 1): RoundDraft {
     submissionAllowedTypes: [...allowedSubmissionTypes],
     submissionMaxSizeMb: 50,
     evaluationEnabled: true,
-    evaluationMaxScore: 5,
+    evaluationMaxScore: getEvaluationCriteriaTotal(evaluationCriteria),
+    evaluationCriteria,
     evaluationButtons: {
       shortlist: true,
       reject: true,
@@ -1721,6 +2642,14 @@ function createDefaultRoundDraft(roundNumber = 1): RoundDraft {
       noShow: true,
     },
   };
+}
+
+function createDefaultEvaluationCriteria(): BrowserHackathonEvaluationCriterion[] {
+  return [
+    { id: 'criterion-code-quality', label: 'Code Quality', maxScore: 5 },
+    { id: 'criterion-design', label: 'Design', maxScore: 3 },
+    { id: 'criterion-presentation', label: 'Presentation', maxScore: 2 },
+  ];
 }
 
 function formatDateTimeLocal(value: Date) {
@@ -1733,44 +2662,18 @@ function formatDateTimeLocal(value: Date) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-function createTeamRecords(hackathon: BrowserHackathon, stages: StageDefinition[]): TeamRecord[] {
-  const demoParticipants = [
-    {
-      id: 'participant-1',
-      participantName: 'Pavanprasad0605',
-      email: 'pavanprasad0605@gmail.com',
-      company: 'Cprime Technologies',
-      registrationStatus: 'COMPLETE' as const,
-    },
-    {
-      id: 'participant-2',
-      participantName: 'Aarav Build Lab',
-      email: 'aarav@buildlab.dev',
-      company: hackathon.tracks[0] ?? 'Build Lab',
-      registrationStatus: 'COMPLETE' as const,
-    },
-    {
-      id: 'participant-3',
-      participantName: 'Nexus Foundry',
-      email: 'team@nexusfoundry.ai',
-      company: hackathon.tracks[1] ?? 'Nexus Foundry',
-      registrationStatus: 'COMPLETE' as const,
-    },
-    {
-      id: 'participant-4',
-      participantName: 'Orbit Stack',
-      email: 'hello@orbitstack.dev',
-      company: hackathon.tracks[2] ?? 'Orbit Stack',
-      registrationStatus: 'INCOMPLETE' as const,
-    },
-  ];
-
-  return demoParticipants.map((participant, participantIndex) => ({
-    ...participant,
+function mapRegistrationsToTeamRecords(registrations: HackathonRegistrationItem[], stages: StageDefinition[]): TeamRecord[] {
+  return registrations.map((registration, index) => ({
+    id: registration.id,
+    displayName: registration.teamName || registration.participantName,
+    participantName: registration.participantName,
+    email: registration.participantEmail,
+    detail: registration.teamName ? registration.participantName : (registration.track || ''),
+    registrationStatus: 'COMPLETE',
     stageEntries: Object.fromEntries(
       stages
         .filter((stage) => stage.type === 'SUBMISSION')
-        .map((stage, submissionIndex) => [stage.id, createSubmissionEntry(participantIndex, submissionIndex)])
+        .map((stage, submissionIndex) => [stage.id, createSubmissionEntry(index, submissionIndex)])
     ),
   }));
 }
@@ -1857,12 +2760,11 @@ function downloadRegistrations(
   downloadTextFile(
     `${slug}-${code.toLowerCase()}-registrations.csv`,
     [
-      'participant_name,email,company,registration_status',
+      'name,email,registration_status',
       ...records.map((record) => (
         [
-          escapeCsv(record.participantName),
+          escapeCsv(record.displayName),
           escapeCsv(record.email),
-          escapeCsv(record.company),
           record.registrationStatus,
         ].join(',')
       )),
@@ -1883,9 +2785,9 @@ function downloadProfiles(
   downloadTextFile(
     `${slug}-${code.toLowerCase()}-profiles.csv`,
     [
-      'participant_name,email,company',
+      'name,email',
       ...records.map((record) => (
-        [escapeCsv(record.participantName), escapeCsv(record.email), escapeCsv(record.company)].join(',')
+        [escapeCsv(record.displayName), escapeCsv(record.email)].join(',')
       )),
     ].join('\n')
   );
@@ -1907,13 +2809,12 @@ function downloadSubmissions(
   downloadTextFile(
     `${slug}-${code.toLowerCase()}-submissions.csv`,
     [
-      'participant_name,email,company,status,score,panel',
+      'name,email,status,score,panel',
       ...submitted.map((record) => {
         const entry = record.stageEntries[stageId];
         return [
-          escapeCsv(record.participantName),
+          escapeCsv(record.displayName),
           escapeCsv(record.email),
-          escapeCsv(record.company),
           entry?.status ?? '',
           entry?.score ?? '',
           entry?.panel ?? '',
@@ -2014,7 +2915,10 @@ function ActionIconButton({
         disabled ? 'cursor-not-allowed opacity-40' : 'hover:bg-slate-50',
         className
       )}
-      onClick={onClick}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick();
+      }}
     >
       {children}
     </button>

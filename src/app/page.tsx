@@ -1,19 +1,41 @@
 'use client';
 
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import TextPressure from '@/components/TextPressure';
 import Aurora from '@/components/Aurora';
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AlertCircle, ShieldCheck } from 'lucide-react';
+import { consumeLoginReturnTo, useAuth } from '@/context/AuthContext';
 
 export default function LandingPage() {
   const { resolvedTheme } = useTheme();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { currentUser, authConfigured, authError, login } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const returnTo = searchParams.get('returnTo') || '/hackathons';
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      router.replace(consumeLoginReturnTo() || returnTo);
+    }
+  }, [currentUser, returnTo, router]);
+
+  const handleLogin = async () => {
+    try {
+      setIsSubmitting(true);
+      await login(returnTo);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Render a simple placeholder on the server and before the client has mounted
   // to avoid hydration mismatch, as our Aurora and TextPressure components
@@ -26,12 +48,19 @@ export default function LandingPage() {
           <p className="mt-4 text-xl text-muted-foreground max-w-3xl">
             From community forums to ideation and hackathon portals, we connect brilliant minds with real-world challenges.
           </p>
-          <div className="flex space-x-4 pt-8">
-            <Button asChild size="lg">
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button asChild variant="secondary" size="lg">
-              <Link href="/signup">Create Account</Link>
+          {authError && (
+            <div className="mt-6 max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+              <div className="flex items-center justify-center gap-2 font-medium text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                Sign-in is not ready
+              </div>
+              <p className="mt-2 text-muted-foreground">{authError}</p>
+            </div>
+          )}
+          <div className="pt-8">
+            <Button size="lg" disabled={!authConfigured || isSubmitting} onClick={() => void handleLogin()}>
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              {isSubmitting ? 'Signing in...' : 'Login'}
             </Button>
           </div>
         </div>
@@ -70,12 +99,19 @@ export default function LandingPage() {
         <p className="mt-4 text-xl text-muted-foreground max-w-3xl">
           From community forums to ideation and hackathon portals, we connect brilliant minds with real-world challenges.
         </p>
-        <div className="flex space-x-4 pt-8">
-          <Button asChild size="lg">
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button asChild variant="secondary" size="lg">
-            <Link href="/signup">Create Account</Link>
+        {authError && (
+          <div className="mt-6 max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+            <div className="flex items-center justify-center gap-2 font-medium text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              Sign-in is not ready
+            </div>
+            <p className="mt-2 text-muted-foreground">{authError}</p>
+          </div>
+        )}
+        <div className="pt-8">
+          <Button size="lg" disabled={!authConfigured || isSubmitting} onClick={() => void handleLogin()}>
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            {isSubmitting ? 'Signing in...' : 'Login'}
           </Button>
         </div>
       </div>

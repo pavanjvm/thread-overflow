@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import type { BrowserHackathon } from '@/lib/browser-hackathons';
-import { readBrowserHackathons } from '@/lib/browser-hackathons';
+import { readBrowserHackathons, writeBrowserHackathons } from '@/lib/browser-hackathons';
+import { fetchHackathons } from '@/lib/hackathons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,7 +19,29 @@ export default function HackathonsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    setHackathons(readBrowserHackathons());
+    let cancelled = false;
+
+    const loadHackathons = async () => {
+      try {
+        const nextHackathons = await fetchHackathons();
+        if (cancelled) {
+          return;
+        }
+
+        setHackathons(nextHackathons);
+        writeBrowserHackathons(nextHackathons);
+      } catch {
+        if (!cancelled) {
+          setHackathons(readBrowserHackathons());
+        }
+      }
+    };
+
+    void loadHackathons();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -94,9 +117,11 @@ export default function HackathonsPage() {
                   <CardContent className="space-y-5 p-6">
                     <div>
                       <p className="text-sm font-medium">Hackathon Details</p>
-                      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-                        {hackathon.overviewText || 'No overview added.'}
-                      </p>
+                      {hackathon.overviewText ? (
+                        <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                          {hackathon.overviewText}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div className="rounded-xl bg-muted/50 p-3">
@@ -124,17 +149,6 @@ export default function HackathonsPage() {
                         </div>
                         <p className="mt-1 font-medium">{hackathon.tracks.length} tracks</p>
                       </div>
-                    </div>
-                    <div className="rounded-2xl border p-4">
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Participant Track Options</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {hackathon.tracks.map((track) => (
-                          <Badge key={track} variant="secondary">{track}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Registration fields: <span className="font-medium text-foreground">{hackathon.registrationFields.length}</span>
                     </div>
                     {isAdmin && (
                       <div className="flex justify-end pt-1">

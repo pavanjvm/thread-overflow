@@ -30,10 +30,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import {
-  createHackathonSlug,
-  getTextFromHtml,
   saveBrowserHackathon,
 } from '@/lib/browser-hackathons';
+import { createHackathon as createHackathonRequest } from '@/lib/hackathons';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -91,36 +90,44 @@ export default function NewHackathonPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [trackInput, setTrackInput] = useState('');
-  const [tracks, setTracks] = useState<string[]>(['AI Ops', 'Developer Tools']);
+  const [tracks, setTracks] = useState<string[]>([]);
   const [registrationStart, setRegistrationStart] = useState('');
   const [registrationEnd, setRegistrationEnd] = useState('');
   const [registrationStartDate, setRegistrationStartDate] = useState<Date>();
   const [registrationEndDate, setRegistrationEndDate] = useState<Date>();
   const [startCalendarOpen, setStartCalendarOpen] = useState(false);
   const [endCalendarOpen, setEndCalendarOpen] = useState(false);
-  const [participationType, setParticipationType] = useState<ParticipationType>('TEAM');
-  const [minTeamSize, setMinTeamSize] = useState('1');
-  const [maxTeamSize, setMaxTeamSize] = useState('2');
+  const [participationType, setParticipationType] = useState<ParticipationType | null>(null);
+  const [minTeamSize, setMinTeamSize] = useState('');
+  const [maxTeamSize, setMaxTeamSize] = useState('');
   const [customFieldInput, setCustomFieldInput] = useState('');
   const [customRegistrationFields, setCustomRegistrationFields] = useState<string[]>([]);
   const [draftSaved, setDraftSaved] = useState(false);
-  const [created, setCreated] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const registrationFields = useMemo(() => {
-    const defaultFields = participationType === 'INDIVIDUAL'
-      ? ['Full Name', 'Mobile Number', 'Track']
-      : ['Team Name', 'Team Leader Name', 'Mobile Number', 'Add Team Members', 'Track'];
+  const registrationFields = useMemo(() => customRegistrationFields, [customRegistrationFields]);
+  const builtInRegistrationFields = useMemo(() => {
+    const fields = ['Full name', 'Email'];
 
-    return [...defaultFields, ...customRegistrationFields];
-  }, [participationType, customRegistrationFields]);
-
-  const defaultRegistrationFields = useMemo(() => {
-    if (participationType === 'INDIVIDUAL') {
-      return ['Full Name', 'Mobile Number', 'Track'];
+    if (participationType === 'TEAM') {
+      fields.push('Team name', 'Team members');
     }
 
-    return ['Team Name', 'Team Leader Name', 'Mobile Number', 'Add Team Members', 'Track'];
-  }, [participationType]);
+    if (tracks.length > 0) {
+      fields.push('Track');
+    }
+
+    return fields;
+  }, [participationType, tracks.length]);
+  const hasValidTeamSize = participationType !== 'TEAM'
+    || (
+      minTeamSize.trim() !== ''
+      && maxTeamSize.trim() !== ''
+      && Number.isInteger(Number(minTeamSize))
+      && Number.isInteger(Number(maxTeamSize))
+      && Number(maxTeamSize) >= Number(minTeamSize)
+    );
 
   const canMoveToStepTwo =
     logoName.trim() !== '' &&
@@ -130,6 +137,9 @@ export default function NewHackathonPage() {
     tracks.length > 0 &&
     registrationStart.trim() !== '' &&
     registrationEnd.trim() !== '';
+  const canCreateHackathon =
+    participationType !== null &&
+    hasValidTeamSize;
 
   const handleAddTrack = () => {
     const trimmed = trackInput.trim();
@@ -246,29 +256,38 @@ export default function NewHackathonPage() {
     setDraftSaved(true);
   };
 
-  const handleCreateHackathon = () => {
-    const id = `hackathon-${Date.now()}`;
-    const overviewText = getTextFromHtml(description);
+  const handleCreateHackathon = async () => {
+    if (!participationType || !canCreateHackathon) {
+      setSubmitError('Complete the registration setup before creating the hackathon.');
+      return;
+    }
 
-    saveBrowserHackathon({
-      id,
-      slug: createHackathonSlug(title, id),
-      title: title.trim(),
-      logoDataUrl,
-      coverImageDataUrl,
-      overviewHtml: description,
-      overviewText,
-      tracks,
-      registrationStart,
-      registrationEnd,
-      participationType,
-      minTeamSize,
-      maxTeamSize,
-      registrationFields,
-      createdAt: new Date().toISOString(),
-    });
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
 
-    router.push('/hackathons');
+      const hackathon = await createHackathonRequest({
+        title: title.trim(),
+        description,
+        logoDataUrl,
+        coverImageDataUrl,
+        tracks,
+        registrationStart,
+        registrationEnd,
+        participationType,
+        minTeamSize: participationType === 'TEAM' ? minTeamSize : undefined,
+        maxTeamSize: participationType === 'TEAM' ? maxTeamSize : undefined,
+        registrationFields,
+      });
+
+      saveBrowserHackathon(hackathon);
+      router.push('/hackathons');
+    } catch (error) {
+      console.error('Failed to create hackathon.', error);
+      setSubmitError('Unable to create the hackathon right now. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!currentUser || currentUser.role !== 'ADMIN') {
@@ -286,52 +305,6 @@ export default function NewHackathonPage() {
             <Button asChild>
               <Link href="/hackathons">Back to Hackathons</Link>
             </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (created) {
-    return (
-      <div className="mx-auto max-w-5xl space-y-6 py-8">
-        <Card className="overflow-hidden rounded-[28px] border border-slate-200">
-          <div className="h-6 bg-gradient-to-r from-sky-500 via-sky-300 to-sky-100" />
-          <CardHeader>
-            <CardTitle className="text-3xl">Hackathon Draft Created</CardTitle>
-            <CardDescription>
-              The step-by-step configuration is ready. Next we can shape how the hackathon detail page should behave when someone opens it.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="rounded-2xl border p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Title</p>
-              <p className="mt-2 text-lg font-semibold">{title}</p>
-            </div>
-            <div className="rounded-2xl border p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Tracks</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {tracks.map((track) => (
-                  <Badge key={track} variant="secondary">{track}</Badge>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-2xl border p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Registration Form</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {registrationFields.map((field) => (
-                  <Badge key={field} variant="outline">{field}</Badge>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button asChild>
-                <Link href="/hackathons">Back to Hackathons</Link>
-              </Button>
-              <Button variant="outline" onClick={() => setCreated(false)}>
-                Edit Draft
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -455,7 +428,6 @@ export default function NewHackathonPage() {
                       id="title"
                       value={title}
                       onChange={(event) => setTitle(event.target.value)}
-                      placeholder="Enter title."
                       className="h-16 rounded-2xl text-2xl"
                     />
                     <p className="text-sm text-muted-foreground">Max 190 characters</p>
@@ -539,7 +511,6 @@ export default function NewHackathonPage() {
                       <Input
                         value={trackInput}
                         onChange={(event) => setTrackInput(event.target.value)}
-                        placeholder="Add a track like AI, Web3, Design, Robotics"
                         className="h-14 rounded-2xl text-lg"
                       />
                       <Button type="button" onClick={handleAddTrack} className="h-14 rounded-2xl px-6">
@@ -632,7 +603,11 @@ export default function NewHackathonPage() {
                         <div className="flex flex-wrap gap-3">
                           <button
                             type="button"
-                            onClick={() => setParticipationType('INDIVIDUAL')}
+                            onClick={() => {
+                              setParticipationType('INDIVIDUAL');
+                              setMinTeamSize('');
+                              setMaxTeamSize('');
+                            }}
                             className={cn(
                               'flex items-center gap-3 rounded-2xl border border-dashed px-6 py-4 text-xl',
                               participationType === 'INDIVIDUAL' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300'
@@ -661,7 +636,7 @@ export default function NewHackathonPage() {
                           <div className="grid gap-4 md:grid-cols-2">
                             <Select value={minTeamSize} onValueChange={setMinTeamSize}>
                               <SelectTrigger className="h-16 rounded-2xl text-xl">
-                                <SelectValue placeholder="Min team size" />
+                                <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 {['1', '2', '3', '4', '5'].map((value) => (
@@ -671,7 +646,7 @@ export default function NewHackathonPage() {
                             </Select>
                             <Select value={maxTeamSize} onValueChange={setMaxTeamSize}>
                               <SelectTrigger className="h-16 rounded-2xl text-xl">
-                                <SelectValue placeholder="Max team size" />
+                                <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 {['2', '3', '4', '5', '6'].map((value) => (
@@ -680,6 +655,9 @@ export default function NewHackathonPage() {
                               </SelectContent>
                             </Select>
                           </div>
+                          {!hasValidTeamSize ? (
+                            <p className="text-sm text-destructive">Maximum team size must be greater than or equal to minimum team size.</p>
+                          ) : null}
                         </div>
                       )}
                     </div>
@@ -689,41 +667,59 @@ export default function NewHackathonPage() {
                 <div className="space-y-4">
                   <h3 className="text-3xl font-semibold tracking-tight">Registration Form</h3>
                   <div className="rounded-[28px] border p-8">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {defaultRegistrationFields.map((field) => (
-                        <div key={field} className="rounded-2xl border bg-muted/30 p-4">
-                          <p className="text-base font-medium">{field}</p>
-                          {field === 'Track' ? (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {tracks.map((track) => (
-                                <Badge key={track} variant="secondary">{track}</Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="mt-1 text-sm text-muted-foreground">Required field</p>
-                          )}
-                        </div>
-                      ))}
-                      {customRegistrationFields.map((field) => (
-                        <div key={field} className="flex items-start justify-between gap-3 rounded-2xl border bg-muted/30 p-4">
-                          <div>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-lg font-semibold">Built-in fields</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          These fields are always shown to participants during registration.
+                        </p>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {builtInRegistrationFields.map((field) => (
+                          <div key={field} className="rounded-2xl border bg-blue-50/50 p-4">
                             <p className="text-base font-medium">{field}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">Custom field</p>
+                            <p className="mt-1 text-sm text-muted-foreground">Built-in field</p>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveRegistrationField(field)}
-                            className="rounded-full p-1 text-muted-foreground hover:bg-background hover:text-foreground"
-                            aria-label={`Remove ${field}`}
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-8 space-y-4">
+                      <div>
+                        <p className="text-lg font-semibold">Custom fields</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Add optional extra questions only if this hackathon needs them.
+                        </p>
+                      </div>
+
+                    {customRegistrationFields.length > 0 ? (
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {customRegistrationFields.map((field) => (
+                          <div key={field} className="flex items-start justify-between gap-3 rounded-2xl border bg-muted/30 p-4">
+                            <div>
+                              <p className="text-base font-medium">{field}</p>
+                              <p className="mt-1 text-sm text-muted-foreground">Registration field</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveRegistrationField(field)}
+                              className="rounded-full p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                              aria-label={`Remove ${field}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed bg-muted/20 p-6 text-sm text-muted-foreground">
+                        No custom registration fields added yet.
+                      </div>
+                    )}
                     </div>
 
                     <div className="mt-6 space-y-3">
-                      <Label htmlFor="custom-field" className="text-2xl font-medium">Add Fields</Label>
+                      <Label htmlFor="custom-field" className="text-2xl font-medium">Add Custom Fields</Label>
                       <div className="flex gap-3">
                         <Input
                           id="custom-field"
@@ -735,7 +731,6 @@ export default function NewHackathonPage() {
                               handleAddRegistrationField();
                             }
                           }}
-                          placeholder="Add a field like College Name, GitHub Profile, T-shirt Size"
                           className="h-14 rounded-2xl text-lg"
                         />
                         <Button type="button" onClick={handleAddRegistrationField} className="h-14 rounded-2xl px-6">
@@ -751,7 +746,7 @@ export default function NewHackathonPage() {
 
           <div className="flex items-center justify-between border-t px-8 py-6">
             <div className="text-sm text-muted-foreground">
-              {draftSaved ? 'Draft saved locally.' : ''}
+              {submitError ? <span className="text-destructive">{submitError}</span> : draftSaved ? 'Draft saved locally.' : ''}
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" onClick={handleDraftSave}>
@@ -766,8 +761,8 @@ export default function NewHackathonPage() {
                   <Button variant="outline" onClick={() => setStep(1)}>
                     Previous
                   </Button>
-                  <Button onClick={handleCreateHackathon}>
-                    Create hackathon
+                  <Button onClick={() => void handleCreateHackathon()} disabled={isSubmitting || !canCreateHackathon}>
+                    {isSubmitting ? 'Creating...' : 'Create hackathon'}
                   </Button>
                 </>
               )}

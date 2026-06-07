@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
         </CardHeader>
         <CardContent>
           <Button asChild>
-            <Link href="/login">Back to Login</Link>
+            <Link href="/">Back to Home</Link>
           </Button>
         </CardContent>
       </Card>

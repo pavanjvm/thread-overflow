@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1780822818941,
+      "tag": "0000_lowly_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780824878886,
+      "tag": "0001_smiling_triton",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780924200000,
+      "tag": "0003_remove_hackathon_organization_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780927800000,
+      "tag": "0004_hackathon_stages",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780931400000,
+      "tag": "0005_hackathon_registrations",
+      "breakpoints": true
+    }
+  ]
+}

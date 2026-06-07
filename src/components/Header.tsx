@@ -47,9 +47,9 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
   };
 
   return (
@@ -185,7 +185,7 @@ const Header = ({ showSidebar = true, setIsChatOpen }: { showSidebar?: boolean, 
                 </DropdownMenuItem>
                 <DropdownMenuItem><Settings className="mr-2" />Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem onClick={() => void handleLogout()}>
                   <LogOut className="mr-2" />
                   Log out
                 </DropdownMenuItem>
