@@ -36,6 +36,20 @@
       "when": 1780931400000,
       "tag": "0005_hackathon_registrations",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780933200000,
+      "tag": "0006_hackathon_stage_windows",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780935000000,
+      "tag": "0007_hackathon_stage_submissions",
+      "breakpoints": true
     }
   ]
 }

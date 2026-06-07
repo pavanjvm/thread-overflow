@@ -11,8 +11,11 @@ import {
   getHackathonRegistration,
   getHackathonRegistrations,
   getHackathons,
+  getMyHackathonRegistration,
   postHackathon,
   postHackathonRegistration,
+  putHackathonStageSubmissionReview,
+  putMyHackathonStageSubmission,
   putHackathonStages,
 } from './hackathons.controller.ts';
 
@@ -23,7 +26,10 @@ hackathonsRoutes.get('/:slug', requireSessionUser, asyncHandler(getHackathon));
 hackathonsRoutes.post('/', requireAdmin, asyncHandler(postHackathon));
 hackathonsRoutes.delete('/:slug', requireAdmin, asyncHandler(deleteHackathon));
 hackathonsRoutes.put('/:slug/stages', requireAdmin, asyncHandler(putHackathonStages));
+hackathonsRoutes.get('/:slug/my-registration', requireSessionUser, asyncHandler(getMyHackathonRegistration));
+hackathonsRoutes.put('/:slug/my-registration/submissions/:stageId', requireSessionUser, asyncHandler(putMyHackathonStageSubmission));
 hackathonsRoutes.get('/:slug/registrations', requireAdmin, asyncHandler(getHackathonRegistrations));
 hackathonsRoutes.get('/:slug/registrations/:registrationId', requireAdmin, asyncHandler(getHackathonRegistration));
+hackathonsRoutes.put('/:slug/registrations/:registrationId/submissions/:stageId/status', requireAdmin, asyncHandler(putHackathonStageSubmissionReview));
 hackathonsRoutes.post('/:slug/registrations', requireSessionUser, asyncHandler(postHackathonRegistration));
 hackathonsRoutes.delete('/:slug/registrations/:registrationId', requireAdmin, asyncHandler(deleteHackathonRegistrationById));

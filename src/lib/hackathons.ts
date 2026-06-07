@@ -25,9 +25,7 @@ interface HackathonResponse {
 }
 
 interface HackathonRegistrationResponse {
-  registration: {
-    id: string;
-  };
+  registration: HackathonRegistrationItem;
   hackathon: BrowserHackathon;
 }
 
@@ -56,6 +54,7 @@ export interface HackathonRegistrationItem {
   track?: string;
   formResponses: Array<{ field: string; value: string }>;
   teammates: Array<{ name: string; email: string }>;
+  submissions: HackathonRegistrationSubmissionItem[];
   createdAt: string;
 }
 
@@ -70,13 +69,43 @@ export interface HackathonRegistrationSubmissionItem {
   stageId: string;
   stageName: string;
   stageCode: string;
+  status: 'IN_PROGRESS' | 'SHORTLISTED' | 'REJECTED';
   submitted: boolean;
+  projectTitle?: string;
+  summary?: string;
+  demoUrl?: string;
+  repositoryUrl?: string;
+  videoUrl?: string;
+  deckUrl?: string;
+  additionalNotes?: string;
+  score?: string;
+  panel?: string;
+  decisionNote?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
 }
 
 export interface HackathonRegistrationDetailItem extends HackathonRegistrationItem {
   lead: HackathonRegistrationMemberItem;
   members: HackathonRegistrationMemberItem[];
-  submissions: HackathonRegistrationSubmissionItem[];
+}
+
+export interface UpsertHackathonStageSubmissionPayload {
+  projectTitle?: string;
+  summary?: string;
+  demoUrl?: string;
+  repositoryUrl?: string;
+  videoUrl?: string;
+  deckUrl?: string;
+  additionalNotes?: string;
+  submitted: boolean;
+}
+
+export interface ReviewHackathonStageSubmissionPayload {
+  status: 'IN_PROGRESS' | 'SHORTLISTED' | 'REJECTED';
+  score?: string;
+  panel?: string;
+  decisionNote?: string;
 }
 
 export async function fetchHackathons() {
@@ -205,6 +234,69 @@ export async function fetchHackathonRegistrationById(slug: string, registrationI
 
   if (!response.ok) {
     throw new Error('Unable to load hackathon registration.');
+  }
+
+  const data = (await response.json()) as HackathonRegistrationDetailResponse;
+  return data.registration;
+}
+
+export async function fetchMyHackathonRegistration(slug: string) {
+  const response = await fetch(`${API_BASE_URL}/hackathons/${slug}/my-registration`, {
+    credentials: 'include',
+    cache: 'no-store',
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error('Unable to load your hackathon registration.');
+  }
+
+  const data = (await response.json()) as HackathonRegistrationDetailResponse;
+  return data.registration;
+}
+
+export async function upsertMyHackathonStageSubmission(
+  slug: string,
+  stageId: string,
+  payload: UpsertHackathonStageSubmissionPayload,
+) {
+  const response = await fetch(`${API_BASE_URL}/hackathons/${slug}/my-registration/submissions/${stageId}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error('Unable to save hackathon submission.');
+  }
+
+  const data = (await response.json()) as HackathonRegistrationDetailResponse;
+  return data.registration;
+}
+
+export async function reviewHackathonStageSubmission(
+  slug: string,
+  registrationId: string,
+  stageId: string,
+  payload: ReviewHackathonStageSubmissionPayload,
+) {
+  const response = await fetch(`${API_BASE_URL}/hackathons/${slug}/registrations/${registrationId}/submissions/${stageId}/status`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error('Unable to update submission status.');
   }
 
   const data = (await response.json()) as HackathonRegistrationDetailResponse;

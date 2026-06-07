@@ -145,6 +145,7 @@ export default function HackathonLayout({
 
 function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon }) {
   const { currentUser } = useAuth();
+  const hasSubmissionStages = hackathon.stages?.some((stage) => stage.type === 'SUBMISSION') ?? false;
   const teamSize = hackathon.participationType === 'TEAM'
     ? `${hackathon.minTeamSize} - ${hackathon.maxTeamSize} Members`
     : 'Individual';
@@ -346,6 +347,13 @@ function SessionHackathonDetails({ hackathon }: { hackathon: BrowserHackathon })
                   Register Now
                 </Link>
               </Button>
+              {hasSubmissionStages ? (
+                <Button asChild variant="outline" className="h-12 w-full rounded-full">
+                  <Link href={`/hackathons/${hackathon.slug}/submission`}>
+                    Submission Status
+                  </Link>
+                </Button>
+              ) : null}
               <div className="flex items-center justify-center gap-2 text-sm font-medium">
                 <Users2 className="h-4 w-4 text-accent" />
                 {hackathon.registrationCount ?? 0} Registered

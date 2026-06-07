@@ -1,19 +1,30 @@
 import crypto from 'node:crypto';
 
-import { asc, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '../../db/index.ts';
-import { hackathonRegistrationFields, hackathonRegistrations, hackathonStages, hackathons, hackathonTracks, users } from '../../db/schema.ts';
+import {
+  hackathonRegistrationFields,
+  hackathonRegistrations,
+  hackathonStageSubmissions,
+  hackathonStages,
+  hackathons,
+  hackathonTracks,
+  users,
+} from '../../db/schema.ts';
 import { deleteStoredObject, uploadImageDataUrl } from '../../lib/object-storage.ts';
 
 import type {
   CreateHackathonInput,
+  CreateHackathonRegistrationInput,
   HackathonListItem,
+  HackathonRegistrationDetailItem,
+  HackathonRegistrationItem,
+  HackathonRegistrationSubmissionItem,
   HackathonStageCriterionItem,
   HackathonStageItem,
-  HackathonRegistrationItem,
-  HackathonRegistrationDetailItem,
-  CreateHackathonRegistrationInput,
+  ReviewHackathonStageSubmissionInput,
+  UpsertHackathonStageSubmissionInput,
   UpdateHackathonStagesInput,
 } from './hackathons.types.ts';
 
@@ -25,6 +36,85 @@ function createHackathonSlug(title: string, id: string) {
     .replace(/^-+|-+$/g, '');
 
   return `${normalized || 'hackathon'}-${id.slice(-6)}`;
+}
+
+function normalizeOptionalText(value?: string | null) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function mapSubmission(
+  stage: typeof hackathonStages.$inferSelect,
+  record?: typeof hackathonStageSubmissions.$inferSelect,
+): HackathonRegistrationSubmissionItem {
+  return {
+    stageId: stage.id,
+    stageName: stage.name,
+    stageCode: stage.code,
+    status: record?.status ?? 'IN_PROGRESS',
+    submitted: record?.submitted ?? false,
+    projectTitle: record?.projectTitle ?? undefined,
+    summary: record?.summary ?? undefined,
+    demoUrl: record?.demoUrl ?? undefined,
+    repositoryUrl: record?.repositoryUrl ?? undefined,
+    videoUrl: record?.videoUrl ?? undefined,
+    deckUrl: record?.deckUrl ?? undefined,
+    additionalNotes: record?.additionalNotes ?? undefined,
+    score: record?.score ?? undefined,
+    panel: record?.panel ?? undefined,
+    decisionNote: record?.decisionNote ?? undefined,
+    submittedAt: record?.submittedAt?.toISOString(),
+    reviewedAt: record?.reviewedAt?.toISOString(),
+  };
+}
+
+async function getHackathonStageRecords(hackathonId: string) {
+  return db
+    .select()
+    .from(hackathonStages)
+    .where(eq(hackathonStages.hackathonId, hackathonId))
+    .orderBy(asc(hackathonStages.sortOrder));
+}
+
+async function getSubmissionLookup(registrationIds: string[]) {
+  if (registrationIds.length === 0) {
+    return new Map<string, Map<string, typeof hackathonStageSubmissions.$inferSelect>>();
+  }
+
+  const records = await db
+    .select()
+    .from(hackathonStageSubmissions)
+    .where(inArray(hackathonStageSubmissions.registrationId, registrationIds));
+
+  const submissionsByRegistrationId = new Map<string, Map<string, typeof hackathonStageSubmissions.$inferSelect>>();
+
+  for (const record of records) {
+    const stageMap = submissionsByRegistrationId.get(record.registrationId) ?? new Map<string, typeof hackathonStageSubmissions.$inferSelect>();
+    stageMap.set(record.stageId, record);
+    submissionsByRegistrationId.set(record.registrationId, stageMap);
+  }
+
+  return submissionsByRegistrationId;
+}
+
+async function mapRegistrationRecord(
+  record: typeof hackathonRegistrations.$inferSelect,
+  stageRecords: Array<typeof hackathonStages.$inferSelect>,
+  submissionLookup: Map<string, typeof hackathonStageSubmissions.$inferSelect>,
+): Promise<HackathonRegistrationItem> {
+  return {
+    id: record.id,
+    participantName: record.participantName,
+    participantEmail: record.participantEmail,
+    teamName: record.teamName ?? undefined,
+    track: record.track ?? undefined,
+    formResponses: record.formResponses,
+    teammates: record.teammates,
+    submissions: stageRecords
+      .filter((stage) => stage.type === 'SUBMISSION')
+      .map((stage) => mapSubmission(stage, submissionLookup.get(stage.id))),
+    createdAt: record.createdAt.toISOString(),
+  };
 }
 
 async function mapHackathons(records: Array<typeof hackathons.$inferSelect>): Promise<HackathonListItem[]> {
@@ -242,19 +332,6 @@ export async function replaceHackathonStages(slug: string, input: UpdateHackatho
   return getHackathonBySlug(slug);
 }
 
-function mapRegistration(record: typeof hackathonRegistrations.$inferSelect): HackathonRegistrationItem {
-  return {
-    id: record.id,
-    participantName: record.participantName,
-    participantEmail: record.participantEmail,
-    teamName: record.teamName ?? undefined,
-    track: record.track ?? undefined,
-    formResponses: record.formResponses,
-    teammates: record.teammates,
-    createdAt: record.createdAt.toISOString(),
-  };
-}
-
 export async function createHackathonRegistration(slug: string, userId: string, input: CreateHackathonRegistrationInput) {
   const [hackathonRecord] = await db.select().from(hackathons).where(eq(hackathons.slug, slug)).limit(1);
 
@@ -292,8 +369,10 @@ export async function createHackathonRegistration(slug: string, userId: string, 
     })
     .returning();
 
+  const stageRecords = await getHackathonStageRecords(hackathonRecord.id);
+
   return {
-    registration: mapRegistration(record),
+    registration: await mapRegistrationRecord(record, stageRecords, new Map()),
     hackathon: await getHackathonBySlug(slug),
   };
 }
@@ -311,7 +390,37 @@ export async function listHackathonRegistrations(slug: string) {
     .where(eq(hackathonRegistrations.hackathonId, hackathonRecord.id))
     .orderBy(desc(hackathonRegistrations.createdAt));
 
-  return records.map(mapRegistration);
+  const [stageRecords, submissionLookup] = await Promise.all([
+    getHackathonStageRecords(hackathonRecord.id),
+    getSubmissionLookup(records.map((record) => record.id)),
+  ]);
+
+  return Promise.all(
+    records.map((record) => mapRegistrationRecord(record, stageRecords, submissionLookup.get(record.id) ?? new Map())),
+  );
+}
+
+export async function getHackathonRegistrationByUserId(slug: string, userId: string) {
+  const [hackathonRecord] = await db.select().from(hackathons).where(eq(hackathons.slug, slug)).limit(1);
+
+  if (!hackathonRecord) {
+    return null;
+  }
+
+  const [registrationRecord] = await db
+    .select()
+    .from(hackathonRegistrations)
+    .where(and(
+      eq(hackathonRegistrations.hackathonId, hackathonRecord.id),
+      eq(hackathonRegistrations.userId, userId),
+    ))
+    .limit(1);
+
+  if (!registrationRecord) {
+    return false;
+  }
+
+  return getHackathonRegistrationById(slug, registrationRecord.id);
 }
 
 export async function getHackathonRegistrationById(slug: string, registrationId: string) {
@@ -342,14 +451,15 @@ export async function getHackathonRegistrationById(slug: string, registrationId:
     ? await db.select().from(users).where(inArray(users.email, memberEmails))
     : [];
   const avatarByEmail = new Map(matchedUsers.map((user) => [user.email.toLowerCase(), user.avatarUrl ?? null]));
-
-  const stageRecords = await db
-    .select()
-    .from(hackathonStages)
-    .where(eq(hackathonStages.hackathonId, hackathonRecord.id))
-    .orderBy(asc(hackathonStages.sortOrder));
-
-  const baseRegistration = mapRegistration(registrationRecord);
+  const [stageRecords, submissionLookup] = await Promise.all([
+    getHackathonStageRecords(hackathonRecord.id),
+    getSubmissionLookup([registrationRecord.id]),
+  ]);
+  const baseRegistration = await mapRegistrationRecord(
+    registrationRecord,
+    stageRecords,
+    submissionLookup.get(registrationRecord.id) ?? new Map(),
+  );
   const lead = {
     name: baseRegistration.participantName,
     email: baseRegistration.participantEmail,
@@ -365,23 +475,174 @@ export async function getHackathonRegistrationById(slug: string, registrationId:
       role: 'MEMBER' as const,
     })),
   ];
-  const submissions = stageRecords
-    .filter((stage) => stage.type === 'SUBMISSION')
-    .map((stage) => ({
-      stageId: stage.id,
-      stageName: stage.name,
-      stageCode: stage.code,
-      submitted: false,
-    }));
 
   const detail: HackathonRegistrationDetailItem = {
     ...baseRegistration,
     lead,
     members,
-    submissions,
   };
 
   return detail;
+}
+
+export async function upsertHackathonStageSubmission(
+  slug: string,
+  userId: string,
+  stageId: string,
+  input: UpsertHackathonStageSubmissionInput,
+) {
+  const [hackathonRecord] = await db.select().from(hackathons).where(eq(hackathons.slug, slug)).limit(1);
+
+  if (!hackathonRecord) {
+    return null;
+  }
+
+  const [registrationRecord, stageRecord] = await Promise.all([
+    db
+      .select()
+      .from(hackathonRegistrations)
+      .where(and(
+        eq(hackathonRegistrations.hackathonId, hackathonRecord.id),
+        eq(hackathonRegistrations.userId, userId),
+      ))
+      .limit(1)
+      .then((records) => records[0]),
+    db
+      .select()
+      .from(hackathonStages)
+      .where(and(
+        eq(hackathonStages.hackathonId, hackathonRecord.id),
+        eq(hackathonStages.id, stageId),
+      ))
+      .limit(1)
+      .then((records) => records[0]),
+  ]);
+
+  if (!registrationRecord) {
+    return false;
+  }
+
+  if (!stageRecord || stageRecord.type !== 'SUBMISSION') {
+    return 'stage_not_found' as const;
+  }
+
+  const now = new Date();
+  const [submissionRecord] = await db
+    .insert(hackathonStageSubmissions)
+    .values({
+      id: `hackathon-stage-submission-${crypto.randomUUID()}`,
+      registrationId: registrationRecord.id,
+      stageId: stageRecord.id,
+      projectTitle: normalizeOptionalText(input.projectTitle),
+      summary: normalizeOptionalText(input.summary),
+      demoUrl: normalizeOptionalText(input.demoUrl),
+      repositoryUrl: normalizeOptionalText(input.repositoryUrl),
+      videoUrl: normalizeOptionalText(input.videoUrl),
+      deckUrl: normalizeOptionalText(input.deckUrl),
+      additionalNotes: normalizeOptionalText(input.additionalNotes),
+      submitted: input.submitted,
+      status: 'IN_PROGRESS',
+      submittedAt: input.submitted ? now : null,
+      reviewedAt: null,
+      updatedAt: now,
+      createdAt: now,
+    })
+    .onConflictDoUpdate({
+      target: [hackathonStageSubmissions.registrationId, hackathonStageSubmissions.stageId],
+      set: {
+        projectTitle: normalizeOptionalText(input.projectTitle),
+        summary: normalizeOptionalText(input.summary),
+        demoUrl: normalizeOptionalText(input.demoUrl),
+        repositoryUrl: normalizeOptionalText(input.repositoryUrl),
+        videoUrl: normalizeOptionalText(input.videoUrl),
+        deckUrl: normalizeOptionalText(input.deckUrl),
+        additionalNotes: normalizeOptionalText(input.additionalNotes),
+        submitted: input.submitted,
+        status: 'IN_PROGRESS',
+        submittedAt: input.submitted ? now : null,
+        reviewedAt: null,
+        decisionNote: null,
+        updatedAt: now,
+      },
+    })
+    .returning();
+
+  return {
+    registration: await getHackathonRegistrationById(slug, registrationRecord.id),
+    submission: mapSubmission(stageRecord, submissionRecord),
+  };
+}
+
+export async function reviewHackathonStageSubmission(
+  slug: string,
+  registrationId: string,
+  stageId: string,
+  input: ReviewHackathonStageSubmissionInput,
+) {
+  const [hackathonRecord] = await db.select().from(hackathons).where(eq(hackathons.slug, slug)).limit(1);
+
+  if (!hackathonRecord) {
+    return null;
+  }
+
+  const [registrationRecord, stageRecord] = await Promise.all([
+    db
+      .select()
+      .from(hackathonRegistrations)
+      .where(and(
+        eq(hackathonRegistrations.id, registrationId),
+        eq(hackathonRegistrations.hackathonId, hackathonRecord.id),
+      ))
+      .limit(1)
+      .then((records) => records[0]),
+    db
+      .select()
+      .from(hackathonStages)
+      .where(and(
+        eq(hackathonStages.id, stageId),
+        eq(hackathonStages.hackathonId, hackathonRecord.id),
+      ))
+      .limit(1)
+      .then((records) => records[0]),
+  ]);
+
+  if (!registrationRecord) {
+    return false;
+  }
+
+  if (!stageRecord || stageRecord.type !== 'SUBMISSION') {
+    return 'stage_not_found' as const;
+  }
+
+  const [existingSubmission] = await db
+    .select()
+    .from(hackathonStageSubmissions)
+    .where(and(
+      eq(hackathonStageSubmissions.registrationId, registrationRecord.id),
+      eq(hackathonStageSubmissions.stageId, stageRecord.id),
+    ))
+    .limit(1);
+
+  if (!existingSubmission) {
+    return 'submission_not_found' as const;
+  }
+
+  const now = new Date();
+  await db
+    .update(hackathonStageSubmissions)
+    .set({
+      status: input.status,
+      score: normalizeOptionalText(input.score),
+      panel: normalizeOptionalText(input.panel),
+      decisionNote: normalizeOptionalText(input.decisionNote),
+      reviewedAt: now,
+      updatedAt: now,
+    })
+    .where(eq(hackathonStageSubmissions.id, existingSubmission.id));
+
+  return {
+    registration: await getHackathonRegistrationById(slug, registrationRecord.id),
+  };
 }
 
 export async function deleteHackathonRegistration(slug: string, registrationId: string) {

@@ -84,6 +84,59 @@ export const createHackathonRegistrationSchema = z.object({
 
 export type CreateHackathonRegistrationInput = z.infer<typeof createHackathonRegistrationSchema>;
 
+export const upsertHackathonStageSubmissionSchema = z.object({
+  projectTitle: z.string().trim().optional(),
+  summary: z.string().trim().optional(),
+  demoUrl: z.string().trim().url().optional().or(z.literal('')),
+  repositoryUrl: z.string().trim().url().optional().or(z.literal('')),
+  videoUrl: z.string().trim().url().optional().or(z.literal('')),
+  deckUrl: z.string().trim().url().optional().or(z.literal('')),
+  additionalNotes: z.string().trim().optional(),
+  submitted: z.boolean(),
+}).superRefine((value, context) => {
+  if (!value.submitted) {
+    return;
+  }
+
+  if (!value.projectTitle?.trim()) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Project title is required before submission.',
+      path: ['projectTitle'],
+    });
+  }
+
+  if (!value.summary?.trim()) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Project summary is required before submission.',
+      path: ['summary'],
+    });
+  }
+
+  const hasArtifact = [value.demoUrl, value.repositoryUrl, value.videoUrl, value.deckUrl]
+    .some((item) => item?.trim());
+
+  if (!hasArtifact) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Add at least one project link before submission.',
+      path: ['demoUrl'],
+    });
+  }
+});
+
+export type UpsertHackathonStageSubmissionInput = z.infer<typeof upsertHackathonStageSubmissionSchema>;
+
+export const reviewHackathonStageSubmissionSchema = z.object({
+  status: z.enum(['IN_PROGRESS', 'SHORTLISTED', 'REJECTED']),
+  score: z.string().trim().optional(),
+  panel: z.string().trim().optional(),
+  decisionNote: z.string().trim().optional(),
+});
+
+export type ReviewHackathonStageSubmissionInput = z.infer<typeof reviewHackathonStageSubmissionSchema>;
+
 export interface HackathonListItem {
   id: string;
   slug: string;
@@ -124,17 +177,6 @@ export interface HackathonStageItem {
   evaluationCriteria?: HackathonStageCriterionItem[];
 }
 
-export interface HackathonRegistrationItem {
-  id: string;
-  participantName: string;
-  participantEmail: string;
-  teamName?: string;
-  track?: string;
-  formResponses: Array<{ field: string; value: string }>;
-  teammates: Array<{ name: string; email: string }>;
-  createdAt: string;
-}
-
 export interface HackathonRegistrationMemberItem {
   name: string;
   email: string;
@@ -146,11 +188,35 @@ export interface HackathonRegistrationSubmissionItem {
   stageId: string;
   stageName: string;
   stageCode: string;
+  status: 'IN_PROGRESS' | 'SHORTLISTED' | 'REJECTED';
   submitted: boolean;
+  projectTitle?: string;
+  summary?: string;
+  demoUrl?: string;
+  repositoryUrl?: string;
+  videoUrl?: string;
+  deckUrl?: string;
+  additionalNotes?: string;
+  score?: string;
+  panel?: string;
+  decisionNote?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
+}
+
+export interface HackathonRegistrationItem {
+  id: string;
+  participantName: string;
+  participantEmail: string;
+  teamName?: string;
+  track?: string;
+  formResponses: Array<{ field: string; value: string }>;
+  teammates: Array<{ name: string; email: string }>;
+  submissions: HackathonRegistrationSubmissionItem[];
+  createdAt: string;
 }
 
 export interface HackathonRegistrationDetailItem extends HackathonRegistrationItem {
   lead: HackathonRegistrationMemberItem;
   members: HackathonRegistrationMemberItem[];
-  submissions: HackathonRegistrationSubmissionItem[];
 }

@@ -23,8 +23,10 @@ import {
   deleteHackathonRegistration,
   fetchHackathonBySlug,
   fetchHackathonRegistrations,
+  reviewHackathonStageSubmission,
   updateHackathonStages,
   type HackathonRegistrationItem,
+  type HackathonRegistrationSubmissionItem,
 } from '@/lib/hackathons';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -102,6 +104,15 @@ type StageEntry = {
   submitted: boolean;
   score: string;
   panel: string;
+  projectTitle?: string;
+  summary?: string;
+  demoUrl?: string;
+  repositoryUrl?: string;
+  videoUrl?: string;
+  deckUrl?: string;
+  additionalNotes?: string;
+  decisionNote?: string;
+  hasContent: boolean;
 };
 
 type TeamRecord = {
@@ -964,12 +975,27 @@ function ManageRegistrationsTab({
                                 if (!stageEntry?.submitted) {
                                   return;
                                 }
-
-                                setRecords((current) => updateSubmissionStatus(current, selectedStage.id, record.id, 'REJECTED'));
-                                toast({
-                                  title: 'Submission rejected',
-                                  description: `${record.participantName} was marked rejected in ${selectedStage.name}.`,
-                                });
+                                void (async () => {
+                                  try {
+                                    const updatedRegistration = await reviewHackathonStageSubmission(
+                                      hackathon.slug,
+                                      record.id,
+                                      selectedStage.id,
+                                      { status: 'REJECTED', score: stageEntry.score, panel: stageEntry.panel },
+                                    );
+                                    setRecords((current) => replaceRegistrationRecord(current, updatedRegistration, stages));
+                                    toast({
+                                      title: 'Submission rejected',
+                                      description: `${record.participantName} was marked rejected in ${selectedStage.name}.`,
+                                    });
+                                  } catch {
+                                    toast({
+                                      title: 'Unable to update submission',
+                                      description: 'Please try again.',
+                                      variant: 'destructive',
+                                    });
+                                  }
+                                })();
                               }}
                             >
                               <X className="h-4 w-4" />
@@ -982,12 +1008,27 @@ function ManageRegistrationsTab({
                                 if (!stageEntry?.submitted) {
                                   return;
                                 }
-
-                                setRecords((current) => updateSubmissionStatus(current, selectedStage.id, record.id, 'SHORTLISTED'));
-                                toast({
-                                  title: 'Submission approved',
-                                  description: `${record.participantName} was shortlisted in ${selectedStage.name}.`,
-                                });
+                                void (async () => {
+                                  try {
+                                    const updatedRegistration = await reviewHackathonStageSubmission(
+                                      hackathon.slug,
+                                      record.id,
+                                      selectedStage.id,
+                                      { status: 'SHORTLISTED', score: stageEntry.score, panel: stageEntry.panel },
+                                    );
+                                    setRecords((current) => replaceRegistrationRecord(current, updatedRegistration, stages));
+                                    toast({
+                                      title: 'Submission approved',
+                                      description: `${record.participantName} was shortlisted in ${selectedStage.name}.`,
+                                    });
+                                  } catch {
+                                    toast({
+                                      title: 'Unable to update submission',
+                                      description: 'Please try again.',
+                                      variant: 'destructive',
+                                    });
+                                  }
+                                })();
                               }}
                             >
                               <Check className="h-4 w-4" />
@@ -1007,8 +1048,15 @@ function ManageRegistrationsTab({
                                     `Email: ${record.email}`,
                                     `Detail: ${record.detail || '-'}`,
                                     `Stage: ${selectedStage.name}`,
+                                    `Project Title: ${stageEntry.projectTitle || '-'}`,
+                                    `Demo URL: ${stageEntry.demoUrl || '-'}`,
+                                    `Repository URL: ${stageEntry.repositoryUrl || '-'}`,
+                                    `Video URL: ${stageEntry.videoUrl || '-'}`,
+                                    `Deck URL: ${stageEntry.deckUrl || '-'}`,
                                     `Panel: ${stageEntry.panel}`,
                                     `Status: ${getSubmissionStatusLabel(stageEntry)}`,
+                                    `Summary: ${stageEntry.summary || '-'}`,
+                                    `Notes: ${stageEntry.additionalNotes || '-'}`,
                                   ].join('\n')
                                 );
                               }}
@@ -2663,7 +2711,7 @@ function formatDateTimeLocal(value: Date) {
 }
 
 function mapRegistrationsToTeamRecords(registrations: HackathonRegistrationItem[], stages: StageDefinition[]): TeamRecord[] {
-  return registrations.map((registration, index) => ({
+  return registrations.map((registration) => ({
     id: registration.id,
     displayName: registration.teamName || registration.participantName,
     participantName: registration.participantName,
@@ -2673,82 +2721,65 @@ function mapRegistrationsToTeamRecords(registrations: HackathonRegistrationItem[
     stageEntries: Object.fromEntries(
       stages
         .filter((stage) => stage.type === 'SUBMISSION')
-        .map((stage, submissionIndex) => [stage.id, createSubmissionEntry(index, submissionIndex)])
+        .map((stage) => [stage.id, createSubmissionEntry(registration.submissions.find((submission) => submission.stageId === stage.id))])
     ),
   }));
 }
 
 function mergeRecordsWithStages(records: TeamRecord[], stages: StageDefinition[]) {
-  return records.map((record, recordIndex) => ({
+  return records.map((record) => ({
     ...record,
     stageEntries: Object.fromEntries(
       stages
         .filter((stage) => stage.type === 'SUBMISSION')
-        .map((stage, submissionIndex) => [
+        .map((stage) => [
           stage.id,
-          record.stageEntries[stage.id] ?? createSubmissionEntry(recordIndex, submissionIndex),
+          record.stageEntries[stage.id] ?? createSubmissionEntry(),
         ])
     ),
   }));
 }
 
-function createSubmissionEntry(recordIndex: number, submissionIndex: number): StageEntry {
-  if (submissionIndex === 0) {
-    if (recordIndex === 0) {
-      return { status: 'IN_PROGRESS', submitted: false, score: '--', panel: 'Panel A' };
-    }
-    if (recordIndex === 1) {
-      return { status: 'SHORTLISTED', submitted: true, score: '87', panel: 'Panel B' };
-    }
-    if (recordIndex === 2) {
-      return { status: 'REJECTED', submitted: true, score: '49', panel: 'Panel C' };
-    }
-
-    return { status: 'IN_PROGRESS', submitted: true, score: '--', panel: 'Panel A' };
-  }
-
-  if (recordIndex === 0) {
-    return { status: 'IN_PROGRESS', submitted: true, score: '--', panel: 'Panel A' };
-  }
-  if (recordIndex === 1) {
-    return { status: 'SHORTLISTED', submitted: true, score: '84', panel: 'Panel B' };
-  }
-  if (recordIndex === 2) {
-    return { status: 'REJECTED', submitted: true, score: '53', panel: 'Panel C' };
-  }
-
-  return { status: 'IN_PROGRESS', submitted: true, score: '--', panel: 'Panel A' };
+function createSubmissionEntry(submission?: HackathonRegistrationSubmissionItem): StageEntry {
+  return {
+    status: submission?.status ?? 'IN_PROGRESS',
+    submitted: submission?.submitted ?? false,
+    score: submission?.score ?? '--',
+    panel: submission?.panel ?? '--',
+    projectTitle: submission?.projectTitle,
+    summary: submission?.summary,
+    demoUrl: submission?.demoUrl,
+    repositoryUrl: submission?.repositoryUrl,
+    videoUrl: submission?.videoUrl,
+    deckUrl: submission?.deckUrl,
+    additionalNotes: submission?.additionalNotes,
+    decisionNote: submission?.decisionNote,
+    hasContent: Boolean(
+      submission?.projectTitle
+      || submission?.summary
+      || submission?.demoUrl
+      || submission?.repositoryUrl
+      || submission?.videoUrl
+      || submission?.deckUrl
+      || submission?.additionalNotes,
+    ),
+  };
 }
 
-function updateSubmissionStatus(
+function replaceRegistrationRecord(
   records: TeamRecord[],
-  stageId: string,
-  recordId: string,
-  status: SubmissionStatus
+  registration: HackathonRegistrationItem,
+  stages: StageDefinition[],
 ) {
-  return records.map((record) => {
-    if (record.id !== recordId) {
-      return record;
-    }
+  const nextRecord = mapRegistrationsToTeamRecords([registration], stages)[0];
 
-    const entry = record.stageEntries[stageId];
-    if (!entry) {
-      return record;
-    }
+  if (!nextRecord) {
+    return records;
+  }
 
-    return {
-      ...record,
-      stageEntries: {
-        ...record.stageEntries,
-        [stageId]: {
-          ...entry,
-          status,
-          submitted: true,
-          score: status === 'SHORTLISTED' ? '84' : entry.score === '--' ? '49' : entry.score,
-        },
-      },
-    };
-  });
+  return records.map((record) => (
+    record.id === registration.id ? nextRecord : record
+  ));
 }
 
 function downloadRegistrations(
@@ -2809,7 +2840,7 @@ function downloadSubmissions(
   downloadTextFile(
     `${slug}-${code.toLowerCase()}-submissions.csv`,
     [
-      'name,email,status,score,panel',
+      'name,email,status,score,panel,project_title,demo_url,repository_url,video_url,deck_url',
       ...submitted.map((record) => {
         const entry = record.stageEntries[stageId];
         return [
@@ -2818,6 +2849,11 @@ function downloadSubmissions(
           entry?.status ?? '',
           entry?.score ?? '',
           entry?.panel ?? '',
+          escapeCsv(entry?.projectTitle ?? ''),
+          escapeCsv(entry?.demoUrl ?? ''),
+          escapeCsv(entry?.repositoryUrl ?? ''),
+          escapeCsv(entry?.videoUrl ?? ''),
+          escapeCsv(entry?.deckUrl ?? ''),
         ].join(',');
       }),
     ].join('\n')
@@ -2960,6 +2996,9 @@ function StageTransition({
 }
 
 function getSubmissionStatusLabel(entry: StageEntry) {
+  if (!entry.submitted && entry.hasContent) {
+    return 'Draft Saved';
+  }
   if (!entry.submitted && entry.status === 'IN_PROGRESS') {
     return 'Not Submitted';
   }

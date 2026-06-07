@@ -40,6 +40,34 @@ function formatDate(value: string, options?: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat('en-US', options ?? { dateStyle: 'medium' }).format(new Date(value));
 }
 
+function getSubmissionBadge(submission: HackathonRegistrationDetailItem['submissions'][number]) {
+  if (!submission.submitted) {
+    return {
+      label: submission.projectTitle || submission.summary ? 'Draft Saved' : 'Pending',
+      className: 'bg-slate-200 text-slate-700 hover:bg-slate-200',
+    };
+  }
+
+  if (submission.status === 'SHORTLISTED') {
+    return {
+      label: 'Shortlisted',
+      className: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
+    };
+  }
+
+  if (submission.status === 'REJECTED') {
+    return {
+      label: 'Rejected',
+      className: 'bg-red-100 text-red-700 hover:bg-red-100',
+    };
+  }
+
+  return {
+    label: 'Under Review',
+    className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+  };
+}
+
 function MemberCard({
   member,
   highlighted = false,
@@ -337,6 +365,10 @@ export default function ManageRegistrationDetailPage() {
               {registration.submissions.length > 0 ? (
                 <div className="mt-6 space-y-4">
                   {registration.submissions.map((submission, index) => (
+                    (() => {
+                      const badge = getSubmissionBadge(submission);
+
+                      return (
                     <div
                       key={submission.stageId}
                       className="grid gap-4 rounded-[28px] border border-white/75 bg-white/50 p-5 backdrop-blur-md md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center"
@@ -351,25 +383,27 @@ export default function ManageRegistrationDetailPage() {
                         </div>
                         <p className="mt-1 text-sm text-slate-500">
                           {submission.submitted
-                            ? 'A submission is available for review in this round.'
-                            : 'No submission has been uploaded for this round yet.'}
+                            ? submission.status === 'SHORTLISTED'
+                              ? 'This team was shortlisted for the next step in this round.'
+                              : submission.status === 'REJECTED'
+                                ? (submission.decisionNote || 'This submission was reviewed and not shortlisted.')
+                                : 'A submission is available and is currently waiting for review.'
+                            : submission.projectTitle || submission.summary
+                              ? 'A draft exists for this round, but it has not been formally submitted yet.'
+                              : 'No submission has been uploaded for this round yet.'}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
-                        <Badge
-                          className={
-                            submission.submitted
-                              ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'
-                              : 'bg-slate-200 text-slate-700 hover:bg-slate-200'
-                          }
-                        >
-                          {submission.submitted ? 'Submitted' : 'Pending'}
+                        <Badge className={badge.className}>
+                          {badge.label}
                         </Badge>
                         <span className="text-xs uppercase tracking-[0.24em] text-slate-400">
                           Round {index + 1}
                         </span>
                       </div>
                     </div>
+                      );
+                    })()
                   ))}
                 </div>
               ) : (
