@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import type { User } from '@/lib/types';
-import { establishSession, fetchCurrentUser, fetchSession, logoutFromSession } from '@/lib/auth';
+import { AuthApiError, establishSession, fetchCurrentUser, fetchSession, logoutFromSession } from '@/lib/auth';
 import { isMsalConfigured, loginRequest, msalInstance } from '@/lib/msal';
 
 interface AuthContextType {
@@ -21,6 +21,22 @@ const LOGIN_RETURN_TO_KEY = 'thread-overflow-login-return-to';
 
 async function initializeMsal() {
   await msalInstance.initialize();
+}
+
+function getAuthErrorMessage(error: unknown) {
+  if (error instanceof AuthApiError) {
+    if (error.code === 'azure_sso_not_configured') {
+      return 'Microsoft sign-in is not configured on the API server yet.';
+    }
+
+    if (error.code === 'invalid_id_token') {
+      return 'Microsoft sign-in could not be verified by the API server.';
+    }
+
+    return error.message;
+  }
+
+  return 'Unable to initialize the authentication session.';
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -103,6 +119,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         await refreshSession();
+      } catch (error) {
+        console.error('Failed to initialize auth session.', error);
+        setCurrentUser(null);
+        setAuthConfigured(isMsalConfigured);
+        setAuthError(getAuthErrorMessage(error));
       } finally {
         setLoading(false);
       }

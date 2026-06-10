@@ -2,16 +2,28 @@
 
 Next.js app for a forum + ideation + hackathon portal UI, now paired with SPA-based Microsoft Entra sign-in, a TypeScript Node/Express backend, PostgreSQL, Drizzle ORM, and S3-compatible object storage.
 
+## Repository Layout
+
+```text
+thread-overflow/
+  frontend/  # Next.js app
+  backend/   # Express API + Drizzle
+  docker-compose.yml
+  package.json  # optional root helper scripts only
+```
+
 ## Run It
 
-Copy `.env.example` to `.env.local` for the frontend and `.env` for the backend, then fill in your Entra values.
+Copy `frontend/.env.local.example` to `frontend/.env.local` and `backend/.env.example` to `backend/.env`. The repo root `.env` and `.env.local` are still supported as fallbacks, so existing local setups keep working.
 
 ```bash
-npm install
+cd frontend && npm install
+cd ../backend && npm install
+cd ..
 docker compose up -d
-npm run db:push
-npm run dev:api
-npm run dev
+npm --prefix backend run db:push
+npm --prefix backend run dev
+npm --prefix frontend run dev
 ```
 
 - Frontend: `http://localhost:9002`
@@ -34,6 +46,21 @@ backend/
       users/
     server.ts
 ```
+
+Frontend structure:
+
+```text
+frontend/
+  src/
+  next.config.ts
+  tsconfig.json
+  tailwind.config.ts
+```
+
+Backend docs:
+
+- OpenAPI JSON: `http://localhost:3000/openapi.json`
+- Scalar UI: `http://localhost:3000/docs`
 
 ## Azure Setup
 
@@ -79,10 +106,11 @@ Optional legacy fallback role mapping:
 ## Checks
 
 ```bash
-npm run db:push
-npm run lint
-npm run typecheck
-npm run build
+npm --prefix backend run db:push
+npm --prefix frontend run lint
+npm --prefix frontend run typecheck
+npm --prefix backend run typecheck
+npm --prefix frontend run build
 ```
 
 ## Notes

@@ -15,6 +15,35 @@ interface CurrentUserResponse {
   user: SessionUser;
 }
 
+interface ApiErrorBody {
+  error?: string;
+  message?: string;
+}
+
+export class AuthApiError extends Error {
+  status: number;
+  code: string | null;
+
+  constructor(message: string, status: number, code: string | null = null) {
+    super(message);
+    this.name = 'AuthApiError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function createAuthApiError(response: Response, fallbackMessage: string) {
+  let payload: ApiErrorBody | null = null;
+
+  try {
+    payload = (await response.json()) as ApiErrorBody;
+  } catch {
+    payload = null;
+  }
+
+  return new AuthApiError(payload?.message || fallbackMessage, response.status, payload?.error ?? null);
+}
+
 export async function fetchSession(): Promise<SessionResponse> {
   const response = await fetch(`${API_BASE_URL}/auth/me`, {
     credentials: 'include',
@@ -22,7 +51,7 @@ export async function fetchSession(): Promise<SessionResponse> {
   });
 
   if (!response.ok) {
-    throw new Error('Unable to load auth session.');
+    throw await createAuthApiError(response, 'Unable to load auth session.');
   }
 
   return (await response.json()) as SessionResponse;
@@ -39,7 +68,7 @@ export async function establishSession(idToken: string): Promise<SessionResponse
   });
 
   if (!response.ok) {
-    throw new Error('Unable to create auth session.');
+    throw await createAuthApiError(response, 'Unable to create auth session.');
   }
 
   return (await response.json()) as SessionResponse;
@@ -52,7 +81,7 @@ export async function fetchCurrentUser(): Promise<SessionUser> {
   });
 
   if (!response.ok) {
-    throw new Error('Unable to load current user.');
+    throw await createAuthApiError(response, 'Unable to load current user.');
   }
 
   const payload = (await response.json()) as CurrentUserResponse;
@@ -66,7 +95,7 @@ export async function logoutFromSession() {
   });
 
   if (!response.ok) {
-    throw new Error('Unable to log out.');
+    throw await createAuthApiError(response, 'Unable to log out.');
   }
 
   return (await response.json()) as { ok: boolean };

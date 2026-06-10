@@ -1,15 +1,16 @@
 .PHONY: install dev frontend backend lint typecheck build db-push db-generate
 
 install:
-	npm install
+	npm --prefix frontend install
+	npm --prefix backend install
 
 dev:
 	@trap 'kill 0' INT TERM EXIT; \
 	npm run dev:api & \
-	npm run dev
+	npm run dev:frontend
 
 frontend:
-	npm run dev
+	npm run dev:frontend
 
 backend:
 	npm run dev:api

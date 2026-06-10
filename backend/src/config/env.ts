@@ -1,6 +1,4 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
+import './load-env.ts';
 
 function parseCsvSet(value: string | undefined) {
   return new Set(
